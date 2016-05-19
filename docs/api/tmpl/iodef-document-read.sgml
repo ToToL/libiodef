@@ -1,0 +1,352 @@
+<!-- ##### SECTION Title ##### -->
+iodef-document-read
+
+<!-- ##### SECTION Short_Description ##### -->
+
+Reading a message from a #prelude_msg_t buffer
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+Once you read a #prelude_msg_t object, you need to decode this message.
+In case this is an IODEF style message, the following API allow to read
+the relevant IODEF fields from the #prelude_msg_t object, and create the
+IODEF object from it's content.
+
+</para>
+
+<para>
+
+The function you're most probably looking to use is iodef_document_read(), and here
+is an example on how to use it:
+
+<programlisting>
+int ret;
+prelude_msg_t *pmsg;
+iodef_document_t *message;
+
+pmsg = whatever_method_to_get_a_prelude_msg();
+
+ret = iodef_document_new(&amp;message);
+if ( ret &lt; 0 )
+        return ret;
+
+ret = iodef_document_read(message, pmsg);
+</programlisting>
+
+This will decode the full IODEF message stored within pmsg into the #iodef_document_t
+IODEF object and it's childrens.
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### SECTION Image ##### -->
+
+
+<!-- ##### FUNCTION iodef_additional_data_read ##### -->
+<para>
+
+</para>
+
+@additional_data: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_reference_read ##### -->
+<para>
+
+</para>
+
+@reference: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_classification_read ##### -->
+<para>
+
+</para>
+
+@classification: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_user_id_read ##### -->
+<para>
+
+</para>
+
+@user_id: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_user_read ##### -->
+<para>
+
+</para>
+
+@user: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_address_read ##### -->
+<para>
+
+</para>
+
+@address: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_process_read ##### -->
+<para>
+
+</para>
+
+@process: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_web_service_read ##### -->
+<para>
+
+</para>
+
+@web_service: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_read ##### -->
+<para>
+
+</para>
+
+@snmp_service: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_service_read ##### -->
+<para>
+
+</para>
+
+@service: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_node_read ##### -->
+<para>
+
+</para>
+
+@node: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_source_read ##### -->
+<para>
+
+</para>
+
+@source: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_access_read ##### -->
+<para>
+
+</para>
+
+@file_access: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_inode_read ##### -->
+<para>
+
+</para>
+
+@inode: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_checksum_read ##### -->
+<para>
+
+</para>
+
+@checksum: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_read ##### -->
+<para>
+
+</para>
+
+@file: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_linkage_read ##### -->
+<para>
+
+</para>
+
+@linkage: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_target_read ##### -->
+<para>
+
+</para>
+
+@target: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_read ##### -->
+<para>
+
+</para>
+
+@analyzer: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alertident_read ##### -->
+<para>
+
+</para>
+
+@alertident: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_impact_read ##### -->
+<para>
+
+</para>
+
+@impact: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_action_read ##### -->
+<para>
+
+</para>
+
+@action: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_confidence_read ##### -->
+<para>
+
+</para>
+
+@confidence: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_assessment_read ##### -->
+<para>
+
+</para>
+
+@assessment: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_tool_alert_read ##### -->
+<para>
+
+</para>
+
+@tool_alert: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_correlation_alert_read ##### -->
+<para>
+
+</para>
+
+@correlation_alert: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_overflow_alert_read ##### -->
+<para>
+
+</para>
+
+@overflow_alert: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_read ##### -->
+<para>
+
+</para>
+
+@alert: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_heartbeat_read ##### -->
+<para>
+
+</para>
+
+@heartbeat: 
+@msg: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_document_read ##### -->
+<para>
+
+</para>
+
+@message: 
+@msg: 
+@Returns: 
+
+

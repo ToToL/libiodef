@@ -1,0 +1,113 @@
+IODEF Library (https://www.prelude-siem.org)
+The IODEF Library is brought to you by CS (http://www.c-s.fr).
+
+
+IODEF Library Overview
+========================
+
+The IODEF Library is based on libPrelude (https://www.prelude-siem.org)
+and aim to split IODEF manipulation dans IODEF transport.
+
+The IODEF Library is used to make sensor developers' life better by
+providing features used by every sensor.
+
+Dependencies
+============
+
+   For Redhat based systems (CentOS, Fedora, etc.)
+       Minimal            :    gcc gcc-c++ gnutls-devel libgcrypt-devel make
+                               libtool-ltdl-devel
+       Documentation      :    gtk-doc
+       Perl Binding       :    perl perl-devel
+       Python Binding     :    python python-devel
+       LUA Binding        :    lua lua-devel
+       Ruby Binding       :    ruby ruby-devel
+
+   For Debian systems
+       Minimal            :    gcc g++ libcurl4-gnutls-dev libglib2.0-dev make
+                               libltdl-dev
+       Documentation      :    gtk-doc-tools
+       Perl Binding       :    perl
+       Python Binding     :    python python-dev
+       Ruby Binding       :    ruby ruby-dev
+
+       For Debian 7
+              LUA Binding :    lua5.2 liblua5.2-dev
+       For Debian 6
+              LUA Binding :    lua5.1 liblua5.1-dev
+
+
+
+IRC
+===
+
+If there's something you just can't find out elsewhere, you want to
+give feedback directly to the authors or you're just bored, visit
+#prelude on irc.freenode.net
+
+
+
+Get Support
+===========
+
+Prelude-user forums can be accessed at:
+    https://www.prelude-siem.org/projects/prelude/boards
+
+Old mailing lists can be accessed at:
+	http://news.gmane.org/gmane.comp.security.ids.prelude.user
+	news://news.gmane.org/gmane.comp.security.ids.prelude.user
+
+Commercial Support is available through the CS company:
+	http://www.prelude-siem.com, contact.prelude@c-s.fr
+
+
+
+Help development
+================
+
+1. SUBMITTING PATCHES
+
+The IODEF source is constantly changing. If you want to submit a patch,
+please do so from the most recent GIT source tree, subscribe to the
+prelude-devel forum and post your patch with a description of functionality.
+You can also attach patches to bugs on
+
+        https://www.prelude-siem.org
+
+
+2. BUGS
+
+If you find any bugs, please report them to:
+
+	https://www.prelude-siem.org
+
+Please make sure that what you're reporting is actually a BUG and not
+a problem on your side.
+
+
+3. SUGGESTIONS
+
+Subscribe to prelude-devel and give us your suggestions.
+
+
+
+How to install the IODEF Library
+==================================
+
+
+1. IODEF Library installation
+
+If you want to build IODEF, unpack the tarball and cd into the
+newly created directory. Then type :
+
+	./configure
+	make
+
+If everything works, su to root and type:
+
+	make install
+
+How to use the IODEF Library
+============================
+
+You can see two example in the example folder.

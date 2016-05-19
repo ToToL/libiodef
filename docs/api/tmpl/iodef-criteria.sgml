@@ -1,0 +1,314 @@
+<!-- ##### SECTION Title ##### -->
+iodef-criteria
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### SECTION Image ##### -->
+
+
+<!-- ##### ENUM iodef_criterion_operator_t ##### -->
+<para>
+
+</para>
+
+@IODEF_CRITERION_OPERATOR_NOT: 
+@IODEF_CRITERION_OPERATOR_NOCASE: 
+@IODEF_CRITERION_OPERATOR_EQUAL: 
+@IODEF_CRITERION_OPERATOR_EQUAL_NOCASE: 
+@IODEF_CRITERION_OPERATOR_NOT_EQUAL: 
+@IODEF_CRITERION_OPERATOR_NOT_EQUAL_NOCASE: 
+@IODEF_CRITERION_OPERATOR_LESSER: 
+@IODEF_CRITERION_OPERATOR_LESSER_OR_EQUAL: 
+@IODEF_CRITERION_OPERATOR_GREATER: 
+@IODEF_CRITERION_OPERATOR_GREATER_OR_EQUAL: 
+@IODEF_CRITERION_OPERATOR_SUBSTR: 
+@IODEF_CRITERION_OPERATOR_SUBSTR_NOCASE: 
+@IODEF_CRITERION_OPERATOR_NOT_SUBSTR: 
+@IODEF_CRITERION_OPERATOR_NOT_SUBSTR_NOCASE: 
+@IODEF_CRITERION_OPERATOR_REGEX: 
+@IODEF_CRITERION_OPERATOR_REGEX_NOCASE: 
+@IODEF_CRITERION_OPERATOR_NOT_REGEX: 
+@IODEF_CRITERION_OPERATOR_NOT_REGEX_NOCASE: 
+@IODEF_CRITERION_OPERATOR_NULL: 
+@IODEF_CRITERION_OPERATOR_NOT_NULL: 
+
+<!-- ##### TYPEDEF iodef_criteria_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### TYPEDEF iodef_criterion_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_criterion_operator_to_string ##### -->
+<para>
+
+</para>
+
+@op: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criterion_new ##### -->
+<para>
+
+</para>
+
+@criterion: 
+@path: 
+@value: 
+@op: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criterion_destroy ##### -->
+<para>
+
+</para>
+
+@criterion: 
+
+
+<!-- ##### FUNCTION iodef_criterion_clone ##### -->
+<para>
+
+</para>
+
+@criterion: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criterion_print ##### -->
+<para>
+
+</para>
+
+@criterion: 
+@fd: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criterion_to_string ##### -->
+<para>
+
+</para>
+
+@criterion: 
+@out: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criterion_get_path ##### -->
+<para>
+
+</para>
+
+@criterion: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criterion_get_value ##### -->
+<para>
+
+</para>
+
+@criterion: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criterion_get_operator ##### -->
+<para>
+
+</para>
+
+@criterion: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criterion_match ##### -->
+<para>
+
+</para>
+
+@criterion: 
+@message: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criteria_new ##### -->
+<para>
+
+</para>
+
+@criteria: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criteria_ref ##### -->
+<para>
+
+</para>
+
+@criteria: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criteria_destroy ##### -->
+<para>
+
+</para>
+
+@criteria: 
+
+
+<!-- ##### FUNCTION iodef_criteria_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criteria_print ##### -->
+<para>
+
+</para>
+
+@criteria: 
+@fd: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criteria_to_string ##### -->
+<para>
+
+</para>
+
+@criteria: 
+@out: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criteria_is_criterion ##### -->
+<para>
+
+</para>
+
+@criteria: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criteria_get_criterion ##### -->
+<para>
+
+</para>
+
+@criteria: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criteria_set_criterion ##### -->
+<para>
+
+</para>
+
+@criteria: 
+@criterion: 
+
+
+<!-- ##### FUNCTION iodef_criteria_or_criteria ##### -->
+<para>
+
+</para>
+
+@criteria: 
+@criteria2: 
+
+
+<!-- ##### FUNCTION iodef_criteria_and_criteria ##### -->
+<para>
+
+</para>
+
+@criteria: 
+@criteria2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criteria_match ##### -->
+<para>
+
+</para>
+
+@criteria: 
+@message: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criteria_get_or ##### -->
+<para>
+
+</para>
+
+@criteria: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criteria_get_and ##### -->
+<para>
+
+</para>
+
+@criteria: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criteria_new_from_string ##### -->
+<para>
+
+</para>
+
+@criteria: 
+@str: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criteria_get_negation ##### -->
+<para>
+
+</para>
+
+@criteria: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criteria_set_negation ##### -->
+<para>
+
+</para>
+
+@criteria: 
+@negate: 
+
+

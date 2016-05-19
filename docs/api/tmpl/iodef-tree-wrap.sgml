@@ -1,0 +1,7692 @@
+<!-- ##### SECTION Title ##### -->
+iodef-tree-wrap
+
+<!-- ##### SECTION Short_Description ##### -->
+
+Generating events using the low level IODEF API
+
+<!-- ##### SECTION Long_Description ##### -->
+
+<para>
+
+The IODEF API is used by a sensor in order to generate events.  IODEF is an alert description
+format allowing almost any alert information to fit within an IODEF alert, independantly of the
+type of analyzer used.
+
+</para>
+
+<para> 
+Here is real world example taken from the Snort Prelude sensors. The top level IODEF object is always 
+of type #iodef_document_t. You should refer to the <ulink url="http://www.ietf.org/internet-drafts/draft-ietf-idwg-iodef-xml-14.txt">IODEF draft</ulink>, or to the Prelude API documentation in order to get a complete 
+listing of theses objects, or a description of what information an object may carry.
+
+<programlisting>
+void snort_alert_prelude(Packet *p, char *msg, void *data, Event *event)
+{
+        int ret;
+        iodef_time_t *time;
+        iodef_alert_t *alert;
+        prelude_string_t *str;
+        iodef_document_t *iodef;
+        iodef_classification_t *class;
+        prelude_client_t *client = data;
+        
+        ret = iodef_document_new(&amp;iodef);
+        if ( ret &lt; 0 )
+                return;
+
+        ret = iodef_document_new_alert(iodef, &amp;alert);
+        if ( ret &lt; 0 )
+                goto err;
+
+        ret = iodef_alert_new_classification(alert, &amp;class);
+        if ( ret &lt; 0 )
+                goto err;
+
+        ret = iodef_classification_new_text(class, &amp;str);
+        if ( ret &lt; 0 )
+                goto err;
+
+        prelude_string_set_ref(str, msg);
+
+        ret = event_to_impact(event, alert);
+        if ( ret &lt; 0 )
+                goto err;
+
+        ret = event_to_reference(event, class);
+        if ( ret &lt; 0 )
+                goto err;
+        
+        ret = event_to_source_target(p, alert);
+        if ( ret &lt; 0 )
+                goto err;
+        
+        ret = packet_to_data(p, event, alert);
+        if ( ret &lt; 0 )
+                goto err;
+        
+        ret = iodef_alert_new_detect_time(alert, &amp;time);
+        if ( ret &lt; 0 )
+                goto err;
+        iodef_time_set_from_timeval(time, &amp;p->pkth->ts);
+        
+        ret = iodef_time_new_from_gettimeofday(&amp;time);
+        if ( ret &lt; 0 )
+                goto err; 
+        iodef_alert_set_create_time(alert, time);
+                
+        iodef_alert_set_analyzer(alert, iodef_analyzer_ref(prelude_client_get_analyzer(client)), 0);
+        prelude_client_send_iodef(client, iodef);
+                
+ err:
+        iodef_document_destroy(iodef);
+	prelude_perror(ret, "Unable to create IODEF alert");
+}
+</programlisting>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+#iodef_path_t for the high level IODEF API.
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### SECTION Image ##### -->
+
+
+<!-- ##### MACRO IODEF_LIST_APPEND ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_LIST_PREPEND ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### FUNCTION iodef_document_get_data ##### -->
+<para>
+
+</para>
+
+@message: 
+@path: 
+@data: 
+@size: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_document_get_number ##### -->
+<para>
+
+</para>
+
+@message: 
+@path: 
+@result: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_document_get_string ##### -->
+<para>
+
+</para>
+
+@message: 
+@path: 
+@result: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_document_get_value ##### -->
+<para>
+
+</para>
+
+@message: 
+@path: 
+@value: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_document_set_data ##### -->
+<para>
+
+</para>
+
+@message: 
+@path: 
+@data: 
+@size: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_document_set_number ##### -->
+<para>
+
+</para>
+
+@message: 
+@path: 
+@number: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_document_set_string ##### -->
+<para>
+
+</para>
+
+@message: 
+@path: 
+@value: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_document_set_value ##### -->
+<para>
+
+</para>
+
+@message: 
+@path: 
+@value: 
+@Returns: 
+
+
+<!-- ##### ENUM iodef_additional_data_type_t ##### -->
+<para>
+
+</para>
+
+@IODEF_ADDITIONAL_DATA_TYPE_ERROR: 
+@IODEF_ADDITIONAL_DATA_TYPE_STRING: 
+@IODEF_ADDITIONAL_DATA_TYPE_BYTE: 
+@IODEF_ADDITIONAL_DATA_TYPE_CHARACTER: 
+@IODEF_ADDITIONAL_DATA_TYPE_DATE_TIME: 
+@IODEF_ADDITIONAL_DATA_TYPE_INTEGER: 
+@IODEF_ADDITIONAL_DATA_TYPE_NTPSTAMP: 
+@IODEF_ADDITIONAL_DATA_TYPE_PORTLIST: 
+@IODEF_ADDITIONAL_DATA_TYPE_REAL: 
+@IODEF_ADDITIONAL_DATA_TYPE_BOOLEAN: 
+@IODEF_ADDITIONAL_DATA_TYPE_BYTE_STRING: 
+@IODEF_ADDITIONAL_DATA_TYPE_XML: 
+
+<!-- ##### FUNCTION iodef_additional_data_type_to_numeric ##### -->
+<para>
+
+</para>
+
+@name: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_additional_data_type_to_string ##### -->
+<para>
+
+</para>
+
+@val: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_additional_data_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_additional_data_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_additional_data_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_additional_data_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_additional_data_ref ##### -->
+<para>
+
+</para>
+
+@additional_data: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_additional_data_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_additional_data_get_type ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_additional_data_set_type ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@type: 
+
+
+<!-- ##### FUNCTION iodef_additional_data_new_type ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_additional_data_get_meaning ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_additional_data_set_meaning ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@meaning: 
+
+
+<!-- ##### FUNCTION iodef_additional_data_new_meaning ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_additional_data_get_data ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_additional_data_set_data ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@data: 
+
+
+<!-- ##### FUNCTION iodef_additional_data_new_data ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### ENUM iodef_reference_origin_t ##### -->
+<para>
+
+</para>
+
+@IODEF_REFERENCE_ORIGIN_ERROR: 
+@IODEF_REFERENCE_ORIGIN_UNKNOWN: 
+@IODEF_REFERENCE_ORIGIN_VENDOR_SPECIFIC: 
+@IODEF_REFERENCE_ORIGIN_USER_SPECIFIC: 
+@IODEF_REFERENCE_ORIGIN_BUGTRAQID: 
+@IODEF_REFERENCE_ORIGIN_CVE: 
+@IODEF_REFERENCE_ORIGIN_OSVDB: 
+
+<!-- ##### FUNCTION iodef_reference_origin_to_numeric ##### -->
+<para>
+
+</para>
+
+@name: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_reference_origin_to_string ##### -->
+<para>
+
+</para>
+
+@val: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_reference_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_reference_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_reference_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_reference_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_reference_ref ##### -->
+<para>
+
+</para>
+
+@reference: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_reference_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_reference_get_origin ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_reference_set_origin ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@origin: 
+
+
+<!-- ##### FUNCTION iodef_reference_new_origin ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_reference_get_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_reference_set_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@name: 
+
+
+<!-- ##### FUNCTION iodef_reference_new_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_reference_get_url ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_reference_set_url ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@url: 
+
+
+<!-- ##### FUNCTION iodef_reference_new_url ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_reference_get_meaning ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_reference_set_meaning ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@meaning: 
+
+
+<!-- ##### FUNCTION iodef_reference_new_meaning ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_classification_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_classification_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_classification_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_classification_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_classification_ref ##### -->
+<para>
+
+</para>
+
+@classification: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_classification_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_classification_get_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_classification_set_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ident: 
+
+
+<!-- ##### FUNCTION iodef_classification_new_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_classification_get_text ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_classification_set_text ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@text: 
+
+
+<!-- ##### FUNCTION iodef_classification_new_text ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_classification_get_next_reference ##### -->
+<para>
+
+</para>
+
+@classification: 
+@reference_cur: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_classification_set_reference ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@object: 
+@pos: 
+
+
+<!-- ##### FUNCTION iodef_classification_new_reference ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@pos: 
+@Returns: 
+
+
+<!-- ##### ENUM iodef_user_id_type_t ##### -->
+<para>
+
+</para>
+
+@IODEF_USER_ID_TYPE_ORIGINAL_ERROR: 
+@IODEF_USER_ID_TYPE_ORIGINAL_USER: 
+@IODEF_USER_ID_TYPE_CURRENT_USER: 
+@IODEF_USER_ID_TYPE_TARGET_USER: 
+@IODEF_USER_ID_TYPE_USER_PRIVS: 
+@IODEF_USER_ID_TYPE_CURRENT_GROUP: 
+@IODEF_USER_ID_TYPE_GROUP_PRIVS: 
+@IODEF_USER_ID_TYPE_OTHER_PRIVS: 
+
+<!-- ##### FUNCTION iodef_user_id_type_to_numeric ##### -->
+<para>
+
+</para>
+
+@name: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_user_id_type_to_string ##### -->
+<para>
+
+</para>
+
+@val: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_user_id_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_user_id_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_user_id_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_user_id_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_user_id_ref ##### -->
+<para>
+
+</para>
+
+@user_id: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_user_id_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_user_id_get_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_user_id_set_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ident: 
+
+
+<!-- ##### FUNCTION iodef_user_id_new_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_user_id_get_type ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_user_id_set_type ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@type: 
+
+
+<!-- ##### FUNCTION iodef_user_id_new_type ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_user_id_get_tty ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_user_id_set_tty ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@tty: 
+
+
+<!-- ##### FUNCTION iodef_user_id_new_tty ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_user_id_get_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_user_id_set_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@name: 
+
+
+<!-- ##### FUNCTION iodef_user_id_new_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_user_id_unset_number ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_user_id_get_number ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_user_id_set_number ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@number: 
+
+
+<!-- ##### FUNCTION iodef_user_id_new_number ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### ENUM iodef_user_category_t ##### -->
+<para>
+
+</para>
+
+@IODEF_USER_CATEGORY_ERROR: 
+@IODEF_USER_CATEGORY_UNKNOWN: 
+@IODEF_USER_CATEGORY_APPLICATION: 
+@IODEF_USER_CATEGORY_OS_DEVICE: 
+
+<!-- ##### FUNCTION iodef_user_category_to_numeric ##### -->
+<para>
+
+</para>
+
+@name: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_user_category_to_string ##### -->
+<para>
+
+</para>
+
+@val: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_user_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_user_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_user_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_user_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_user_ref ##### -->
+<para>
+
+</para>
+
+@user: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_user_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_user_get_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_user_set_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ident: 
+
+
+<!-- ##### FUNCTION iodef_user_new_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_user_get_category ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_user_set_category ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@category: 
+
+
+<!-- ##### FUNCTION iodef_user_new_category ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_user_get_next_user_id ##### -->
+<para>
+
+</para>
+
+@user: 
+@user_id_cur: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_user_set_user_id ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@object: 
+@pos: 
+
+
+<!-- ##### FUNCTION iodef_user_new_user_id ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@pos: 
+@Returns: 
+
+
+<!-- ##### ENUM iodef_address_category_t ##### -->
+<para>
+
+</para>
+
+@IODEF_ADDRESS_CATEGORY_ERROR: 
+@IODEF_ADDRESS_CATEGORY_UNKNOWN: 
+@IODEF_ADDRESS_CATEGORY_ATM: 
+@IODEF_ADDRESS_CATEGORY_E_MAIL: 
+@IODEF_ADDRESS_CATEGORY_LOTUS_NOTES: 
+@IODEF_ADDRESS_CATEGORY_MAC: 
+@IODEF_ADDRESS_CATEGORY_SNA: 
+@IODEF_ADDRESS_CATEGORY_VM: 
+@IODEF_ADDRESS_CATEGORY_IPV4_ADDR: 
+@IODEF_ADDRESS_CATEGORY_IPV4_ADDR_HEX: 
+@IODEF_ADDRESS_CATEGORY_IPV4_NET: 
+@IODEF_ADDRESS_CATEGORY_IPV4_NET_MASK: 
+@IODEF_ADDRESS_CATEGORY_IPV6_ADDR: 
+@IODEF_ADDRESS_CATEGORY_IPV6_ADDR_HEX: 
+@IODEF_ADDRESS_CATEGORY_IPV6_NET: 
+@IODEF_ADDRESS_CATEGORY_IPV6_NET_MASK: 
+
+<!-- ##### FUNCTION iodef_address_category_to_numeric ##### -->
+<para>
+
+</para>
+
+@name: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_address_category_to_string ##### -->
+<para>
+
+</para>
+
+@val: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_address_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_address_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_address_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_address_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_address_ref ##### -->
+<para>
+
+</para>
+
+@address: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_address_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_address_get_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_address_set_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ident: 
+
+
+<!-- ##### FUNCTION iodef_address_new_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_address_get_category ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_address_set_category ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@category: 
+
+
+<!-- ##### FUNCTION iodef_address_new_category ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_address_get_vlan_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_address_set_vlan_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@vlan_name: 
+
+
+<!-- ##### FUNCTION iodef_address_new_vlan_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_address_unset_vlan_num ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_address_get_vlan_num ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_address_set_vlan_num ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@vlan_num: 
+
+
+<!-- ##### FUNCTION iodef_address_new_vlan_num ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_address_get_address ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_address_set_address ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@address: 
+
+
+<!-- ##### FUNCTION iodef_address_new_address ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_address_get_netmask ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_address_set_netmask ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@netmask: 
+
+
+<!-- ##### FUNCTION iodef_address_new_netmask ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_process_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_process_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_process_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_process_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_process_ref ##### -->
+<para>
+
+</para>
+
+@process: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_process_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_process_get_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_process_set_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ident: 
+
+
+<!-- ##### FUNCTION iodef_process_new_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_process_get_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_process_set_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@name: 
+
+
+<!-- ##### FUNCTION iodef_process_new_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_process_unset_pid ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_process_get_pid ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_process_set_pid ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@pid: 
+
+
+<!-- ##### FUNCTION iodef_process_new_pid ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_process_get_path ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_process_set_path ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@path: 
+
+
+<!-- ##### FUNCTION iodef_process_new_path ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_process_get_next_arg ##### -->
+<para>
+
+</para>
+
+@process: 
+@prelude_string_cur: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_process_set_arg ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@object: 
+@pos: 
+
+
+<!-- ##### FUNCTION iodef_process_new_arg ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@pos: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_process_get_next_env ##### -->
+<para>
+
+</para>
+
+@process: 
+@prelude_string_cur: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_process_set_env ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@object: 
+@pos: 
+
+
+<!-- ##### FUNCTION iodef_process_new_env ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@pos: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_web_service_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_web_service_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_web_service_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_web_service_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_web_service_ref ##### -->
+<para>
+
+</para>
+
+@web_service: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_web_service_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_web_service_get_url ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_web_service_set_url ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@url: 
+
+
+<!-- ##### FUNCTION iodef_web_service_new_url ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_web_service_get_cgi ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_web_service_set_cgi ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@cgi: 
+
+
+<!-- ##### FUNCTION iodef_web_service_new_cgi ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_web_service_get_http_method ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_web_service_set_http_method ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@http_method: 
+
+
+<!-- ##### FUNCTION iodef_web_service_new_http_method ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_web_service_get_next_arg ##### -->
+<para>
+
+</para>
+
+@web_service: 
+@prelude_string_cur: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_web_service_set_arg ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@object: 
+@pos: 
+
+
+<!-- ##### FUNCTION iodef_web_service_new_arg ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@pos: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_snmp_service_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_snmp_service_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_ref ##### -->
+<para>
+
+</para>
+
+@snmp_service: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_get_oid ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_set_oid ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@oid: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_new_oid ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_unset_message_processing_model ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_get_message_processing_model ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_set_message_processing_model ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@message_processing_model: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_new_message_processing_model ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_unset_security_model ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_get_security_model ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_set_security_model ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@security_model: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_new_security_model ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_get_security_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_set_security_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@security_name: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_new_security_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_unset_security_level ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_get_security_level ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_set_security_level ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@security_level: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_new_security_level ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_get_context_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_set_context_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@context_name: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_new_context_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_get_context_engine_id ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_set_context_engine_id ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@context_engine_id: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_new_context_engine_id ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_get_command ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_set_command ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@command: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_new_command ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_get_community ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_set_community ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@community: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_new_community ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### ENUM iodef_service_type_t ##### -->
+<para>
+
+</para>
+
+@IODEF_SERVICE_TYPE_ERROR: 
+@IODEF_SERVICE_TYPE_DEFAULT: 
+@IODEF_SERVICE_TYPE_WEB: 
+@IODEF_SERVICE_TYPE_SNMP: 
+
+<!-- ##### FUNCTION iodef_service_type_to_numeric ##### -->
+<para>
+
+</para>
+
+@name: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_service_type_to_string ##### -->
+<para>
+
+</para>
+
+@val: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_service_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_service_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_service_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_service_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_service_ref ##### -->
+<para>
+
+</para>
+
+@service: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_service_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_service_get_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_service_set_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ident: 
+
+
+<!-- ##### FUNCTION iodef_service_new_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_service_unset_ip_version ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_service_get_ip_version ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_service_set_ip_version ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ip_version: 
+
+
+<!-- ##### FUNCTION iodef_service_new_ip_version ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_service_unset_iana_protocol_number ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_service_get_iana_protocol_number ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_service_set_iana_protocol_number ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@iana_protocol_number: 
+
+
+<!-- ##### FUNCTION iodef_service_new_iana_protocol_number ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_service_get_iana_protocol_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_service_set_iana_protocol_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@iana_protocol_name: 
+
+
+<!-- ##### FUNCTION iodef_service_new_iana_protocol_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_service_get_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_service_set_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@name: 
+
+
+<!-- ##### FUNCTION iodef_service_new_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_service_unset_port ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_service_get_port ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_service_set_port ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@port: 
+
+
+<!-- ##### FUNCTION iodef_service_new_port ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_service_get_portlist ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_service_set_portlist ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@portlist: 
+
+
+<!-- ##### FUNCTION iodef_service_new_portlist ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_service_get_protocol ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_service_set_protocol ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@protocol: 
+
+
+<!-- ##### FUNCTION iodef_service_new_protocol ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_service_get_type ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_service_get_web_service ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_service_set_web_service ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@web_service: 
+
+
+<!-- ##### FUNCTION iodef_service_new_web_service ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_service_get_snmp_service ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_service_set_snmp_service ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@snmp_service: 
+
+
+<!-- ##### FUNCTION iodef_service_new_snmp_service ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### ENUM iodef_node_category_t ##### -->
+<para>
+
+</para>
+
+@IODEF_NODE_CATEGORY_ERROR: 
+@IODEF_NODE_CATEGORY_UNKNOWN: 
+@IODEF_NODE_CATEGORY_ADS: 
+@IODEF_NODE_CATEGORY_AFS: 
+@IODEF_NODE_CATEGORY_CODA: 
+@IODEF_NODE_CATEGORY_DFS: 
+@IODEF_NODE_CATEGORY_DNS: 
+@IODEF_NODE_CATEGORY_HOSTS: 
+@IODEF_NODE_CATEGORY_KERBEROS: 
+@IODEF_NODE_CATEGORY_NDS: 
+@IODEF_NODE_CATEGORY_NIS: 
+@IODEF_NODE_CATEGORY_NISPLUS: 
+@IODEF_NODE_CATEGORY_NT: 
+@IODEF_NODE_CATEGORY_WFW: 
+
+<!-- ##### FUNCTION iodef_node_category_to_numeric ##### -->
+<para>
+
+</para>
+
+@name: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_node_category_to_string ##### -->
+<para>
+
+</para>
+
+@val: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_node_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_node_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_node_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_node_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_node_ref ##### -->
+<para>
+
+</para>
+
+@node: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_node_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_node_get_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_node_set_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ident: 
+
+
+<!-- ##### FUNCTION iodef_node_new_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_node_get_category ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_node_set_category ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@category: 
+
+
+<!-- ##### FUNCTION iodef_node_new_category ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_node_get_location ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_node_set_location ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@location: 
+
+
+<!-- ##### FUNCTION iodef_node_new_location ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_node_get_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_node_set_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@name: 
+
+
+<!-- ##### FUNCTION iodef_node_new_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_node_get_next_address ##### -->
+<para>
+
+</para>
+
+@node: 
+@address_cur: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_node_set_address ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@object: 
+@pos: 
+
+
+<!-- ##### FUNCTION iodef_node_new_address ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@pos: 
+@Returns: 
+
+
+<!-- ##### ENUM iodef_source_spoofed_t ##### -->
+<para>
+
+</para>
+
+@IODEF_SOURCE_SPOOFED_ERROR: 
+@IODEF_SOURCE_SPOOFED_UNKNOWN: 
+@IODEF_SOURCE_SPOOFED_YES: 
+@IODEF_SOURCE_SPOOFED_NO: 
+
+<!-- ##### FUNCTION iodef_source_spoofed_to_numeric ##### -->
+<para>
+
+</para>
+
+@name: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_source_spoofed_to_string ##### -->
+<para>
+
+</para>
+
+@val: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_source_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_source_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_source_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_source_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_source_ref ##### -->
+<para>
+
+</para>
+
+@source: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_source_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_source_get_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_source_set_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ident: 
+
+
+<!-- ##### FUNCTION iodef_source_new_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_source_get_spoofed ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_source_set_spoofed ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@spoofed: 
+
+
+<!-- ##### FUNCTION iodef_source_new_spoofed ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_source_get_interface ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_source_set_interface ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@interface: 
+
+
+<!-- ##### FUNCTION iodef_source_new_interface ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_source_get_node ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_source_set_node ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@node: 
+
+
+<!-- ##### FUNCTION iodef_source_new_node ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_source_get_user ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_source_set_user ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@user: 
+
+
+<!-- ##### FUNCTION iodef_source_new_user ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_source_get_process ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_source_set_process ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@process: 
+
+
+<!-- ##### FUNCTION iodef_source_new_process ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_source_get_service ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_source_set_service ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@service: 
+
+
+<!-- ##### FUNCTION iodef_source_new_service ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_file_access_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_file_access_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_access_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_access_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_access_ref ##### -->
+<para>
+
+</para>
+
+@file_access: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_access_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_file_access_get_user_id ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_access_set_user_id ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@user_id: 
+
+
+<!-- ##### FUNCTION iodef_file_access_new_user_id ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_access_get_next_permission ##### -->
+<para>
+
+</para>
+
+@file_access: 
+@prelude_string_cur: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_access_set_permission ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@object: 
+@pos: 
+
+
+<!-- ##### FUNCTION iodef_file_access_new_permission ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@pos: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_inode_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_inode_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_inode_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_inode_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_inode_ref ##### -->
+<para>
+
+</para>
+
+@inode: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_inode_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_inode_get_change_time ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_inode_set_change_time ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@change_time: 
+
+
+<!-- ##### FUNCTION iodef_inode_new_change_time ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_inode_unset_number ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_inode_get_number ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_inode_set_number ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@number: 
+
+
+<!-- ##### FUNCTION iodef_inode_new_number ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_inode_unset_major_device ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_inode_get_major_device ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_inode_set_major_device ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@major_device: 
+
+
+<!-- ##### FUNCTION iodef_inode_new_major_device ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_inode_unset_minor_device ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_inode_get_minor_device ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_inode_set_minor_device ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@minor_device: 
+
+
+<!-- ##### FUNCTION iodef_inode_new_minor_device ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_inode_unset_c_major_device ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_inode_get_c_major_device ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_inode_set_c_major_device ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@c_major_device: 
+
+
+<!-- ##### FUNCTION iodef_inode_new_c_major_device ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_inode_unset_c_minor_device ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_inode_get_c_minor_device ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_inode_set_c_minor_device ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@c_minor_device: 
+
+
+<!-- ##### FUNCTION iodef_inode_new_c_minor_device ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_linkage_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### ENUM iodef_checksum_algorithm_t ##### -->
+<para>
+
+</para>
+
+@IODEF_CHECKSUM_ALGORITHM_ERROR: 
+@IODEF_CHECKSUM_ALGORITHM_MD4: 
+@IODEF_CHECKSUM_ALGORITHM_MD5: 
+@IODEF_CHECKSUM_ALGORITHM_SHA1: 
+@IODEF_CHECKSUM_ALGORITHM_SHA2_256: 
+@IODEF_CHECKSUM_ALGORITHM_SHA2_384: 
+@IODEF_CHECKSUM_ALGORITHM_SHA2_512: 
+@IODEF_CHECKSUM_ALGORITHM_CRC_32: 
+@IODEF_CHECKSUM_ALGORITHM_HAVAL: 
+@IODEF_CHECKSUM_ALGORITHM_TIGER: 
+@IODEF_CHECKSUM_ALGORITHM_GOST: 
+
+<!-- ##### FUNCTION iodef_checksum_algorithm_to_numeric ##### -->
+<para>
+
+</para>
+
+@name: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_checksum_algorithm_to_string ##### -->
+<para>
+
+</para>
+
+@val: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_checksum_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_checksum_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_checksum_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_checksum_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_checksum_ref ##### -->
+<para>
+
+</para>
+
+@checksum: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_checksum_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_checksum_get_value ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_checksum_set_value ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@value: 
+
+
+<!-- ##### FUNCTION iodef_checksum_new_value ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_checksum_get_key ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_checksum_set_key ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@key: 
+
+
+<!-- ##### FUNCTION iodef_checksum_new_key ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_checksum_get_algorithm ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_checksum_set_algorithm ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@algorithm: 
+
+
+<!-- ##### FUNCTION iodef_checksum_new_algorithm ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### ENUM iodef_file_category_t ##### -->
+<para>
+
+</para>
+
+@IODEF_FILE_CATEGORY_ERROR: 
+@IODEF_FILE_CATEGORY_CURRENT: 
+@IODEF_FILE_CATEGORY_ORIGINAL: 
+
+<!-- ##### FUNCTION iodef_file_category_to_numeric ##### -->
+<para>
+
+</para>
+
+@name: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_category_to_string ##### -->
+<para>
+
+</para>
+
+@val: 
+@Returns: 
+
+
+<!-- ##### ENUM iodef_file_fstype_t ##### -->
+<para>
+
+</para>
+
+@IODEF_FILE_FSTYPE_ERROR: 
+@IODEF_FILE_FSTYPE_UFS: 
+@IODEF_FILE_FSTYPE_EFS: 
+@IODEF_FILE_FSTYPE_NFS: 
+@IODEF_FILE_FSTYPE_AFS: 
+@IODEF_FILE_FSTYPE_NTFS: 
+@IODEF_FILE_FSTYPE_FAT16: 
+@IODEF_FILE_FSTYPE_FAT32: 
+@IODEF_FILE_FSTYPE_PCFS: 
+@IODEF_FILE_FSTYPE_JOLIET: 
+@IODEF_FILE_FSTYPE_ISO9660: 
+
+<!-- ##### FUNCTION iodef_file_fstype_to_numeric ##### -->
+<para>
+
+</para>
+
+@name: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_fstype_to_string ##### -->
+<para>
+
+</para>
+
+@val: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_file_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_file_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_ref ##### -->
+<para>
+
+</para>
+
+@file: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_file_get_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_set_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ident: 
+
+
+<!-- ##### FUNCTION iodef_file_new_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_get_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_set_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@name: 
+
+
+<!-- ##### FUNCTION iodef_file_new_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_get_path ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_set_path ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@path: 
+
+
+<!-- ##### FUNCTION iodef_file_new_path ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_get_create_time ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_set_create_time ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@create_time: 
+
+
+<!-- ##### FUNCTION iodef_file_new_create_time ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_get_modify_time ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_set_modify_time ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@modify_time: 
+
+
+<!-- ##### FUNCTION iodef_file_new_modify_time ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_get_access_time ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_set_access_time ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@access_time: 
+
+
+<!-- ##### FUNCTION iodef_file_new_access_time ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_unset_data_size ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_file_get_data_size ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_set_data_size ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@data_size: 
+
+
+<!-- ##### FUNCTION iodef_file_new_data_size ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_unset_disk_size ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_file_get_disk_size ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_set_disk_size ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@disk_size: 
+
+
+<!-- ##### FUNCTION iodef_file_new_disk_size ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_get_next_file_access ##### -->
+<para>
+
+</para>
+
+@file: 
+@file_access_cur: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_set_file_access ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@object: 
+@pos: 
+
+
+<!-- ##### FUNCTION iodef_file_new_file_access ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@pos: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_get_next_linkage ##### -->
+<para>
+
+</para>
+
+@file: 
+@linkage_cur: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_set_linkage ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@object: 
+@pos: 
+
+
+<!-- ##### FUNCTION iodef_file_new_linkage ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@pos: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_get_inode ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_set_inode ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@inode: 
+
+
+<!-- ##### FUNCTION iodef_file_new_inode ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_get_next_checksum ##### -->
+<para>
+
+</para>
+
+@file: 
+@checksum_cur: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_set_checksum ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@object: 
+@pos: 
+
+
+<!-- ##### FUNCTION iodef_file_new_checksum ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@pos: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_get_category ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_set_category ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@category: 
+
+
+<!-- ##### FUNCTION iodef_file_new_category ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_unset_fstype ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_file_get_fstype ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_set_fstype ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@fstype: 
+
+
+<!-- ##### FUNCTION iodef_file_new_fstype ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_get_file_type ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_set_file_type ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@file_type: 
+
+
+<!-- ##### FUNCTION iodef_file_new_file_type ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### ENUM iodef_linkage_category_t ##### -->
+<para>
+
+</para>
+
+@IODEF_LINKAGE_CATEGORY_ERROR: 
+@IODEF_LINKAGE_CATEGORY_HARD_LINK: 
+@IODEF_LINKAGE_CATEGORY_MOUNT_POINT: 
+@IODEF_LINKAGE_CATEGORY_REPARSE_POINT: 
+@IODEF_LINKAGE_CATEGORY_SHORTCUT: 
+@IODEF_LINKAGE_CATEGORY_STREAM: 
+@IODEF_LINKAGE_CATEGORY_SYMBOLIC_LINK: 
+
+<!-- ##### FUNCTION iodef_linkage_category_to_numeric ##### -->
+<para>
+
+</para>
+
+@name: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_linkage_category_to_string ##### -->
+<para>
+
+</para>
+
+@val: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_linkage_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_linkage_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_linkage_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_linkage_ref ##### -->
+<para>
+
+</para>
+
+@linkage: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_linkage_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_linkage_get_category ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_linkage_set_category ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@category: 
+
+
+<!-- ##### FUNCTION iodef_linkage_new_category ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_linkage_get_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_linkage_set_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@name: 
+
+
+<!-- ##### FUNCTION iodef_linkage_new_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_linkage_get_path ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_linkage_set_path ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@path: 
+
+
+<!-- ##### FUNCTION iodef_linkage_new_path ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_linkage_get_file ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_linkage_set_file ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@file: 
+
+
+<!-- ##### FUNCTION iodef_linkage_new_file ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### ENUM iodef_target_decoy_t ##### -->
+<para>
+
+</para>
+
+@IODEF_TARGET_DECOY_ERROR: 
+@IODEF_TARGET_DECOY_UNKNOWN: 
+@IODEF_TARGET_DECOY_YES: 
+@IODEF_TARGET_DECOY_NO: 
+
+<!-- ##### FUNCTION iodef_target_decoy_to_numeric ##### -->
+<para>
+
+</para>
+
+@name: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_target_decoy_to_string ##### -->
+<para>
+
+</para>
+
+@val: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_target_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_target_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_target_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_target_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_target_ref ##### -->
+<para>
+
+</para>
+
+@target: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_target_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_target_get_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_target_set_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ident: 
+
+
+<!-- ##### FUNCTION iodef_target_new_ident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_target_get_decoy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_target_set_decoy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@decoy: 
+
+
+<!-- ##### FUNCTION iodef_target_new_decoy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_target_get_interface ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_target_set_interface ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@interface: 
+
+
+<!-- ##### FUNCTION iodef_target_new_interface ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_target_get_node ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_target_set_node ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@node: 
+
+
+<!-- ##### FUNCTION iodef_target_new_node ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_target_get_user ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_target_set_user ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@user: 
+
+
+<!-- ##### FUNCTION iodef_target_new_user ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_target_get_process ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_target_set_process ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@process: 
+
+
+<!-- ##### FUNCTION iodef_target_new_process ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_target_get_service ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_target_set_service ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@service: 
+
+
+<!-- ##### FUNCTION iodef_target_new_service ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_target_get_next_file ##### -->
+<para>
+
+</para>
+
+@target: 
+@file_cur: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_target_set_file ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@object: 
+@pos: 
+
+
+<!-- ##### FUNCTION iodef_target_new_file ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@pos: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_analyzer_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_analyzer_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_ref ##### -->
+<para>
+
+</para>
+
+@analyzer: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_get_analyzerid ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_set_analyzerid ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@analyzerid: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_new_analyzerid ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_get_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_set_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@name: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_new_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_get_manufacturer ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_set_manufacturer ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@manufacturer: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_new_manufacturer ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_get_model ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_set_model ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@model: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_new_model ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_get_version ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_set_version ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@version: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_new_version ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_get_class ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_set_class ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@class_str: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_new_class ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_get_ostype ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_set_ostype ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ostype: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_new_ostype ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_get_osversion ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_set_osversion ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@osversion: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_new_osversion ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_get_node ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_set_node ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@node: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_new_node ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_get_process ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_set_process ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@process: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_new_process ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_alertident_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_alertident_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alertident_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alertident_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alertident_ref ##### -->
+<para>
+
+</para>
+
+@alertident: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alertident_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_alertident_get_alertident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alertident_set_alertident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@alertident: 
+
+
+<!-- ##### FUNCTION iodef_alertident_new_alertident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alertident_get_analyzerid ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alertident_set_analyzerid ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@analyzerid: 
+
+
+<!-- ##### FUNCTION iodef_alertident_new_analyzerid ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### ENUM iodef_impact_severity_t ##### -->
+<para>
+
+</para>
+
+@IODEF_IMPACT_SEVERITY_ERROR: 
+@IODEF_IMPACT_SEVERITY_INFO: 
+@IODEF_IMPACT_SEVERITY_LOW: 
+@IODEF_IMPACT_SEVERITY_MEDIUM: 
+@IODEF_IMPACT_SEVERITY_HIGH: 
+
+<!-- ##### FUNCTION iodef_impact_severity_to_numeric ##### -->
+<para>
+
+</para>
+
+@name: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_impact_severity_to_string ##### -->
+<para>
+
+</para>
+
+@val: 
+@Returns: 
+
+
+<!-- ##### ENUM iodef_impact_completion_t ##### -->
+<para>
+
+</para>
+
+@IODEF_IMPACT_COMPLETION_ERROR: 
+@IODEF_IMPACT_COMPLETION_FAILED: 
+@IODEF_IMPACT_COMPLETION_SUCCEEDED: 
+
+<!-- ##### FUNCTION iodef_impact_completion_to_numeric ##### -->
+<para>
+
+</para>
+
+@name: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_impact_completion_to_string ##### -->
+<para>
+
+</para>
+
+@val: 
+@Returns: 
+
+
+<!-- ##### ENUM iodef_impact_type_t ##### -->
+<para>
+
+</para>
+
+@IODEF_IMPACT_TYPE_ERROR: 
+@IODEF_IMPACT_TYPE_OTHER: 
+@IODEF_IMPACT_TYPE_ADMIN: 
+@IODEF_IMPACT_TYPE_DOS: 
+@IODEF_IMPACT_TYPE_FILE: 
+@IODEF_IMPACT_TYPE_RECON: 
+@IODEF_IMPACT_TYPE_USER: 
+
+<!-- ##### FUNCTION iodef_impact_type_to_numeric ##### -->
+<para>
+
+</para>
+
+@name: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_impact_type_to_string ##### -->
+<para>
+
+</para>
+
+@val: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_impact_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_impact_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_impact_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_impact_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_impact_ref ##### -->
+<para>
+
+</para>
+
+@impact: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_impact_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_impact_unset_severity ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_impact_get_severity ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_impact_set_severity ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@severity: 
+
+
+<!-- ##### FUNCTION iodef_impact_new_severity ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_impact_unset_completion ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_impact_get_completion ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_impact_set_completion ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@completion: 
+
+
+<!-- ##### FUNCTION iodef_impact_new_completion ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_impact_get_type ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_impact_set_type ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@type: 
+
+
+<!-- ##### FUNCTION iodef_impact_new_type ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_impact_get_description ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_impact_set_description ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@description: 
+
+
+<!-- ##### FUNCTION iodef_impact_new_description ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### ENUM iodef_action_category_t ##### -->
+<para>
+
+</para>
+
+@IODEF_ACTION_CATEGORY_ERROR: 
+@IODEF_ACTION_CATEGORY_OTHER: 
+@IODEF_ACTION_CATEGORY_BLOCK_INSTALLED: 
+@IODEF_ACTION_CATEGORY_NOTIFICATION_SENT: 
+@IODEF_ACTION_CATEGORY_TAKEN_OFFLINE: 
+
+<!-- ##### FUNCTION iodef_action_category_to_numeric ##### -->
+<para>
+
+</para>
+
+@name: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_action_category_to_string ##### -->
+<para>
+
+</para>
+
+@val: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_action_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_action_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_action_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_action_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_action_ref ##### -->
+<para>
+
+</para>
+
+@action: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_action_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_action_get_category ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_action_set_category ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@category: 
+
+
+<!-- ##### FUNCTION iodef_action_new_category ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_action_get_description ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_action_set_description ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@description: 
+
+
+<!-- ##### FUNCTION iodef_action_new_description ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### ENUM iodef_confidence_rating_t ##### -->
+<para>
+
+</para>
+
+@IODEF_CONFIDENCE_RATING_ERROR: 
+@IODEF_CONFIDENCE_RATING_NUMERIC: 
+@IODEF_CONFIDENCE_RATING_LOW: 
+@IODEF_CONFIDENCE_RATING_MEDIUM: 
+@IODEF_CONFIDENCE_RATING_HIGH: 
+
+<!-- ##### FUNCTION iodef_confidence_rating_to_numeric ##### -->
+<para>
+
+</para>
+
+@name: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_confidence_rating_to_string ##### -->
+<para>
+
+</para>
+
+@val: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_confidence_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_confidence_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_confidence_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_confidence_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_confidence_ref ##### -->
+<para>
+
+</para>
+
+@confidence: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_confidence_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_confidence_get_rating ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_confidence_set_rating ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@rating: 
+
+
+<!-- ##### FUNCTION iodef_confidence_new_rating ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_confidence_get_confidence ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_confidence_set_confidence ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@confidence: 
+
+
+<!-- ##### FUNCTION iodef_confidence_new_confidence ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_assessment_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_assessment_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_assessment_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_assessment_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_assessment_ref ##### -->
+<para>
+
+</para>
+
+@assessment: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_assessment_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_assessment_get_impact ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_assessment_set_impact ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@impact: 
+
+
+<!-- ##### FUNCTION iodef_assessment_new_impact ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_assessment_get_next_action ##### -->
+<para>
+
+</para>
+
+@assessment: 
+@action_cur: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_assessment_set_action ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@object: 
+@pos: 
+
+
+<!-- ##### FUNCTION iodef_assessment_new_action ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@pos: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_assessment_get_confidence ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_assessment_set_confidence ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@confidence: 
+
+
+<!-- ##### FUNCTION iodef_assessment_new_confidence ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_tool_alert_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_tool_alert_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_tool_alert_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_tool_alert_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_tool_alert_ref ##### -->
+<para>
+
+</para>
+
+@tool_alert: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_tool_alert_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_tool_alert_get_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_tool_alert_set_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@name: 
+
+
+<!-- ##### FUNCTION iodef_tool_alert_new_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_tool_alert_get_command ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_tool_alert_set_command ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@command: 
+
+
+<!-- ##### FUNCTION iodef_tool_alert_new_command ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_tool_alert_get_next_alertident ##### -->
+<para>
+
+</para>
+
+@tool_alert: 
+@alertident_cur: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_tool_alert_set_alertident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@object: 
+@pos: 
+
+
+<!-- ##### FUNCTION iodef_tool_alert_new_alertident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@pos: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_correlation_alert_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_correlation_alert_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_correlation_alert_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_correlation_alert_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_correlation_alert_ref ##### -->
+<para>
+
+</para>
+
+@correlation_alert: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_correlation_alert_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_correlation_alert_get_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_correlation_alert_set_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@name: 
+
+
+<!-- ##### FUNCTION iodef_correlation_alert_new_name ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_correlation_alert_get_next_alertident ##### -->
+<para>
+
+</para>
+
+@correlation_alert: 
+@alertident_cur: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_correlation_alert_set_alertident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@object: 
+@pos: 
+
+
+<!-- ##### FUNCTION iodef_correlation_alert_new_alertident ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@pos: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_overflow_alert_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_overflow_alert_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_overflow_alert_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_overflow_alert_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_overflow_alert_ref ##### -->
+<para>
+
+</para>
+
+@overflow_alert: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_overflow_alert_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_overflow_alert_get_program ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_overflow_alert_set_program ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@program: 
+
+
+<!-- ##### FUNCTION iodef_overflow_alert_new_program ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_overflow_alert_unset_size ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_overflow_alert_get_size ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_overflow_alert_set_size ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@size: 
+
+
+<!-- ##### FUNCTION iodef_overflow_alert_new_size ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_overflow_alert_get_buffer ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_overflow_alert_set_buffer ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@buffer: 
+
+
+<!-- ##### FUNCTION iodef_overflow_alert_new_buffer ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### ENUM iodef_alert_type_t ##### -->
+<para>
+
+</para>
+
+@IODEF_ALERT_TYPE_ERROR: 
+@IODEF_ALERT_TYPE_DEFAULT: 
+@IODEF_ALERT_TYPE_TOOL: 
+@IODEF_ALERT_TYPE_CORRELATION: 
+@IODEF_ALERT_TYPE_OVERFLOW: 
+
+<!-- ##### FUNCTION iodef_alert_type_to_numeric ##### -->
+<para>
+
+</para>
+
+@name: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_type_to_string ##### -->
+<para>
+
+</para>
+
+@val: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_alert_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_alert_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_ref ##### -->
+<para>
+
+</para>
+
+@alert: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_alert_get_messageid ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_set_messageid ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@messageid: 
+
+
+<!-- ##### FUNCTION iodef_alert_new_messageid ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_get_next_analyzer ##### -->
+<para>
+
+</para>
+
+@alert: 
+@analyzer_cur: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_set_analyzer ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@object: 
+@pos: 
+
+
+<!-- ##### FUNCTION iodef_alert_new_analyzer ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@pos: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_get_create_time ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_set_create_time ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@create_time: 
+
+
+<!-- ##### FUNCTION iodef_alert_new_create_time ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_get_classification ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_set_classification ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@classification: 
+
+
+<!-- ##### FUNCTION iodef_alert_new_classification ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_get_detect_time ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_set_detect_time ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@detect_time: 
+
+
+<!-- ##### FUNCTION iodef_alert_new_detect_time ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_get_analyzer_time ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_set_analyzer_time ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@analyzer_time: 
+
+
+<!-- ##### FUNCTION iodef_alert_new_analyzer_time ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_get_next_source ##### -->
+<para>
+
+</para>
+
+@alert: 
+@source_cur: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_set_source ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@object: 
+@pos: 
+
+
+<!-- ##### FUNCTION iodef_alert_new_source ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@pos: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_get_next_target ##### -->
+<para>
+
+</para>
+
+@alert: 
+@target_cur: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_set_target ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@object: 
+@pos: 
+
+
+<!-- ##### FUNCTION iodef_alert_new_target ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@pos: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_get_assessment ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_set_assessment ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@assessment: 
+
+
+<!-- ##### FUNCTION iodef_alert_new_assessment ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_get_next_additional_data ##### -->
+<para>
+
+</para>
+
+@alert: 
+@additional_data_cur: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_set_additional_data ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@object: 
+@pos: 
+
+
+<!-- ##### FUNCTION iodef_alert_new_additional_data ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@pos: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_get_type ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_get_tool_alert ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_set_tool_alert ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@tool_alert: 
+
+
+<!-- ##### FUNCTION iodef_alert_new_tool_alert ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_get_correlation_alert ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_set_correlation_alert ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@correlation_alert: 
+
+
+<!-- ##### FUNCTION iodef_alert_new_correlation_alert ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_get_overflow_alert ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_set_overflow_alert ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@overflow_alert: 
+
+
+<!-- ##### FUNCTION iodef_alert_new_overflow_alert ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_heartbeat_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_heartbeat_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_heartbeat_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_heartbeat_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_heartbeat_ref ##### -->
+<para>
+
+</para>
+
+@heartbeat: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_heartbeat_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_heartbeat_get_messageid ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_heartbeat_set_messageid ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@messageid: 
+
+
+<!-- ##### FUNCTION iodef_heartbeat_new_messageid ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_heartbeat_get_next_analyzer ##### -->
+<para>
+
+</para>
+
+@heartbeat: 
+@analyzer_cur: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_heartbeat_set_analyzer ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@object: 
+@pos: 
+
+
+<!-- ##### FUNCTION iodef_heartbeat_new_analyzer ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@pos: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_heartbeat_get_create_time ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_heartbeat_set_create_time ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@create_time: 
+
+
+<!-- ##### FUNCTION iodef_heartbeat_new_create_time ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_heartbeat_get_analyzer_time ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_heartbeat_set_analyzer_time ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@analyzer_time: 
+
+
+<!-- ##### FUNCTION iodef_heartbeat_new_analyzer_time ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_heartbeat_unset_heartbeat_interval ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_heartbeat_get_heartbeat_interval ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_heartbeat_set_heartbeat_interval ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@heartbeat_interval: 
+
+
+<!-- ##### FUNCTION iodef_heartbeat_new_heartbeat_interval ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_heartbeat_get_next_additional_data ##### -->
+<para>
+
+</para>
+
+@heartbeat: 
+@additional_data_cur: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_heartbeat_set_additional_data ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@object: 
+@pos: 
+
+
+<!-- ##### FUNCTION iodef_heartbeat_new_additional_data ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@pos: 
+@Returns: 
+
+
+<!-- ##### ENUM iodef_document_type_t ##### -->
+<para>
+
+</para>
+
+@IODEF_DOCUMENT_TYPE_ERROR: 
+@IODEF_DOCUMENT_TYPE_ALERT: 
+@IODEF_DOCUMENT_TYPE_HEARTBEAT: 
+
+<!-- ##### FUNCTION iodef_document_type_to_numeric ##### -->
+<para>
+
+</para>
+
+@name: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_document_type_to_string ##### -->
+<para>
+
+</para>
+
+@val: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF iodef_document_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_document_new ##### -->
+<para>
+
+</para>
+
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_document_copy ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_document_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_document_ref ##### -->
+<para>
+
+</para>
+
+@message: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_document_destroy ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### FUNCTION iodef_document_get_version ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_document_set_version ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@version: 
+
+
+<!-- ##### FUNCTION iodef_document_new_version ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_document_get_type ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_document_get_alert ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_document_set_alert ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@alert: 
+
+
+<!-- ##### FUNCTION iodef_document_new_alert ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_document_get_heartbeat ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_document_set_heartbeat ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@heartbeat: 
+
+
+<!-- ##### FUNCTION iodef_document_new_heartbeat ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_document_set_pmsg ##### -->
+<para>
+
+</para>
+
+@message: 
+@msg: 
+
+
+<!-- ##### FUNCTION iodef_document_get_pmsg ##### -->
+<para>
+
+</para>
+
+@message: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_action_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_additional_data_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_address_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alert_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_alertident_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_analyzer_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_assessment_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_checksum_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_classification_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_confidence_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_correlation_alert_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_data_compare ##### -->
+<para>
+
+</para>
+
+@data1: 
+@data2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_access_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_file_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_heartbeat_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_impact_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_inode_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_linkage_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_document_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_node_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_overflow_alert_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_process_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_reference_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_service_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_snmp_service_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_source_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_target_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_time_compare ##### -->
+<para>
+
+</para>
+
+@time1: 
+@time2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_tool_alert_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_user_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_user_id_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_web_service_compare ##### -->
+<para>
+
+</para>
+
+@obj1: 
+@obj2: 
+@Returns: 
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_ADDITIONAL_DATA_TYPE ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_ADDITIONAL_DATA ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_REFERENCE_ORIGIN ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_REFERENCE ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_CLASSIFICATION ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_USER_ID_TYPE ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_USER_ID ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_USER_CATEGORY ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_USER ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_ADDRESS_CATEGORY ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_ADDRESS ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_PROCESS ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_WEB_SERVICE ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_SNMP_SERVICE ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_SERVICE_TYPE ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_SERVICE ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_NODE_CATEGORY ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_NODE ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_SOURCE_SPOOFED ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_SOURCE ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_FILE_ACCESS ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_INODE ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_CHECKSUM_ALGORITHM ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_CHECKSUM ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_FILE_CATEGORY ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_FILE_FSTYPE ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_FILE ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_LINKAGE_CATEGORY ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_LINKAGE ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_TARGET_DECOY ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_TARGET ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_ANALYZER ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_ALERTIDENT ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_IMPACT_SEVERITY ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_IMPACT_COMPLETION ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_IMPACT_TYPE ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_IMPACT ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_ACTION_CATEGORY ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_ACTION ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_CONFIDENCE_RATING ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_CONFIDENCE ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_ASSESSMENT ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_TOOL_ALERT ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_CORRELATION_ALERT ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_OVERFLOW_ALERT ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_ALERT_TYPE ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_ALERT ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_HEARTBEAT ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_DOCUMENT_TYPE ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IODEF_CLASS_ID_DOCUMENT ##### -->
+<para>
+
+</para>
+
+
+

@@ -1,0 +1,177 @@
+<!-- ##### SECTION Title ##### -->
+iodef-criterion-value
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### SECTION Image ##### -->
+
+
+<!-- ##### TYPEDEF iodef_criterion_value_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### ENUM iodef_criterion_value_type_t ##### -->
+<para>
+
+</para>
+
+@IODEF_CRITERION_VALUE_TYPE_ERROR: 
+@IODEF_CRITERION_VALUE_TYPE_VALUE: 
+@IODEF_CRITERION_VALUE_TYPE_REGEX: 
+@IODEF_CRITERION_VALUE_TYPE_BROKEN_DOWN_TIME: 
+
+<!-- ##### FUNCTION iodef_criterion_value_new ##### -->
+<para>
+
+</para>
+
+@cv: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criterion_value_new_regex ##### -->
+<para>
+
+</para>
+
+@cv: 
+@regex: 
+@op: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criterion_value_new_value ##### -->
+<para>
+
+</para>
+
+@cv: 
+@value: 
+@op: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criterion_value_new_from_string ##### -->
+<para>
+
+</para>
+
+@cv: 
+@path: 
+@value: 
+@op: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criterion_value_new_broken_down_time ##### -->
+<para>
+
+</para>
+
+@cv: 
+@time: 
+@op: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criterion_value_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criterion_value_destroy ##### -->
+<para>
+
+</para>
+
+@value: 
+
+
+<!-- ##### FUNCTION iodef_criterion_value_print ##### -->
+<para>
+
+</para>
+
+@value: 
+@fd: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criterion_value_to_string ##### -->
+<para>
+
+</para>
+
+@value: 
+@out: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criterion_value_match ##### -->
+<para>
+
+</para>
+
+@cv: 
+@value: 
+@op: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criterion_value_get_value ##### -->
+<para>
+
+</para>
+
+@cv: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criterion_value_get_regex ##### -->
+<para>
+
+</para>
+
+@cv: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criterion_value_get_broken_down_time ##### -->
+<para>
+
+</para>
+
+@cv: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_criterion_value_get_type ##### -->
+<para>
+
+</para>
+
+@cv: 
+@Returns: 
+
+

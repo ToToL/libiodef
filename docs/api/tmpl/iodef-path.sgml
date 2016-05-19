@@ -1,0 +1,372 @@
+<!-- ##### SECTION Title ##### -->
+iodef-path
+
+<!-- ##### SECTION Short_Description ##### -->
+
+The High level IODEF API.
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+The IODEF path API provide a methodes to define a "path" in the IODEF tree. 
+Once this path is defined, the user might set or retrieve this path.
+
+</para>
+
+<para>
+Here is an example of how to use this API in order to set a given path within
+a #iodef_document_t root object:
+</para>
+
+<para>
+First, we need to create a path to the object we want to create. If for example,
+we wish to create the alert.classification.text path within our message, we will use:
+
+<programlisting>
+int ret;
+iodef_path_t *path;
+
+ret = iodef_path_new(&amp;path, "alert.classification.text");
+if ( ret &lt; 0 )
+        return ret;
+</programlisting>
+
+Using the above, we just created a "pointer" to a given path in our #iodef_document_t. This
+path doesn't yet exist, but might be used to read, or to write a value.
+
+<programlisting>
+int ret;
+iodef_value_t *value;
+
+ret = iodef_value_new_from_path(&amp;value, path, "A value");
+if ( ret &lt; 0 )
+        return ret;
+</programlisting>
+
+Here we just created a value applicable to the previously created path. That is, if our path
+is pointing to a value of type string, the created #iodef_value_t object will be of this type.
+
+<programlisting>
+iodef_document_t *iodef;
+
+/* 
+ * create our top message 
+ */
+ret = iodef_document_new(&amp;iodef);
+
+/*
+ * Set the previously defined path to the previously created value
+ * in the top level iodef message 'iodef'.
+ */
+ret = iodef_path_set(path, iodef, value);
+</programlisting>
+
+And finally, we create our top level #iodef_document_t object and set the created #iodef_value_t 
+as the value for our created #iodef_path_t.
+</para>
+
+<para>
+
+Given our previous example, we can write the following function:
+
+<programlisting>
+static int set_iodef_path(iodef_document_t *message, const char *pathname, const char *value)
+{
+        int ret;
+        iodef_value_t *val;
+        iodef_path_t *path;
+        
+        ret = iodef_path_new(&amp;path, pathname);
+        if ( ret &lt; 0 )
+                return ret;
+
+        ret = iodef_value_new_from_path(&amp;val, path, value);
+        if ( ret &lt; 0 ) {
+                iodef_path_destroy(path);
+                return ret;
+        }
+
+        ret = iodef_path_set(path, message, val);
+
+        iodef_value_destroy(val);
+        iodef_path_destroy(path);
+        
+        return ret;
+}
+</programlisting>
+
+You will then be able to set any field of the IODEF message using:
+
+<programlisting>
+iodef_document_t *iodef;
+
+ret = iodef_document_new(&amp;iodef);
+if ( ret &lt; 0 )
+        return ret;
+
+set_iodef_path(iodef, "alert.classification.text", "My classification text");
+set_iodef_path(iodef, "alert.classification.reference(0).name", "OSVDB-XXXX");
+set_iodef_path(iodef, "alert.classification.reference(0).origin", "osvdb");
+set_iodef_path(iodef, "alert.classification.reference(0).url", "http://my.url/");
+set_iodef_path(iodef, "alert.source(0).node.address(0).address", "127.0.0.1");
+</programlisting>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+#iodef_value_t for setting #iodef_path_t value.
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### SECTION Image ##### -->
+
+
+<!-- ##### TYPEDEF iodef_path_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION iodef_path_get ##### -->
+<para>
+
+</para>
+
+@path: 
+@message: 
+@ret: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_path_set ##### -->
+<para>
+
+</para>
+
+@path: 
+@message: 
+@value: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_path_new ##### -->
+<para>
+
+</para>
+
+@path: 
+@format: 
+@...: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_path_new_v ##### -->
+<para>
+
+</para>
+
+@path: 
+@format: 
+@args: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_path_new_fast ##### -->
+<para>
+
+</para>
+
+@path: 
+@buffer: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_path_get_class ##### -->
+<para>
+
+</para>
+
+@path: 
+@depth: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_path_get_value_type ##### -->
+<para>
+
+</para>
+
+@path: 
+@depth: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_path_set_index ##### -->
+<para>
+
+</para>
+
+@path: 
+@depth: 
+@index: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_path_undefine_index ##### -->
+<para>
+
+</para>
+
+@path: 
+@depth: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_path_get_index ##### -->
+<para>
+
+</para>
+
+@path: 
+@depth: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_path_make_child ##### -->
+<para>
+
+</para>
+
+@path: 
+@child_name: 
+@index: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_path_make_parent ##### -->
+<para>
+
+</para>
+
+@path: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_path_destroy ##### -->
+<para>
+
+</para>
+
+@path: 
+
+
+<!-- ##### FUNCTION iodef_path_ncompare ##### -->
+<para>
+
+</para>
+
+@p1: 
+@p2: 
+@depth: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_path_compare ##### -->
+<para>
+
+</para>
+
+@p1: 
+@p2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_path_clone ##### -->
+<para>
+
+</para>
+
+@src: 
+@dst: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_path_ref ##### -->
+<para>
+
+</para>
+
+@path: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_path_get_name ##### -->
+<para>
+
+</para>
+
+@path: 
+@depth: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_path_is_ambiguous ##### -->
+<para>
+
+</para>
+
+@path: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_path_has_lists ##### -->
+<para>
+
+</para>
+
+@path: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_path_is_list ##### -->
+<para>
+
+</para>
+
+@path: 
+@depth: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_path_get_depth ##### -->
+<para>
+
+</para>
+
+@path: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_path_check_operator ##### -->
+<para>
+
+</para>
+
+@path: 
+@op: 
+@Returns: 
+
+
+<!-- ##### FUNCTION iodef_path_get_applicable_operators ##### -->
+<para>
+
+</para>
+
+@path: 
+@result: 
+@Returns: 
+
+
