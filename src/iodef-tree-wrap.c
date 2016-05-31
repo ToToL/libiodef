@@ -28178,6 +28178,8 @@ int iodef_incident_new(iodef_incident_t **ret)
                 }
         }
 
+        iodef_time_set_from_gettimeofday((*ret)->report_time);
+
         {
                 int retval = iodef_incident_id_new(&(*ret)->incident_id);
 

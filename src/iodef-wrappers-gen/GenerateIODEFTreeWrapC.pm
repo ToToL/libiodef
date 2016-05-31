@@ -388,7 +388,7 @@ int iodef_$struct->{short_typename}_new($struct->{typename} **ret)
         }
 ");
 
-        if ( $field->{typename} eq "iodef_time_t" and $field->{name} eq "create_time" and ($struct->{short_typename} eq "alert" or $struct->{short_typename} eq "heartbeat") ) {
+        if ( $field->{typename} eq "iodef_time_t" and $field->{name} eq "report_time" and ($struct->{short_typename} eq "incident" or $struct->{short_typename} eq "heartbeat") ) {
                 $self->output("
         iodef_time_set_from_gettimeofday((*ret)->$field->{name});
 ");

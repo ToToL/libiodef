@@ -41,7 +41,6 @@ use GenerateIODEFTreeWrapHxx;
 
 sub	target_need_update
 {
-    return 1;
     my	$generator = shift;
     my	@file_list = @_;
     my	$source = $generator->{source};
