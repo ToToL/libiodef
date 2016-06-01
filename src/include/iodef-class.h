@@ -3,7 +3,7 @@
 * Copyright (C) 2002, 2003, 2004 Krzysztof Zaraska <kzaraska@student.uci.agh.edu.pl>
 * All Rights Reserved
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,8 @@
 *****/
 
 
-#ifndef _LIBPRELUDE_IODEF_CLASS_H
-#define _LIBPRELUDE_IODEF_CLASS_H
+#ifndef _LIBIODEF_IODEF_CLASS_H
+#define _LIBIODEF_IODEF_CLASS_H
 
 #ifdef __cplusplus
  extern "C" {
@@ -37,11 +37,11 @@ typedef int iodef_class_child_id_t;
 /*
  *
  */
-prelude_bool_t iodef_class_is_child_list(iodef_class_id_t classid, iodef_class_child_id_t child);
+libiodef_bool_t iodef_class_is_child_list(iodef_class_id_t classid, iodef_class_child_id_t child);
 
-prelude_bool_t iodef_class_is_child_keyed_list(iodef_class_id_t classid, iodef_class_child_id_t child);
+libiodef_bool_t iodef_class_is_child_keyed_list(iodef_class_id_t classid, iodef_class_child_id_t child);
 
-prelude_bool_t iodef_class_is_child_union_member(iodef_class_id_t classid, iodef_class_child_id_t child);
+libiodef_bool_t iodef_class_is_child_union_member(iodef_class_id_t classid, iodef_class_child_id_t child);
 
 int iodef_class_get_child_union_id(iodef_class_id_t classid, iodef_class_child_id_t child);
 
@@ -96,18 +96,18 @@ int iodef_class_compare(iodef_class_id_t classid, const void *c1, const void *c2
 
 int iodef_class_ref(iodef_class_id_t classid, void *obj);
 
-int iodef_class_print(iodef_class_id_t classid, void *obj, prelude_io_t *fd);
+int iodef_class_print(iodef_class_id_t classid, void *obj, libiodef_io_t *fd);
 
-int iodef_class_print_json(iodef_class_id_t classid, void *obj, prelude_io_t *fd);
+int iodef_class_print_json(iodef_class_id_t classid, void *obj, libiodef_io_t *fd);
 
-int iodef_class_print_binary(iodef_class_id_t classid, void *obj, prelude_io_t *fd);
+int iodef_class_print_binary(iodef_class_id_t classid, void *obj, libiodef_io_t *fd);
 
 int iodef_class_destroy(iodef_class_id_t classid, void *obj);
 
-prelude_bool_t iodef_class_is_listed(iodef_class_id_t classid);
+libiodef_bool_t iodef_class_is_listed(iodef_class_id_t classid);
 
 #ifdef __cplusplus
  }
 #endif
 
-#endif /* _LIBPRELUDE_IODEF_CLASS_H */
+#endif /* _LIBIODEF_IODEF_CLASS_H */

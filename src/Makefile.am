@@ -7,7 +7,7 @@ pkgconfigdir = $(libdir)/pkgconfig
 
 libiodefincludedir = $(includedir)/
 libiodef_la_LIBADD = @LIBIODEF_LIBS@ $(LIBLTDL) $(top_builddir)/libmissing/libmissing.la libiodef-error/libiodef-error.la
-libiodef_la_LDFLAGS = $(GETADDRINFO_LIB) $(GETHOSTNAME_LIB) $(HOSTENT_LIB) $(INET_NTOP_LIB) $(INET_PTON_LIB) $(LIBSOCKET) $(LIB_POLL) $(LIB_SELECT) $(LTLIBINTL) $(LTLIBTHREAD) $(SERVENT_LIB) -no-undefined -version-info @LIBIODEF_SONAME@ -export-symbols-regex "^(iodef|_?prelude)_"
+libiodef_la_LDFLAGS = $(GETADDRINFO_LIB) $(GETHOSTNAME_LIB) $(HOSTENT_LIB) $(INET_NTOP_LIB) $(INET_PTON_LIB) $(LIBSOCKET) $(LIB_POLL) $(LIB_SELECT) $(LTLIBINTL) $(LTLIBTHREAD) $(SERVENT_LIB) -no-undefined -version-info @LIBIODEF_SONAME@ -export-symbols-regex "^(iodef|_?libiodef)_"
 lib_LTLIBRARIES = libiodef.la
 BUILT_SOURCES = $(LTDLDEPS) 
 
@@ -18,11 +18,11 @@ libiodef_la_SOURCES = 		\
 	common.c			\
 	ntp.c				\
 	variable.c			\
-	prelude-hash.c			\
-	prelude-ident.c			\
-	prelude-io.c			\
-	prelude-log.c			\
-	prelude-string.c		\
+	libiodef-hash.c			\
+	libiodef-ident.c			\
+	libiodef-io.c			\
+	libiodef-log.c			\
+	libiodef-string.c		\
 	iodef-additional-data.c		\
 	iodef-class.c			\
 	iodef-criteria.c		\

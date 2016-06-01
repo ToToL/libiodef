@@ -1,12 +1,12 @@
 #!/usr/bin/python
 
-import PreludeEasy
+import LibIodefEasy
 
-client = PreludeEasy.ClientEasy("PoolingTest", PreludeEasy.Client.IODEF_READ)
+client = LibIodefEasy.ClientEasy("PoolingTest", LibIodefEasy.Client.IODEF_READ)
 client.Start()
 
 while True:
-    iodef = PreludeEasy.IODEF()
+    iodef = LibIodefEasy.IODEF()
 
     ret = client.RecvIODEF(iodef)
     if ret:

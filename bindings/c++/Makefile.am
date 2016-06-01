@@ -5,7 +5,7 @@ SUBDIRS = include
 lib_LTLIBRARIES = libiodefcpp.la
 libiodefcpp_ladir = ${prefix}/lib
 libiodefcpp_la_SOURCES = \
-	prelude-error.cxx \
+	libiodef-error.cxx \
 	iodef.cxx \
 	iodef-class.cxx \
 	iodef-criteria.cxx \

@@ -1,9 +1,9 @@
 /*****
 *
 * Copyright (C) 2005-2016 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoannv@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoannv@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@
 #include <sstream>
 
 #include "libiodef.hxx"
-#include "prelude-error.hxx"
+#include "libiodef-error.hxx"
 #include "iodef-criteria.hxx"
 #include "iodef-value.hxx"
 #include "iodef-path.hxx"
@@ -64,8 +64,8 @@ typedef unsigned int uint32_t;
 typedef long long int64_t;
 typedef unsigned long long uint64_t;
 
-%ignore prelude_error_t;
-typedef signed int prelude_error_t;
+%ignore libiodef_error_t;
+typedef signed int libiodef_error_t;
 
 %ignore iodef_class_id_t;
 typedef int iodef_class_id_t;
@@ -76,7 +76,7 @@ typedef long long time_t;
 %exception {
         try {
                 $action
-        } catch(Iodef::PreludeError &e) {
+        } catch(Iodef::LibIodefError &e) {
                 SWIG_exception(SWIG_RuntimeError, e.what());
                 SWIG_fail;
         }
@@ -109,7 +109,7 @@ typedef long long time_t;
 %template() std::vector<Iodef::IODEFValue>;
 %template() std::vector<Iodef::Connection>;
 
-#ifdef SWIG_COMPILE_LIBPRELUDE
+#ifdef SWIG_COMPILE_LIBIODEF
 %extend Iodef::IODEF {
         Iodef::IODEFValue get(const char *path) {
                 Iodef::IODEFValue value;
@@ -164,8 +164,8 @@ int IODEFValue_to_SWIG(TARGET_LANGUAGE_SELF self, const Iodef::IODEFValue &resul
         Iodef::IODEFValue::IODEFValueTypeEnum type = result.getType();
 
         if ( type == Iodef::IODEFValue::TYPE_STRING ) {
-                prelude_string_t *str = iodef_value_get_string(value);
-                *ret = SWIG_FromCharPtrAndSize(prelude_string_get_string(str), prelude_string_get_len(str));
+                libiodef_string_t *str = iodef_value_get_string(value);
+                *ret = SWIG_FromCharPtrAndSize(libiodef_string_get_string(str), libiodef_string_get_len(str));
         }
 
         else if ( type == Iodef::IODEFValue::TYPE_INT8 )
@@ -290,9 +290,9 @@ int IODEFValue_to_SWIG(TARGET_LANGUAGE_SELF self, const Iodef::IODEFValue &resul
  * because they might acquire internal libiodef mutex that may also be
  * acquired undirectly through the libiodef asynchronous stack.
  *
- * [Thread 2]: Libprelude async stack
+ * [Thread 2]: Liblibiodef async stack
  * -> Lock internal mutexX
- *    -> prelude_log()
+ *    -> libiodef_log()
  *       -> SWIG/C log callback
  *          -> Wait on Interpreter lock [DEADLOCK]
  *             -> Python logging callback (never called)
@@ -316,8 +316,8 @@ int IODEFValue_to_SWIG(TARGET_LANGUAGE_SELF self, const Iodef::IODEFValue &resul
  * needed.
  */
 
-#ifdef SWIG_COMPILE_LIBPRELUDE
-%feature("exceptionclass") Iodef::PreludeError;
+#ifdef SWIG_COMPILE_LIBIODEF
+%feature("exceptionclass") Iodef::LibIodefError;
 %feature("kwargs") Iodef::IODEFClass::getPath;
 %feature("kwargs") Iodef::IODEFPath::getClass;
 %feature("kwargs") Iodef::IODEFPath::getValueType;
@@ -329,7 +329,7 @@ int IODEFValue_to_SWIG(TARGET_LANGUAGE_SELF self, const Iodef::IODEFValue &resul
 %feature("kwargs") Iodef::IODEFPath::isList;
 
 %include libiodef.hxx
-%include prelude-error.hxx
+%include libiodef-error.hxx
 %include iodef-criteria.hxx
 %include iodef-value.hxx
 %include iodef-path.hxx

@@ -3,7 +3,7 @@
 * Copyright (C) 2014-2016 CS-SI. All Rights Reserved.
 * Author: Yoann Vandoorselaere <yoannv@gmail.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -21,11 +21,11 @@
 *
 *****/
 
-#ifndef _LIBPRELUDE_IODEF_OBJECT_PRV_H
-#define _LIBPRELUDE_IODEF_OBJECT_PRV_H
+#ifndef _LIBIODEF_IODEF_OBJECT_PRV_H
+#define _LIBIODEF_IODEF_OBJECT_PRV_H
 
 #define IODEF_OBJECT unsigned int _iodef_object_id
-#define IODEF_LINKED_OBJECT IODEF_OBJECT; prelude_list_t _list
+#define IODEF_LINKED_OBJECT IODEF_OBJECT; libiodef_list_t _list
 
 struct iodef_object {
         IODEF_OBJECT;
@@ -33,10 +33,10 @@ struct iodef_object {
 
 struct iodef_linked_object {
         IODEF_OBJECT;
-        prelude_list_t _list;
+        libiodef_list_t _list;
 };
 
 #define iodef_linked_object_get_object(object) \
-        (void *) prelude_list_entry(object, struct iodef_linked_object, _list)
+        (void *) libiodef_list_entry(object, struct iodef_linked_object, _list)
 
-#endif /* _LIBPRELUDE_IODEF_OBJECT_PRV_H */
+#endif /* _LIBIODEF_IODEF_OBJECT_PRV_H */

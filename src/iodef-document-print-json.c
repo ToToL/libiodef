@@ -2,10 +2,10 @@
 /*****
 *
 * Copyright (C) 2004-2016 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoann.v@prelude-ids.com>
-* Author: Nicolas Delon <nicolas.delon@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann.v@libiodef-ids.com>
+* Author: Nicolas Delon <nicolas.delon@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -44,33 +44,33 @@
 #define conv_int32 conv_int64
 
 
-static int conv_uint64(prelude_io_t *fd, uint64_t value)
+static int conv_uint64(libiodef_io_t *fd, uint64_t value)
 {
         int ret;
         char buf[32];
 
-        ret = snprintf(buf, sizeof(buf), "%" PRELUDE_PRIu64, value);
+        ret = snprintf(buf, sizeof(buf), "%" LIBIODEF_PRIu64, value);
         if ( ret < 0 || ret >= sizeof(buf) )
                 return -1;
 
-        return prelude_io_write(fd, buf, ret);
+        return libiodef_io_write(fd, buf, ret);
 }
 
 
-static int conv_int64(prelude_io_t *fd, int64_t value)
+static int conv_int64(libiodef_io_t *fd, int64_t value)
 {
         int ret;
         char buf[32];
 
-        ret = snprintf(buf, sizeof(buf), "%" PRELUDE_PRId64, value);
+        ret = snprintf(buf, sizeof(buf), "%" LIBIODEF_PRId64, value);
         if ( ret < 0 || ret >= sizeof(buf) )
                 return -1;
 
-        return prelude_io_write(fd, buf, ret);
+        return libiodef_io_write(fd, buf, ret);
 }
 
 
-static int conv_float(prelude_io_t *fd, float value)
+static int conv_float(libiodef_io_t *fd, float value)
 {
         int ret;
         char buf[32];
@@ -79,54 +79,54 @@ static int conv_float(prelude_io_t *fd, float value)
         if ( ret < 0 || ret >= sizeof(buf) )
                 return -1;
 
-        return prelude_io_write(fd, buf, ret);
+        return libiodef_io_write(fd, buf, ret);
 }
 
 
-static int conv_string(prelude_io_t *fd, prelude_string_t *string)
+static int conv_string(libiodef_io_t *fd, libiodef_string_t *string)
 {
         size_t i;
         ssize_t ret;
         const unsigned char *content;
 
-        content = (const unsigned char *) prelude_string_get_string_or_default(string, "");
-        ret = prelude_io_write(fd, "\"", 1);
+        content = (const unsigned char *) libiodef_string_get_string_or_default(string, "");
+        ret = libiodef_io_write(fd, "\"", 1);
         if ( ret < 0 )
                 return ret;
 
-        for ( i = 0; i < prelude_string_get_len(string); i++, content++ ) {
+        for ( i = 0; i < libiodef_string_get_len(string); i++, content++ ) {
                 switch(*content) {
                         case '\\':
                         case '"':
                         case '/':
-                                ret = prelude_io_write(fd, "\\", 1);
+                                ret = libiodef_io_write(fd, "\\", 1);
                                 if ( ret < 0 )
                                         return ret;
 
-                                ret = prelude_io_write(fd, content, 1);
+                                ret = libiodef_io_write(fd, content, 1);
                                 break;
                         case '\b':
-                                ret = prelude_io_write(fd, "\\b", 2);
+                                ret = libiodef_io_write(fd, "\\b", 2);
                                 break;
                         case '\t':
-                                ret = prelude_io_write(fd, "\\t", 2);
+                                ret = libiodef_io_write(fd, "\\t", 2);
                                 break;
                         case '\n':
-                                ret = prelude_io_write(fd, "\\n", 2);
+                                ret = libiodef_io_write(fd, "\\n", 2);
                                 break;
                         case '\f':
-                                ret = prelude_io_write(fd, "\\f", 2);
+                                ret = libiodef_io_write(fd, "\\f", 2);
                                 break;
                         case '\r':
-                                ret = prelude_io_write(fd, "\\r", 2);
+                                ret = libiodef_io_write(fd, "\\r", 2);
                                 break;
                         default:
                                 if ( *content >= 0x20 )
-                                        ret = prelude_io_write(fd, content, 1);
+                                        ret = libiodef_io_write(fd, content, 1);
                                 else {
                                         char seq[7];
                                         snprintf(seq, sizeof(seq), "\\u%04X", *content);
-                                        ret = prelude_io_write(fd, seq, strlen(seq));
+                                        ret = libiodef_io_write(fd, seq, strlen(seq));
                                 }
                 }
 
@@ -134,19 +134,19 @@ static int conv_string(prelude_io_t *fd, prelude_string_t *string)
                         return ret;
         }
 
-        return prelude_io_write(fd, "\"", 1);
+        return libiodef_io_write(fd, "\"", 1);
 }
 
 
-static int conv_time(prelude_io_t *fd, iodef_time_t *t)
+static int conv_time(libiodef_io_t *fd, iodef_time_t *t)
 {
         int ret;
-        prelude_string_t *str;
+        libiodef_string_t *str;
 
         if ( ! t )
                 return 0;
 
-        ret = prelude_string_new(&str);
+        ret = libiodef_string_new(&str);
         if ( ret < 0 )
                 return ret;
 
@@ -157,17 +157,17 @@ static int conv_time(prelude_io_t *fd, iodef_time_t *t)
         ret = conv_string(fd, str);
 
 error:
-        prelude_string_destroy(str);
+        libiodef_string_destroy(str);
         return ret;
 }
 
 
-static int conv_data(prelude_io_t *fd, iodef_data_t *data)
+static int conv_data(libiodef_io_t *fd, iodef_data_t *data)
 {
         int ret;
-        prelude_string_t *out;
+        libiodef_string_t *out;
 
-        ret = prelude_string_new(&out);
+        ret = libiodef_string_new(&out);
         if ( ret < 0 )
                 return ret;
 
@@ -178,21 +178,21 @@ static int conv_data(prelude_io_t *fd, iodef_data_t *data)
         switch (iodef_data_get_type(data)) {
                 case IODEF_DATA_TYPE_INT:
                 case IODEF_DATA_TYPE_FLOAT:
-                        ret = prelude_io_write(fd, prelude_string_get_string(out), prelude_string_get_len(out));
+                        ret = libiodef_io_write(fd, libiodef_string_get_string(out), libiodef_string_get_len(out));
                         break;
                 default:
                         ret = conv_string(fd, out);
                         break;
         }
 error:
-        prelude_string_destroy(out);
+        libiodef_string_destroy(out);
         return ret;
 }
 
 
-static int do_write(prelude_io_t *fd, const char *str)
+static int do_write(libiodef_io_t *fd, const char *str)
 {
-        return prelude_io_write(fd, str, strlen(str));
+        return libiodef_io_write(fd, str, strlen(str));
 }
 
 
@@ -202,7 +202,7 @@ static int do_write(prelude_io_t *fd, const char *str)
  *
  * This function will convert @ptr to a json,
  */
-int iodef_additional_data_print_json(iodef_additional_data_t *ptr, prelude_io_t *fd)
+int iodef_additional_data_print_json(iodef_additional_data_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -259,7 +259,7 @@ int iodef_additional_data_print_json(iodef_additional_data_t *ptr, prelude_io_t 
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_additional_data_get_formatid(ptr);
                 if ( field ) {
@@ -274,7 +274,7 @@ int iodef_additional_data_print_json(iodef_additional_data_t *ptr, prelude_io_t 
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_additional_data_get_meaning(ptr);
                 if ( field ) {
@@ -289,7 +289,7 @@ int iodef_additional_data_print_json(iodef_additional_data_t *ptr, prelude_io_t 
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_additional_data_get_ext_dtype(ptr);
                 if ( field ) {
@@ -327,7 +327,7 @@ int iodef_additional_data_print_json(iodef_additional_data_t *ptr, prelude_io_t 
  *
  * This function will convert @ptr to a json,
  */
-int iodef_email_print_json(iodef_email_t *ptr, prelude_io_t *fd)
+int iodef_email_print_json(iodef_email_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -362,7 +362,7 @@ int iodef_email_print_json(iodef_email_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_email_get_email(ptr);
                 if ( field ) {
@@ -385,7 +385,7 @@ int iodef_email_print_json(iodef_email_t *ptr, prelude_io_t *fd)
  *
  * This function will convert @ptr to a json,
  */
-int iodef_registry_handle_print_json(iodef_registry_handle_t *ptr, prelude_io_t *fd)
+int iodef_registry_handle_print_json(iodef_registry_handle_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -420,7 +420,7 @@ int iodef_registry_handle_print_json(iodef_registry_handle_t *ptr, prelude_io_t 
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_registry_handle_get_ext_registry(ptr);
                 if ( field ) {
@@ -443,7 +443,7 @@ int iodef_registry_handle_print_json(iodef_registry_handle_t *ptr, prelude_io_t 
  *
  * This function will convert @ptr to a json,
  */
-int iodef_postal_address_print_json(iodef_postal_address_t *ptr, prelude_io_t *fd)
+int iodef_postal_address_print_json(iodef_postal_address_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -508,7 +508,7 @@ int iodef_postal_address_print_json(iodef_postal_address_t *ptr, prelude_io_t *f
  *
  * This function will convert @ptr to a json,
  */
-int iodef_contact_print_json(iodef_contact_t *ptr, prelude_io_t *fd)
+int iodef_contact_print_json(iodef_contact_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -551,7 +551,7 @@ int iodef_contact_print_json(iodef_contact_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_contact_get_fax(ptr);
                 if ( field ) {
@@ -567,7 +567,7 @@ int iodef_contact_print_json(iodef_contact_t *ptr, prelude_io_t *fd)
 
         {
 
-                prelude_string_t *elem = NULL;
+                libiodef_string_t *elem = NULL;
                 int first = 1;
 
                 while ( (elem = iodef_contact_get_next_description(ptr, elem)) ) {
@@ -597,7 +597,7 @@ int iodef_contact_print_json(iodef_contact_t *ptr, prelude_io_t *fd)
 
         {
 
-                prelude_string_t *elem = NULL;
+                libiodef_string_t *elem = NULL;
                 int first = 1;
 
                 while ( (elem = iodef_contact_get_next_telephone(ptr, elem)) ) {
@@ -686,7 +686,7 @@ int iodef_contact_print_json(iodef_contact_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_contact_get_contact_name(ptr);
                 if ( field ) {
@@ -701,7 +701,7 @@ int iodef_contact_print_json(iodef_contact_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_contact_get_timezone(ptr);
                 if ( field ) {
@@ -805,7 +805,7 @@ int iodef_contact_print_json(iodef_contact_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_contact_get_ext_type(ptr);
                 if ( field ) {
@@ -820,7 +820,7 @@ int iodef_contact_print_json(iodef_contact_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_contact_get_ext_role(ptr);
                 if ( field ) {
@@ -865,7 +865,7 @@ int iodef_contact_print_json(iodef_contact_t *ptr, prelude_io_t *fd)
  *
  * This function will convert @ptr to a json,
  */
-int iodef_incident_id_print_json(iodef_incident_id_t *ptr, prelude_io_t *fd)
+int iodef_incident_id_print_json(iodef_incident_id_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -878,7 +878,7 @@ int iodef_incident_id_print_json(iodef_incident_id_t *ptr, prelude_io_t *fd)
 
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_incident_id_get_instance(ptr);
                 if ( field ) {
@@ -893,7 +893,7 @@ int iodef_incident_id_print_json(iodef_incident_id_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_incident_id_get_name(ptr);
                 if ( field ) {
@@ -938,7 +938,7 @@ int iodef_incident_id_print_json(iodef_incident_id_t *ptr, prelude_io_t *fd)
  *
  * This function will convert @ptr to a json,
  */
-int iodef_alternative_id_print_json(iodef_alternative_id_t *ptr, prelude_io_t *fd)
+int iodef_alternative_id_print_json(iodef_alternative_id_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -1011,7 +1011,7 @@ int iodef_alternative_id_print_json(iodef_alternative_id_t *ptr, prelude_io_t *f
  *
  * This function will convert @ptr to a json,
  */
-int iodef_related_activity_print_json(iodef_related_activity_t *ptr, prelude_io_t *fd)
+int iodef_related_activity_print_json(iodef_related_activity_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -1025,7 +1025,7 @@ int iodef_related_activity_print_json(iodef_related_activity_t *ptr, prelude_io_
 
         {
 
-                prelude_string_t *elem = NULL;
+                libiodef_string_t *elem = NULL;
                 int first = 1;
 
                 while ( (elem = iodef_related_activity_get_next_url(ptr, elem)) ) {
@@ -1114,7 +1114,7 @@ int iodef_related_activity_print_json(iodef_related_activity_t *ptr, prelude_io_
  *
  * This function will convert @ptr to a json,
  */
-int iodef_history_item_print_json(iodef_history_item_t *ptr, prelude_io_t *fd)
+int iodef_history_item_print_json(iodef_history_item_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -1173,7 +1173,7 @@ int iodef_history_item_print_json(iodef_history_item_t *ptr, prelude_io_t *fd)
 
         {
 
-                prelude_string_t *elem = NULL;
+                libiodef_string_t *elem = NULL;
                 int first = 1;
 
                 while ( (elem = iodef_history_item_get_next_description(ptr, elem)) ) {
@@ -1276,7 +1276,7 @@ int iodef_history_item_print_json(iodef_history_item_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_history_item_get_ext_action(ptr);
                 if ( field ) {
@@ -1299,7 +1299,7 @@ int iodef_history_item_print_json(iodef_history_item_t *ptr, prelude_io_t *fd)
  *
  * This function will convert @ptr to a json,
  */
-int iodef_history_print_json(iodef_history_t *ptr, prelude_io_t *fd)
+int iodef_history_print_json(iodef_history_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -1372,7 +1372,7 @@ int iodef_history_print_json(iodef_history_t *ptr, prelude_io_t *fd)
  *
  * This function will convert @ptr to a json,
  */
-int iodef_expectation_print_json(iodef_expectation_t *ptr, prelude_io_t *fd)
+int iodef_expectation_print_json(iodef_expectation_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -1401,7 +1401,7 @@ int iodef_expectation_print_json(iodef_expectation_t *ptr, prelude_io_t *fd)
 
         {
 
-                prelude_string_t *elem = NULL;
+                libiodef_string_t *elem = NULL;
                 int first = 1;
 
                 while ( (elem = iodef_expectation_get_next_description(ptr, elem)) ) {
@@ -1504,7 +1504,7 @@ int iodef_expectation_print_json(iodef_expectation_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_expectation_get_ext_action(ptr);
                 if ( field ) {
@@ -1549,7 +1549,7 @@ int iodef_expectation_print_json(iodef_expectation_t *ptr, prelude_io_t *fd)
  *
  * This function will convert @ptr to a json,
  */
-int iodef_record_pattern_print_json(iodef_record_pattern_t *ptr, prelude_io_t *fd)
+int iodef_record_pattern_print_json(iodef_record_pattern_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -1599,7 +1599,7 @@ int iodef_record_pattern_print_json(iodef_record_pattern_t *ptr, prelude_io_t *f
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_record_pattern_get_ext_type(ptr);
                 if ( field ) {
@@ -1629,7 +1629,7 @@ int iodef_record_pattern_print_json(iodef_record_pattern_t *ptr, prelude_io_t *f
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_record_pattern_get_ext_offsetunit(ptr);
                 if ( field ) {
@@ -1674,7 +1674,7 @@ int iodef_record_pattern_print_json(iodef_record_pattern_t *ptr, prelude_io_t *f
  *
  * This function will convert @ptr to a json,
  */
-int iodef_record_item_print_json(iodef_record_item_t *ptr, prelude_io_t *fd)
+int iodef_record_item_print_json(iodef_record_item_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -1731,7 +1731,7 @@ int iodef_record_item_print_json(iodef_record_item_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_record_item_get_formatid(ptr);
                 if ( field ) {
@@ -1746,7 +1746,7 @@ int iodef_record_item_print_json(iodef_record_item_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_record_item_get_meaning(ptr);
                 if ( field ) {
@@ -1761,7 +1761,7 @@ int iodef_record_item_print_json(iodef_record_item_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_record_item_get_ext_dtype(ptr);
                 if ( field ) {
@@ -1799,7 +1799,7 @@ int iodef_record_item_print_json(iodef_record_item_t *ptr, prelude_io_t *fd)
  *
  * This function will convert @ptr to a json,
  */
-int iodef_application_print_json(iodef_application_t *ptr, prelude_io_t *fd)
+int iodef_application_print_json(iodef_application_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -1812,7 +1812,7 @@ int iodef_application_print_json(iodef_application_t *ptr, prelude_io_t *fd)
 
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_application_get_url(ptr);
                 if ( field ) {
@@ -1827,7 +1827,7 @@ int iodef_application_print_json(iodef_application_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_application_get_vendor(ptr);
                 if ( field ) {
@@ -1842,7 +1842,7 @@ int iodef_application_print_json(iodef_application_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_application_get_name(ptr);
                 if ( field ) {
@@ -1857,7 +1857,7 @@ int iodef_application_print_json(iodef_application_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_application_get_family(ptr);
                 if ( field ) {
@@ -1872,7 +1872,7 @@ int iodef_application_print_json(iodef_application_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_application_get_swid(ptr);
                 if ( field ) {
@@ -1887,7 +1887,7 @@ int iodef_application_print_json(iodef_application_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_application_get_patch(ptr);
                 if ( field ) {
@@ -1902,7 +1902,7 @@ int iodef_application_print_json(iodef_application_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_application_get_version(ptr);
                 if ( field ) {
@@ -1917,7 +1917,7 @@ int iodef_application_print_json(iodef_application_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_application_get_configid(ptr);
                 if ( field ) {
@@ -1940,7 +1940,7 @@ int iodef_application_print_json(iodef_application_t *ptr, prelude_io_t *fd)
  *
  * This function will convert @ptr to a json,
  */
-int iodef_record_data_print_json(iodef_record_data_t *ptr, prelude_io_t *fd)
+int iodef_record_data_print_json(iodef_record_data_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -1969,7 +1969,7 @@ int iodef_record_data_print_json(iodef_record_data_t *ptr, prelude_io_t *fd)
 
         {
 
-                prelude_string_t *elem = NULL;
+                libiodef_string_t *elem = NULL;
                 int first = 1;
 
                 while ( (elem = iodef_record_data_get_next_description(ptr, elem)) ) {
@@ -2118,7 +2118,7 @@ int iodef_record_data_print_json(iodef_record_data_t *ptr, prelude_io_t *fd)
  *
  * This function will convert @ptr to a json,
  */
-int iodef_record_print_json(iodef_record_t *ptr, prelude_io_t *fd)
+int iodef_record_print_json(iodef_record_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -2191,7 +2191,7 @@ int iodef_record_print_json(iodef_record_t *ptr, prelude_io_t *fd)
  *
  * This function will convert @ptr to a json,
  */
-int iodef_reference_print_json(iodef_reference_t *ptr, prelude_io_t *fd)
+int iodef_reference_print_json(iodef_reference_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -2205,7 +2205,7 @@ int iodef_reference_print_json(iodef_reference_t *ptr, prelude_io_t *fd)
 
         {
 
-                prelude_string_t *elem = NULL;
+                libiodef_string_t *elem = NULL;
                 int first = 1;
 
                 while ( (elem = iodef_reference_get_next_url(ptr, elem)) ) {
@@ -2235,7 +2235,7 @@ int iodef_reference_print_json(iodef_reference_t *ptr, prelude_io_t *fd)
 
         {
 
-                prelude_string_t *elem = NULL;
+                libiodef_string_t *elem = NULL;
                 int first = 1;
 
                 while ( (elem = iodef_reference_get_next_description(ptr, elem)) ) {
@@ -2264,7 +2264,7 @@ int iodef_reference_print_json(iodef_reference_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_reference_get_reference_name(ptr);
                 if ( field ) {
@@ -2287,7 +2287,7 @@ int iodef_reference_print_json(iodef_reference_t *ptr, prelude_io_t *fd)
  *
  * This function will convert @ptr to a json,
  */
-int iodef_method_print_json(iodef_method_t *ptr, prelude_io_t *fd)
+int iodef_method_print_json(iodef_method_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -2331,7 +2331,7 @@ int iodef_method_print_json(iodef_method_t *ptr, prelude_io_t *fd)
 
         {
 
-                prelude_string_t *elem = NULL;
+                libiodef_string_t *elem = NULL;
                 int first = 1;
 
                 while ( (elem = iodef_method_get_next_description(ptr, elem)) ) {
@@ -2420,7 +2420,7 @@ int iodef_method_print_json(iodef_method_t *ptr, prelude_io_t *fd)
  *
  * This function will convert @ptr to a json,
  */
-int iodef_time_impact_print_json(iodef_time_impact_t *ptr, prelude_io_t *fd)
+int iodef_time_impact_print_json(iodef_time_impact_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -2433,7 +2433,7 @@ int iodef_time_impact_print_json(iodef_time_impact_t *ptr, prelude_io_t *fd)
 
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_time_impact_get_ext_metric(ptr);
                 if ( field ) {
@@ -2514,7 +2514,7 @@ int iodef_time_impact_print_json(iodef_time_impact_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_time_impact_get_ext_duration(ptr);
                 if ( field ) {
@@ -2537,7 +2537,7 @@ int iodef_time_impact_print_json(iodef_time_impact_t *ptr, prelude_io_t *fd)
  *
  * This function will convert @ptr to a json,
  */
-int iodef_impact_print_json(iodef_impact_t *ptr, prelude_io_t *fd)
+int iodef_impact_print_json(iodef_impact_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -2638,7 +2638,7 @@ int iodef_impact_print_json(iodef_impact_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_impact_get_ext_type(ptr);
                 if ( field ) {
@@ -2661,7 +2661,7 @@ int iodef_impact_print_json(iodef_impact_t *ptr, prelude_io_t *fd)
  *
  * This function will convert @ptr to a json,
  */
-int iodef_confidence_print_json(iodef_confidence_t *ptr, prelude_io_t *fd)
+int iodef_confidence_print_json(iodef_confidence_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -2704,7 +2704,7 @@ int iodef_confidence_print_json(iodef_confidence_t *ptr, prelude_io_t *fd)
  *
  * This function will convert @ptr to a json,
  */
-int iodef_monetary_impact_print_json(iodef_monetary_impact_t *ptr, prelude_io_t *fd)
+int iodef_monetary_impact_print_json(iodef_monetary_impact_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -2717,7 +2717,7 @@ int iodef_monetary_impact_print_json(iodef_monetary_impact_t *ptr, prelude_io_t 
 
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_monetary_impact_get_currency(ptr);
                 if ( field ) {
@@ -2762,7 +2762,7 @@ int iodef_monetary_impact_print_json(iodef_monetary_impact_t *ptr, prelude_io_t 
  *
  * This function will convert @ptr to a json,
  */
-int iodef_counter_print_json(iodef_counter_t *ptr, prelude_io_t *fd)
+int iodef_counter_print_json(iodef_counter_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -2819,7 +2819,7 @@ int iodef_counter_print_json(iodef_counter_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_counter_get_ext_duration(ptr);
                 if ( field ) {
@@ -2834,7 +2834,7 @@ int iodef_counter_print_json(iodef_counter_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_counter_get_ext_type(ptr);
                 if ( field ) {
@@ -2857,7 +2857,7 @@ int iodef_counter_print_json(iodef_counter_t *ptr, prelude_io_t *fd)
  *
  * This function will convert @ptr to a json,
  */
-int iodef_assessment_print_json(iodef_assessment_t *ptr, prelude_io_t *fd)
+int iodef_assessment_print_json(iodef_assessment_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -3087,7 +3087,7 @@ int iodef_assessment_print_json(iodef_assessment_t *ptr, prelude_io_t *fd)
  *
  * This function will convert @ptr to a json,
  */
-int iodef_service_print_json(iodef_service_t *ptr, prelude_io_t *fd)
+int iodef_service_print_json(iodef_service_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -3130,7 +3130,7 @@ int iodef_service_print_json(iodef_service_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_service_get_portlist(ptr);
                 if ( field ) {
@@ -3228,7 +3228,7 @@ int iodef_service_print_json(iodef_service_t *ptr, prelude_io_t *fd)
  *
  * This function will convert @ptr to a json,
  */
-int iodef_address_print_json(iodef_address_t *ptr, prelude_io_t *fd)
+int iodef_address_print_json(iodef_address_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -3263,7 +3263,7 @@ int iodef_address_print_json(iodef_address_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_address_get_vlan_name(ptr);
                 if ( field ) {
@@ -3278,7 +3278,7 @@ int iodef_address_print_json(iodef_address_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_address_get_ext_category(ptr);
                 if ( field ) {
@@ -3293,7 +3293,7 @@ int iodef_address_print_json(iodef_address_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_address_get_vlan_num(ptr);
                 if ( field ) {
@@ -3316,7 +3316,7 @@ int iodef_address_print_json(iodef_address_t *ptr, prelude_io_t *fd)
  *
  * This function will convert @ptr to a json,
  */
-int iodef_node_role_print_json(iodef_node_role_t *ptr, prelude_io_t *fd)
+int iodef_node_role_print_json(iodef_node_role_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -3373,7 +3373,7 @@ int iodef_node_role_print_json(iodef_node_role_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_node_role_get_ext_category(ptr);
                 if ( field ) {
@@ -3396,7 +3396,7 @@ int iodef_node_role_print_json(iodef_node_role_t *ptr, prelude_io_t *fd)
  *
  * This function will convert @ptr to a json,
  */
-int iodef_node_print_json(iodef_node_t *ptr, prelude_io_t *fd)
+int iodef_node_print_json(iodef_node_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -3410,7 +3410,7 @@ int iodef_node_print_json(iodef_node_t *ptr, prelude_io_t *fd)
 
         {
 
-                prelude_string_t *elem = NULL;
+                libiodef_string_t *elem = NULL;
                 int first = 1;
 
                 while ( (elem = iodef_node_get_next_node_name(ptr, elem)) ) {
@@ -3514,7 +3514,7 @@ int iodef_node_print_json(iodef_node_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_node_get_location(ptr);
                 if ( field ) {
@@ -3567,7 +3567,7 @@ int iodef_node_print_json(iodef_node_t *ptr, prelude_io_t *fd)
  *
  * This function will convert @ptr to a json,
  */
-int iodef_operating_system_print_json(iodef_operating_system_t *ptr, prelude_io_t *fd)
+int iodef_operating_system_print_json(iodef_operating_system_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -3580,7 +3580,7 @@ int iodef_operating_system_print_json(iodef_operating_system_t *ptr, prelude_io_
 
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_operating_system_get_url(ptr);
                 if ( field ) {
@@ -3595,7 +3595,7 @@ int iodef_operating_system_print_json(iodef_operating_system_t *ptr, prelude_io_
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_operating_system_get_vendor(ptr);
                 if ( field ) {
@@ -3610,7 +3610,7 @@ int iodef_operating_system_print_json(iodef_operating_system_t *ptr, prelude_io_
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_operating_system_get_name(ptr);
                 if ( field ) {
@@ -3625,7 +3625,7 @@ int iodef_operating_system_print_json(iodef_operating_system_t *ptr, prelude_io_
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_operating_system_get_family(ptr);
                 if ( field ) {
@@ -3640,7 +3640,7 @@ int iodef_operating_system_print_json(iodef_operating_system_t *ptr, prelude_io_
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_operating_system_get_swid(ptr);
                 if ( field ) {
@@ -3655,7 +3655,7 @@ int iodef_operating_system_print_json(iodef_operating_system_t *ptr, prelude_io_
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_operating_system_get_patch(ptr);
                 if ( field ) {
@@ -3670,7 +3670,7 @@ int iodef_operating_system_print_json(iodef_operating_system_t *ptr, prelude_io_
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_operating_system_get_version(ptr);
                 if ( field ) {
@@ -3685,7 +3685,7 @@ int iodef_operating_system_print_json(iodef_operating_system_t *ptr, prelude_io_
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_operating_system_get_configid(ptr);
                 if ( field ) {
@@ -3708,7 +3708,7 @@ int iodef_operating_system_print_json(iodef_operating_system_t *ptr, prelude_io_
  *
  * This function will convert @ptr to a json,
  */
-int iodef_system_print_json(iodef_system_t *ptr, prelude_io_t *fd)
+int iodef_system_print_json(iodef_system_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -3767,7 +3767,7 @@ int iodef_system_print_json(iodef_system_t *ptr, prelude_io_t *fd)
 
         {
 
-                prelude_string_t *elem = NULL;
+                libiodef_string_t *elem = NULL;
                 int first = 1;
 
                 while ( (elem = iodef_system_get_next_description(ptr, elem)) ) {
@@ -3915,7 +3915,7 @@ int iodef_system_print_json(iodef_system_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_system_get_ext_category(ptr);
                 if ( field ) {
@@ -3952,7 +3952,7 @@ int iodef_system_print_json(iodef_system_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_system_get_interface(ptr);
                 if ( field ) {
@@ -3975,7 +3975,7 @@ int iodef_system_print_json(iodef_system_t *ptr, prelude_io_t *fd)
  *
  * This function will convert @ptr to a json,
  */
-int iodef_flow_print_json(iodef_flow_t *ptr, prelude_io_t *fd)
+int iodef_flow_print_json(iodef_flow_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -4026,7 +4026,7 @@ int iodef_flow_print_json(iodef_flow_t *ptr, prelude_io_t *fd)
  *
  * This function will convert @ptr to a json,
  */
-int iodef_event_data_print_json(iodef_event_data_t *ptr, prelude_io_t *fd)
+int iodef_event_data_print_json(iodef_event_data_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -4085,7 +4085,7 @@ int iodef_event_data_print_json(iodef_event_data_t *ptr, prelude_io_t *fd)
 
         {
 
-                prelude_string_t *elem = NULL;
+                libiodef_string_t *elem = NULL;
                 int first = 1;
 
                 while ( (elem = iodef_event_data_get_next_description(ptr, elem)) ) {
@@ -4354,7 +4354,7 @@ int iodef_event_data_print_json(iodef_event_data_t *ptr, prelude_io_t *fd)
  *
  * This function will convert @ptr to a json,
  */
-int iodef_incident_print_json(iodef_incident_t *ptr, prelude_io_t *fd)
+int iodef_incident_print_json(iodef_incident_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -4428,7 +4428,7 @@ int iodef_incident_print_json(iodef_incident_t *ptr, prelude_io_t *fd)
 
         {
 
-                prelude_string_t *elem = NULL;
+                libiodef_string_t *elem = NULL;
                 int first = 1;
 
                 while ( (elem = iodef_incident_get_next_description(ptr, elem)) ) {
@@ -4711,7 +4711,7 @@ int iodef_incident_print_json(iodef_incident_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_incident_get_ext_purpose(ptr);
                 if ( field ) {
@@ -4756,7 +4756,7 @@ int iodef_incident_print_json(iodef_incident_t *ptr, prelude_io_t *fd)
  *
  * This function will convert @ptr to a json,
  */
-int iodef_document_print_json(iodef_document_t *ptr, prelude_io_t *fd)
+int iodef_document_print_json(iodef_document_t *ptr, libiodef_io_t *fd)
 {
         int ret;
 
@@ -4821,7 +4821,7 @@ int iodef_document_print_json(iodef_document_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_document_get_formatid(ptr);
                 if ( field ) {
@@ -4836,7 +4836,7 @@ int iodef_document_print_json(iodef_document_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
 
                 field = iodef_document_get_version(ptr);
                 if ( field ) {

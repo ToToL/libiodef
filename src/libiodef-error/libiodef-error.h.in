@@ -1,0 +1,136 @@
+/*****
+*
+* Copyright (C) 2004-2016 CS-SI. All Rights Reserved.
+* Author: Yoann Vandoorselaere <yoann.v@libiodef-ids.com>
+*
+* This file is part of the LibIodef library.
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2, or (at your option)
+* any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; see the file COPYING.  If not, write to
+* the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+*
+*****/
+
+#ifndef _LIBIODEF_LIBIODEF_ERROR_H
+#define _LIBIODEF_LIBIODEF_ERROR_H
+
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
+#include <stdio.h>
+#include <unistd.h>
+#include <stdarg.h>
+#include <errno.h>
+
+#include "libiodef-macros.h"
+#include "libiodef-string.h"
+
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
+/*
+ * This is inspired from the GPG error interface.
+ *
+ * Bit 1 of libiodef_error_t remain set (negative value).
+ * Bit 2 to 9 are set to the source of the error.
+ * Bit 10 specify whether there is a verbose error available.
+ * Bit 11 to 15 are unspecified.
+ * Bit 16 to 32 are set to the code of the error.
+ */
+
+
+#define LIBIODEF_ERROR_SYSTEM_ERROR    (1 << 15)
+
+typedef enum {
+@include err-sources.in
+} libiodef_error_source_t;
+
+typedef enum {
+@include err-codes.in
+@include errnos.in
+} libiodef_error_code_t;
+
+
+#ifndef LIBIODEF_ERROR_SOURCE_DEFAULT
+ #define LIBIODEF_ERROR_SOURCE_DEFAULT  LIBIODEF_ERROR_SOURCE_UNKNOWN
+#endif
+
+typedef signed int libiodef_error_t;
+
+libiodef_bool_t libiodef_error_is_verbose(libiodef_error_t error);
+
+libiodef_error_code_t libiodef_error_get_code(libiodef_error_t error);
+
+libiodef_error_source_t libiodef_error_get_source(libiodef_error_t error);
+
+libiodef_error_code_t libiodef_error_code_from_errno(int err);
+
+libiodef_error_t libiodef_error_make(libiodef_error_source_t source, libiodef_error_code_t code);
+
+libiodef_error_t libiodef_error_make_from_errno(libiodef_error_source_t source, int err);
+
+void libiodef_perror(libiodef_error_t error, const char *fmt, ...) 
+                   LIBIODEF_FMT_PRINTF(2, 3);
+
+const char *libiodef_strerror(libiodef_error_t err);
+
+const char *libiodef_strsource(libiodef_error_t err);
+
+int libiodef_error_code_to_errno(libiodef_error_code_t code);
+
+libiodef_error_t libiodef_error_verbose_make_v(libiodef_error_source_t source,
+                                             libiodef_error_code_t code, const char *fmt, va_list ap)
+                                             LIBIODEF_FMT_PRINTF(3, 0);
+
+libiodef_error_t libiodef_error_verbose_make(libiodef_error_source_t source,
+                                           libiodef_error_code_t code, const char *fmt, ...)
+                                           LIBIODEF_FMT_PRINTF(3, 4);
+
+
+static inline libiodef_error_t libiodef_error(libiodef_error_code_t code)
+{
+        return libiodef_error_make(LIBIODEF_ERROR_SOURCE_DEFAULT, code);
+}
+
+
+static inline libiodef_error_t libiodef_error_verbose(libiodef_error_code_t code, const char *fmt, ...)
+                                                    LIBIODEF_FMT_PRINTF(2, 3);
+
+static inline libiodef_error_t libiodef_error_verbose(libiodef_error_code_t code, const char *fmt, ...)
+{
+        int ret;
+        va_list ap;
+
+        va_start(ap, fmt);
+        ret = libiodef_error_verbose_make_v(LIBIODEF_ERROR_SOURCE_DEFAULT, code, fmt, ap);
+        va_end(ap);
+
+        return ret;
+}
+
+
+
+static inline libiodef_error_t libiodef_error_from_errno(int err)
+{
+        return libiodef_error_make(LIBIODEF_ERROR_SOURCE_DEFAULT, libiodef_error_code_from_errno(err));
+}
+
+
+#ifdef __cplusplus
+ }
+#endif
+
+
+#endif

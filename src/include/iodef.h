@@ -1,10 +1,10 @@
 /*****
 *
 * Copyright (C) 2003-2016 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoann.v@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann.v@libiodef-ids.com>
 * Author: Krzysztof Zaraska <kzaraska@student.uci.agh.edu.pl>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,8 @@
 *
 *****/
 
-#ifndef _LIBPRELUDE_IODEF_H
-#define _LIBPRELUDE_IODEF_H
+#ifndef _LIBIODEF_IODEF_H
+#define _LIBIODEF_IODEF_H
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -31,13 +31,13 @@
 
 #include <sys/types.h>
 
-#include "prelude-error.h"
+#include "libiodef-error.h"
 
-#include "prelude-inttypes.h"
+#include "libiodef-inttypes.h"
 #include "common.h"
-#include "prelude-list.h"
-#include "prelude-ident.h"
-#include "prelude-string.h"
+#include "libiodef-list.h"
+#include "libiodef-ident.h"
+#include "libiodef-string.h"
 #include "iodef-time.h"
 #include "iodef-data.h"
 #include "iodef-class.h"
@@ -51,4 +51,4 @@
 #include "iodef-document-print.h"
 #include "iodef-additional-data.h"
 
-#endif /* _LIBPRELUDE_IODEF_H */
+#endif /* _LIBIODEF_IODEF_H */

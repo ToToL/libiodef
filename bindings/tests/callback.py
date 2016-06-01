@@ -5,19 +5,19 @@ sys.path.append('.')
 sys.path.append('./.libs')
 
 try:
-	import PreludeEasy
+	import LibIodefEasy
 except:
 	print "Import failed"
-	print "Try 'cd ./.libs && ln -s libprelude_python.so _PreludeEasy.so'"
+	print "Try 'cd ./.libs && ln -s libiodef_python.so _LibIodefEasy.so'"
 	sys.exit(1)
 
 def foo(id):
         print "callback: id = " + str(id)
-	iodef = PreludeEasy._get_IODEF(id)
+	iodef = LibIodefEasy._get_IODEF(id)
         iodef.PrintToStdout()
         #print bar.Get("alert.classification.text") # XXX not yet implemented
         return 0
 
-PreludeEasy.set_pymethod(foo)
+LibIodefEasy.set_pymethod(foo)
 
-PreludeEasy.test_fct()
+LibIodefEasy.test_fct()

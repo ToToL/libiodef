@@ -1,9 +1,9 @@
 /*****
 *
 * Copyright (C) 2003-2016 CS-SI. All Rights Reserved.
-* Author: Nicolas Delon <nicolas.delon@prelude-ids.com>
+* Author: Nicolas Delon <nicolas.delon@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@
 *
 *****/
 
-#ifndef _LIBPRELUDE_IODEF_TIME_H
-#define _LIBPRELUDE_IODEF_TIME_H
+#ifndef _LIBIODEF_IODEF_TIME_H
+#define _LIBIODEF_IODEF_TIME_H
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -82,8 +82,8 @@ uint32_t iodef_time_get_sec(const iodef_time_t *time);
 uint32_t iodef_time_get_usec(const iodef_time_t *time);
 int32_t iodef_time_get_gmt_offset(const iodef_time_t *time);
 
-int iodef_time_to_string(const iodef_time_t *time, prelude_string_t *out);
-int iodef_time_to_ntpstamp(const iodef_time_t *time, prelude_string_t *out);
+int iodef_time_to_string(const iodef_time_t *time, libiodef_string_t *out);
+int iodef_time_to_ntpstamp(const iodef_time_t *time, libiodef_string_t *out);
 
 int iodef_time_compare(const iodef_time_t *time1, const iodef_time_t *time2);
          
@@ -91,4 +91,4 @@ int iodef_time_compare(const iodef_time_t *time1, const iodef_time_t *time2);
  }
 #endif
          
-#endif /* _LIBPRELUDE_IODEF_TIME_H */
+#endif /* _LIBIODEF_IODEF_TIME_H */

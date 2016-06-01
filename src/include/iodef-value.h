@@ -1,11 +1,11 @@
 /*****
 *
 * Copyright (C) 2002-2016 CS-SI. All Rights Reserved.
-* Author: Nicolas Delon <nicolas.delon@prelude-ids.com>
+* Author: Nicolas Delon <nicolas.delon@libiodef-ids.com>
 * Author: Krzysztof Zaraska <kzaraska@student.uci.agh.edu.pl>
-* Author: Yoann Vandoorselaere <yoann.v@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann.v@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -23,15 +23,15 @@
 *
 *****/
 
-#ifndef _LIBPRELUDE_IODEF_VALUE_H
-#define _LIBPRELUDE_IODEF_VALUE_H
+#ifndef _LIBIODEF_IODEF_VALUE_H
+#define _LIBIODEF_IODEF_VALUE_H
 
 
 typedef struct iodef_value iodef_value_t;
 
-#include "prelude-io.h"
+#include "libiodef-io.h"
 #include "iodef-value-type.h"
-#include "prelude-string.h"
+#include "libiodef-string.h"
 #include "iodef-class.h"
 #include "iodef-path.h"
 
@@ -49,7 +49,7 @@ int iodef_value_new_int64(iodef_value_t **value, int64_t val);
 int iodef_value_new_uint64(iodef_value_t **value, uint64_t val);
 int iodef_value_new_float(iodef_value_t **value, float val);
 int iodef_value_new_double(iodef_value_t **value, double val);
-int iodef_value_new_string(iodef_value_t **value, prelude_string_t *string);
+int iodef_value_new_string(iodef_value_t **value, libiodef_string_t *string);
 int iodef_value_new_time(iodef_value_t **value, iodef_time_t *time);
 int iodef_value_new_data(iodef_value_t **value, iodef_data_t *data);
 int iodef_value_new_class(iodef_value_t **value, iodef_class_id_t classid, void *ptr);
@@ -68,7 +68,7 @@ int iodef_value_set_int64(iodef_value_t *value, int64_t val);
 int iodef_value_set_uint64(iodef_value_t *value, uint64_t val);
 int iodef_value_set_float(iodef_value_t *value, float val);
 int iodef_value_set_double(iodef_value_t *value, double val);
-int iodef_value_set_string(iodef_value_t *value, prelude_string_t *string);
+int iodef_value_set_string(iodef_value_t *value, libiodef_string_t *string);
 int iodef_value_set_time(iodef_value_t *value, iodef_time_t *time);
 int iodef_value_set_data(iodef_value_t *value, iodef_data_t *data);
 int iodef_value_set_enum(iodef_value_t *value, iodef_class_id_t classid, const char *buf);
@@ -94,11 +94,11 @@ double iodef_value_get_double(const iodef_value_t *val);
 
 iodef_time_t *iodef_value_get_time(const iodef_value_t *val);
 iodef_data_t *iodef_value_get_data(const iodef_value_t *val);
-prelude_string_t *iodef_value_get_string(const iodef_value_t *val);
+libiodef_string_t *iodef_value_get_string(const iodef_value_t *val);
 
 int iodef_value_list_add(iodef_value_t *list, iodef_value_t *item);
-prelude_bool_t iodef_value_is_list(const iodef_value_t *list);
-prelude_bool_t iodef_value_list_is_empty(const iodef_value_t *list);
+libiodef_bool_t iodef_value_is_list(const iodef_value_t *list);
+libiodef_bool_t iodef_value_list_is_empty(const iodef_value_t *list);
 
 int iodef_value_have_own_data(iodef_value_t *value);
 int iodef_value_dont_have_own_data(iodef_value_t *value);
@@ -122,9 +122,9 @@ int iodef_value_clone(const iodef_value_t *val, iodef_value_t **dst);
 
 iodef_value_t *iodef_value_ref(iodef_value_t *val);
 
-int iodef_value_print(const iodef_value_t *val, prelude_io_t *fd);
+int iodef_value_print(const iodef_value_t *val, libiodef_io_t *fd);
 
-int iodef_value_to_string(const iodef_value_t *value, prelude_string_t *out);
+int iodef_value_to_string(const iodef_value_t *value, libiodef_string_t *out);
 
 int iodef_value_get(const iodef_value_t *val, void *res);
 
@@ -148,4 +148,4 @@ int _iodef_value_cast(iodef_value_t *val, iodef_value_type_id_t target_type, iod
  }
 #endif
 
-#endif /* _LIBPRELUDE_IODEF_VALUE_H */
+#endif /* _LIBIODEF_IODEF_VALUE_H */

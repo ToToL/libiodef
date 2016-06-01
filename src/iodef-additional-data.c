@@ -1,9 +1,9 @@
 /*****
 *
 * Copyright (C) 2004-2016 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoann.v@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann.v@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -29,10 +29,10 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 
-#include "prelude-log.h"
-#include "prelude-string.h"
-#include "prelude-error.h"
-#include "prelude-inttypes.h"
+#include "libiodef-log.h"
+#include "libiodef-string.h"
+#include "libiodef-error.h"
+#include "libiodef-inttypes.h"
 #include "iodef.h"
 #include "iodef-tree-wrap.h"
 #include "iodef-additional-data.h"
@@ -171,7 +171,7 @@ static const struct {
         { IODEF_ADDITIONAL_DATA_TYPE_NTPSTAMP, IODEF_DATA_TYPE_INT, sizeof(uint64_t) },
         { IODEF_ADDITIONAL_DATA_TYPE_PORTLIST, IODEF_DATA_TYPE_CHAR_STRING, 0 },
         { IODEF_ADDITIONAL_DATA_TYPE_REAL, IODEF_DATA_TYPE_FLOAT, sizeof(float) },
-        { IODEF_ADDITIONAL_DATA_TYPE_BOOLEAN, IODEF_DATA_TYPE_BYTE, sizeof(prelude_bool_t) },
+        { IODEF_ADDITIONAL_DATA_TYPE_BOOLEAN, IODEF_DATA_TYPE_BYTE, sizeof(libiodef_bool_t) },
         { IODEF_ADDITIONAL_DATA_TYPE_BYTE_STRING, IODEF_DATA_TYPE_BYTE_STRING, 0 },
         { IODEF_ADDITIONAL_DATA_TYPE_XML, IODEF_DATA_TYPE_CHAR_STRING, 0 }
 };
@@ -181,20 +181,20 @@ static const struct {
 static int check_type(iodef_additional_data_type_t type, const unsigned char *buf, size_t len)
 {
         if ( type < 0 || (size_t) type >= sizeof(iodef_additional_data_type_table) / sizeof(*iodef_additional_data_type_table) )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "Invalid IODEFAdditionalData type specified");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "Invalid IODEFAdditionalData type specified");
 
         if ( iodef_additional_data_type_table[type].len != 0 &&
              len > iodef_additional_data_type_table[type].len )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "Provided value length does not match specified type length");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "Provided value length does not match specified type length");
 
         if ( iodef_additional_data_type_table[type].len == 0 && len < 1 )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "Invalid value length for this type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "Invalid value length for this type");
 
         if ( type == IODEF_ADDITIONAL_DATA_TYPE_STRING ||
              type == IODEF_ADDITIONAL_DATA_TYPE_DATE_TIME ||
              type == IODEF_ADDITIONAL_DATA_TYPE_PORTLIST ||
              type == IODEF_ADDITIONAL_DATA_TYPE_XML )
-                return buf[len - 1] == '\0' ? 0 : prelude_error_verbose(PRELUDE_ERROR_GENERIC, "String is not nul terminated");
+                return buf[len - 1] == '\0' ? 0 : libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "String is not nul terminated");
 
         return 0;
 }
@@ -355,7 +355,7 @@ int iodef_additional_data_set_ptr_nodup_fast(iodef_additional_data_t *data,
  */
 IODEF_ADDITIONAL_DATA_SIMPLE(IODEF_DATA_TYPE_FLOAT, float, IODEF_ADDITIONAL_DATA_TYPE_REAL, float, real)
 IODEF_ADDITIONAL_DATA_SIMPLE(IODEF_DATA_TYPE_INT, int, IODEF_ADDITIONAL_DATA_TYPE_INTEGER, uint32_t, integer)
-IODEF_ADDITIONAL_DATA_SIMPLE(IODEF_DATA_TYPE_BYTE, byte, IODEF_ADDITIONAL_DATA_TYPE_BOOLEAN, prelude_bool_t, boolean)
+IODEF_ADDITIONAL_DATA_SIMPLE(IODEF_DATA_TYPE_BYTE, byte, IODEF_ADDITIONAL_DATA_TYPE_BOOLEAN, libiodef_bool_t, boolean)
 IODEF_ADDITIONAL_DATA_SIMPLE(IODEF_DATA_TYPE_BYTE, byte, IODEF_ADDITIONAL_DATA_TYPE_BYTE, uint8_t, byte)
 IODEF_ADDITIONAL_DATA_SIMPLE(IODEF_DATA_TYPE_CHAR, char, IODEF_ADDITIONAL_DATA_TYPE_CHARACTER, char, character)
 
@@ -374,7 +374,7 @@ int iodef_additional_data_copy_ref(iodef_additional_data_t *src, iodef_additiona
 {
         int ret;
 
-        ret = prelude_string_copy_ref(iodef_additional_data_get_meaning(src), iodef_additional_data_get_meaning(dst));
+        ret = libiodef_string_copy_ref(iodef_additional_data_get_meaning(src), iodef_additional_data_get_meaning(dst));
         if ( ret < 0 )
                 return ret;
 
@@ -392,7 +392,7 @@ int iodef_additional_data_copy_dup(iodef_additional_data_t *src, iodef_additiona
 {
         int ret;
 
-        ret = prelude_string_copy_dup(iodef_additional_data_get_meaning(src), iodef_additional_data_get_meaning(dst));
+        ret = libiodef_string_copy_dup(iodef_additional_data_get_meaning(src), iodef_additional_data_get_meaning(dst));
         if ( ret < 0 )
                 return ret;
 
@@ -410,14 +410,14 @@ size_t iodef_additional_data_get_len(iodef_additional_data_t *data)
 
 
 
-prelude_bool_t iodef_additional_data_is_empty(iodef_additional_data_t *data)
+libiodef_bool_t iodef_additional_data_is_empty(iodef_additional_data_t *data)
 {
         return iodef_data_is_empty(iodef_additional_data_get_data(data));
 }
 
 
 
-int iodef_additional_data_data_to_string(iodef_additional_data_t *ad, prelude_string_t *out)
+int iodef_additional_data_data_to_string(iodef_additional_data_t *ad, libiodef_string_t *out)
 {
         int ret;
         uint64_t i;
@@ -431,7 +431,7 @@ int iodef_additional_data_data_to_string(iodef_additional_data_t *ad, prelude_st
 
         case IODEF_ADDITIONAL_DATA_TYPE_NTPSTAMP:
                 i = iodef_data_get_int(data);
-                ret = prelude_string_sprintf(out, "0x%" PRELUDE_PRIx32 ".0x%" PRELUDE_PRIx32, (uint32_t) (i >> 32), (uint32_t) i);
+                ret = libiodef_string_sprintf(out, "0x%" LIBIODEF_PRIx32 ".0x%" LIBIODEF_PRIx32, (uint32_t) (i >> 32), (uint32_t) i);
                 break;
 
         default:

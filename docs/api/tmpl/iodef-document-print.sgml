@@ -9,17 +9,17 @@ Dumping an IODEF message as a string
 <para>
 This API provide method for dumping any IODEF object as a string of characters.
 When dumping an object, the object and all of it's children are dumped to the
-provided #prelude_io_t object. 
+provided #libiodef_io_t object. 
 </para>
 
 <para>
-The #prelude_io_t object might be a buffer, a file, or even a socket. Check
-the #prelude_io_t API for more information.
+The #libiodef_io_t object might be a buffer, a file, or even a socket. Check
+the #libiodef_io_t API for more information.
 </para>
 
 <!-- ##### SECTION See_Also ##### -->
 <para>
-#prelude_io_t
+#libiodef_io_t
 </para>
 
 <!-- ##### SECTION Stability_Level ##### -->

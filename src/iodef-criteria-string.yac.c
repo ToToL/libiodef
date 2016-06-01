@@ -69,7 +69,7 @@
 /* Line 371 of yacc.c  */
 #line 29 "iodef-criteria-string.yac.y"
 
-#define PRELUDE_ERROR_SOURCE_DEFAULT PRELUDE_ERROR_SOURCE_IODEF_CRITERIA
+#define LIBIODEF_ERROR_SOURCE_DEFAULT LIBIODEF_ERROR_SOURCE_IODEF_CRITERIA
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -80,9 +80,9 @@
 
 #include "glthread/lock.h"
 
-#include "prelude-log.h"
-#include "prelude-error.h"
-#include "prelude-inttypes.h"
+#include "libiodef-log.h"
+#include "libiodef-error.h"
+#include "libiodef-inttypes.h"
 
 #include "iodef.h"
 #include "iodef-criteria.h"
@@ -1783,7 +1783,7 @@ yyreduce:
   case 34:
 /* Line 1792 of yacc.c  */
 #line 299 "iodef-criteria-string.yac.y"
-    { real_ret = prelude_error_verbose(PRELUDE_ERROR_IODEF_CRITERIA_PARSE,
+    { real_ret = libiodef_error_verbose(LIBIODEF_ERROR_IODEF_CRITERIA_PARSE,
                                                                        "Criteria parser reported: Invalid operator found"); YYERROR; }
     break;
 
@@ -2038,8 +2038,8 @@ yyreturn:
 
 static void yyerror(char *s)  /* Called by yyparse on error */
 {
-        real_ret = prelude_error_verbose_make(PRELUDE_ERROR_SOURCE_IODEF_CRITERIA,
-                                              PRELUDE_ERROR_IODEF_CRITERIA_PARSE,
+        real_ret = libiodef_error_verbose_make(LIBIODEF_ERROR_SOURCE_IODEF_CRITERIA,
+                                              LIBIODEF_ERROR_IODEF_CRITERIA_PARSE,
                                               "IODEF-Criteria parser: %s", s);
 }
 
@@ -2049,7 +2049,7 @@ int iodef_criteria_new_from_string(iodef_criteria_t **new_criteria, const char *
         int ret;
         void *state;
 
-        prelude_return_val_if_fail(str, -1);
+        libiodef_return_val_if_fail(str, -1);
 
         gl_lock_lock(_criteria_parse_mutex);
 
@@ -2066,7 +2066,7 @@ int iodef_criteria_new_from_string(iodef_criteria_t **new_criteria, const char *
                 if ( real_ret )
                         ret = real_ret;
                 else
-                        ret = prelude_error_make(PRELUDE_ERROR_SOURCE_IODEF_CRITERIA, PRELUDE_ERROR_IODEF_CRITERIA_PARSE);
+                        ret = libiodef_error_make(LIBIODEF_ERROR_SOURCE_IODEF_CRITERIA, LIBIODEF_ERROR_IODEF_CRITERIA_PARSE);
 
                 if ( processed_criteria )
                         iodef_criteria_destroy(processed_criteria);

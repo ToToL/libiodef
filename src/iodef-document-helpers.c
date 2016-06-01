@@ -1,9 +1,9 @@
 /*****
 *
 * Copyright (C) 2008-2016 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoann.v@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann.v@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -105,15 +105,15 @@ int iodef_document_set_string(iodef_document_t *message, const char *path, const
 {
         int ret;
         iodef_value_t *iv;
-        prelude_string_t *str;
+        libiodef_string_t *str;
 
-        ret = prelude_string_new_dup(&str, value);
+        ret = libiodef_string_new_dup(&str, value);
         if ( ret < 0 )
                 return ret;
 
         ret = iodef_value_new_string(&iv, str);
         if ( ret < 0 ) {
-                prelude_string_destroy(str);
+                libiodef_string_destroy(str);
                 return ret;
         }
 
@@ -143,7 +143,7 @@ int iodef_document_get_string(iodef_document_t *message, const char *path, char 
 {
         int ret;
         iodef_value_t *iv;
-        prelude_string_t *str;
+        libiodef_string_t *str;
 
         ret = iodef_document_get_value(message, path, &iv);
         if ( ret <= 0 )
@@ -160,13 +160,13 @@ int iodef_document_get_string(iodef_document_t *message, const char *path, char 
                 goto err;
         }
 
-        if ( prelude_string_is_empty(str) ) {
+        if ( libiodef_string_is_empty(str) ) {
                 *result = NULL;
                 return 0;
         }
 
-        *result = strdup(prelude_string_get_string(str));
-        ret = prelude_string_get_len(str);
+        *result = strdup(libiodef_string_get_string(str));
+        ret = libiodef_string_get_len(str);
 
 err:
         iodef_value_destroy(iv);

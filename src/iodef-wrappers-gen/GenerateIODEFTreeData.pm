@@ -1,7 +1,7 @@
 # Copyright (C) 2003-2016 CS-SI. All Rights Reserved.
-# Author: Nicolas Delon <nicolas.delon@prelude-ids.com>
+# Author: Nicolas Delon <nicolas.delon@libiodef-ids.com>
 #
-# This file is part of the Prelude library.
+# This file is part of the LibIodef library.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,8 +34,8 @@ sub     header
 
 typedef struct \{
         const char *name;
-        prelude_bool_t list;
-        prelude_bool_t keyed_list;
+        libiodef_bool_t list;
+        libiodef_bool_t keyed_list;
         iodef_value_type_id_t type;
         iodef_class_id_t class;
         int union_id;
@@ -132,12 +132,12 @@ typedef struct \{
         int (*copy)(const void *src, void *dst);
         int (*clone)(const void *src, void **dst);
         int (*compare)(const void *obj1, const void *obj2);
-        int (*print)(const void *obj, prelude_io_t *fd);
-        int (*print_json)(const void *obj, prelude_io_t *fd);
-        int (*print_binary)(const void *obj, prelude_io_t *fd);
+        int (*print)(const void *obj, libiodef_io_t *fd);
+        int (*print_json)(const void *obj, libiodef_io_t *fd);
+        int (*print_binary)(const void *obj, libiodef_io_t *fd);
         void *(*ref)(void *src);
         void (*destroy)(void *obj);
-        prelude_bool_t is_listed;
+        libiodef_bool_t is_listed;
 \} object_data_t;
 
 

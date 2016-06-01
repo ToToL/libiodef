@@ -2,10 +2,10 @@
 /*****
 *
 * Copyright (C) 2001-2012 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoann.v@prelude-ids.com>
-* Author: Nicolas Delon <nicolas.delon@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann.v@libiodef-ids.com>
+* Author: Nicolas Delon <nicolas.delon@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -31,11 +31,11 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "prelude-error.h"
-#include "prelude-inttypes.h"
-#include "prelude-list.h"
-#include "prelude-extract.h"
-#include "prelude-io.h"
+#include "libiodef-error.h"
+#include "libiodef-inttypes.h"
+#include "libiodef-list.h"
+#include "libiodef-extract.h"
+#include "libiodef-io.h"
 #include "iodef-document-id.h"
 #include "iodef.h"
 #include "iodef-tree-wrap.h"
@@ -61,18 +61,18 @@ typedef struct {
 
 
 // code from http://stackoverflow.com/a/4609989/697313
-static int unicode_to_utf8(unsigned int codepoint, prelude_string_t *out)
+static int unicode_to_utf8(unsigned int codepoint, libiodef_string_t *out)
 {
           char val;
 
           if ( codepoint < 0x80 )
-                prelude_string_ncat(out, (char *) &codepoint, 1);
+                libiodef_string_ncat(out, (char *) &codepoint, 1);
 
           else if ( codepoint < 0x800 ) {
                 val = 192 + codepoint / 64;
-                prelude_string_ncat(out, &val, 1);
+                libiodef_string_ncat(out, &val, 1);
                 val = 128 + codepoint % 64;
-                prelude_string_ncat(out, &val, 1);
+                libiodef_string_ncat(out, &val, 1);
           }
 
           else if ( codepoint - 0xd800u < 0x800 )
@@ -80,22 +80,22 @@ static int unicode_to_utf8(unsigned int codepoint, prelude_string_t *out)
 
           else if ( codepoint < 0x10000 ) {
                 val = 224 + codepoint / 4096;
-                prelude_string_ncat(out, &val, 1);
+                libiodef_string_ncat(out, &val, 1);
                 val = 128 + codepoint /64 % 64;
-                prelude_string_ncat(out, &val, 1);
+                libiodef_string_ncat(out, &val, 1);
                 val = 128 + codepoint % 64;
-                prelude_string_ncat(out, &val, 1);
+                libiodef_string_ncat(out, &val, 1);
           }
 
           else if ( codepoint < 0x110000 ) {
                 val = 240 + codepoint / 262144;
-                prelude_string_ncat(out, &val, 1);
+                libiodef_string_ncat(out, &val, 1);
                 val = 128 + codepoint / 4096 % 64;
-                prelude_string_ncat(out, &val, 1);
+                libiodef_string_ncat(out, &val, 1);
                 val = 128 + codepoint / 64 % 64;
-                prelude_string_ncat(out, &val, 1);
+                libiodef_string_ncat(out, &val, 1);
                 val = 128 + codepoint % 64;
-                prelude_string_ncat(out, &val, 1);
+                libiodef_string_ncat(out, &val, 1);
           }
 
           else
@@ -125,23 +125,23 @@ static int unescape_unicode(const char *in, const char *end)
         int h1, h2, h3, h4;
 
         if ( in + 4 > end )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unicode sequence must be at least 4 characters long");;
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unicode sequence must be at least 4 characters long");;
 
         if ( (h1 = hexval(in[0])) < 0 || (h2 = hexval(in[1])) < 0 || (h3 = hexval(in[2])) < 0 || (h4 = hexval(in[3])) < 0 )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "invalid unicode escape: '%.6s'", in - 2);
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "invalid unicode escape: '%.6s'", in - 2);
 
         return h1 << 12 | h2 << 8 | h3 << 4 | h4;
 }
 
 
-static int unescape_string(prelude_string_t *out, const char *in, size_t size)
+static int unescape_string(libiodef_string_t *out, const char *in, size_t size)
 {
         int ret;
         const char *end = in + size;
 
         for ( ; in < end; in++ ) {
                 if ( *in != '\\' ) {
-                        ret = prelude_string_ncat(out, in, 1);
+                        ret = libiodef_string_ncat(out, in, 1);
                         continue;
                 }
 
@@ -150,23 +150,23 @@ static int unescape_string(prelude_string_t *out, const char *in, size_t size)
                         case '"':
                         case '/':
                         case '\\':
-                                ret = prelude_string_ncat(out, in, 1);
+                                ret = libiodef_string_ncat(out, in, 1);
                                 break;
 
                         case 'b':
-                                ret = prelude_string_ncat(out, "\b", 1);
+                                ret = libiodef_string_ncat(out, "\b", 1);
                                 break;
                         case 't':
-                                ret = prelude_string_ncat(out, "\t", 1);
+                                ret = libiodef_string_ncat(out, "\t", 1);
                                 break;
                         case 'n':
-                                ret = prelude_string_ncat(out, "\n", 1);
+                                ret = libiodef_string_ncat(out, "\n", 1);
                                 break;
                         case 'f':
-                                ret = prelude_string_ncat(out, "\f", 1);
+                                ret = libiodef_string_ncat(out, "\f", 1);
                                 break;
                         case 'r':
-                                ret = prelude_string_ncat(out, "\r", 1);
+                                ret = libiodef_string_ncat(out, "\r", 1);
                                 break;
 
                         case 'u': {
@@ -198,7 +198,7 @@ static int unescape_string(prelude_string_t *out, const char *in, size_t size)
                         }
 
                         default:
-                                ret = prelude_string_ncat(out, in, 1);
+                                ret = libiodef_string_ncat(out, in, 1);
                                 break;
                 }
 
@@ -219,7 +219,7 @@ static int __get_float(json_data_t *ctrl, float *value)
 
         *value = strtof(ctrl->input + j->start, &end);
         if ( end != (str + len) )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "error decoding to real");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "error decoding to real");
 
         return 0;
 }
@@ -235,11 +235,11 @@ static int64_t __get_integer(json_data_t *ctrl)
         const char *str = ctrl->input + j->start;
 
         if ( j->type != JSMN_PRIMITIVE )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "JSON value is not a primitive");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "JSON value is not a primitive");
 
         ret = strtoll(ctrl->input + j->start, &end, 10);
         if ( end != (str + len) )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "error decoding to integer");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "error decoding to integer");
 
         return ret;
 }
@@ -259,7 +259,7 @@ static int __get_string_copy(json_data_t *ctrl, unsigned int idx, char *out, siz
         }
 
         else if ( insize >= size )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "buffer is too small");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "buffer is too small");
 
         strncpy(out, input, MIN(size, j->end - j->start));
         out[j->end - j->start] = 0;
@@ -267,13 +267,13 @@ static int __get_string_copy(json_data_t *ctrl, unsigned int idx, char *out, siz
         return 0;
 }
 
-static int __get_string(json_data_t *ctrl, prelude_string_t *out)
+static int __get_string(json_data_t *ctrl, libiodef_string_t *out)
 {
         jsmntok_t *j = &ctrl->jtok[ctrl->idx];
         const char *input = ctrl->input + j->start;
 
         if ( j->type != JSMN_STRING )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "JSON value is not string");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "JSON value is not string");
 
         if ( j->end - j->start == 0 )
                 return 0;
@@ -327,7 +327,7 @@ static int iodef_additional_data_read_json(iodef_additional_data_t *additional_d
         //printf("READ additional_data idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -372,7 +372,7 @@ static int iodef_additional_data_read_json(iodef_additional_data_t *additional_d
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_additional_data_new_formatid(additional_data, &str);
                         if ( ret < 0 )
@@ -388,7 +388,7 @@ static int iodef_additional_data_read_json(iodef_additional_data_t *additional_d
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_additional_data_new_meaning(additional_data, &str);
                         if ( ret < 0 )
@@ -404,7 +404,7 @@ static int iodef_additional_data_read_json(iodef_additional_data_t *additional_d
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_additional_data_new_ext_dtype(additional_data, &str);
                         if ( ret < 0 )
@@ -426,7 +426,7 @@ static int iodef_additional_data_read_json(iodef_additional_data_t *additional_d
 
                         ret = __get_json_key(ctrl, "type", obj_idx);
                         if ( ret < 0 )
-                                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "type argument required for additional data object");
+                                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "type argument required for additional data object");
 
                         ret = __get_string_copy(ctrl, obj_idx + ret + 1, buf, sizeof(buf));
                         if ( ret < 0 )
@@ -487,24 +487,24 @@ static int iodef_additional_data_read_json(iodef_additional_data_t *additional_d
                                 case IODEF_ADDITIONAL_DATA_TYPE_NTPSTAMP:
                                 case IODEF_ADDITIONAL_DATA_TYPE_PORTLIST:
                                 case IODEF_ADDITIONAL_DATA_TYPE_XML: {
-                                        prelude_string_t *str;
+                                        libiodef_string_t *str;
 
-                                        ret = prelude_string_new(&str);
+                                        ret = libiodef_string_new(&str);
                                         if ( ret < 0 )
                                                 return ret;
 
                                         ret = __get_string(ctrl, str);
                                         if ( ret < 0 ) {
-                                                prelude_string_destroy(str);
+                                                libiodef_string_destroy(str);
                                                 return ret;
                                         }
 
                                         if ( type == IODEF_ADDITIONAL_DATA_TYPE_BYTE_STRING )
-                                                ret = iodef_data_set_byte_string_dup(data, (const unsigned char *) prelude_string_get_string(str), prelude_string_get_len(str));
+                                                ret = iodef_data_set_byte_string_dup(data, (const unsigned char *) libiodef_string_get_string(str), libiodef_string_get_len(str));
                                         else
-                                                ret = iodef_data_set_char_string_dup_fast(data, prelude_string_get_string(str), prelude_string_get_len(str));
+                                                ret = iodef_data_set_char_string_dup_fast(data, libiodef_string_get_string(str), libiodef_string_get_len(str));
 
-                                        prelude_string_destroy(str);
+                                        libiodef_string_destroy(str);
                                         break;
                                 }
 
@@ -515,7 +515,7 @@ static int iodef_additional_data_read_json(iodef_additional_data_t *additional_d
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading additional_data", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading additional_data", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -540,7 +540,7 @@ static int iodef_email_read_json(iodef_email_t *email, json_data_t *ctrl)
         //printf("READ email idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -569,7 +569,7 @@ static int iodef_email_read_json(iodef_email_t *email, json_data_t *ctrl)
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_email_new_email(email, &str);
                         if ( ret < 0 )
@@ -582,7 +582,7 @@ static int iodef_email_read_json(iodef_email_t *email, json_data_t *ctrl)
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading email", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading email", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -607,7 +607,7 @@ static int iodef_registry_handle_read_json(iodef_registry_handle_t *registry_han
         //printf("READ registry_handle idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -636,7 +636,7 @@ static int iodef_registry_handle_read_json(iodef_registry_handle_t *registry_han
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_registry_handle_new_ext_registry(registry_handle, &str);
                         if ( ret < 0 )
@@ -649,7 +649,7 @@ static int iodef_registry_handle_read_json(iodef_registry_handle_t *registry_han
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading registry_handle", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading registry_handle", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -674,7 +674,7 @@ static int iodef_postal_address_read_json(iodef_postal_address_t *postal_address
         //printf("READ postal_address idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -716,7 +716,7 @@ static int iodef_postal_address_read_json(iodef_postal_address_t *postal_address
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading postal_address", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading postal_address", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -741,7 +741,7 @@ static int iodef_contact_read_json(iodef_contact_t *contact, json_data_t *ctrl)
         //printf("READ contact idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -779,7 +779,7 @@ static int iodef_contact_read_json(iodef_contact_t *contact, json_data_t *ctrl)
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_contact_new_fax(contact, &str);
                         if ( ret < 0 )
@@ -801,7 +801,7 @@ static int iodef_contact_read_json(iodef_contact_t *contact, json_data_t *ctrl)
                                 for ( unsigned int j = 0; j < lsize; j++ ) {
 
                                         int ret;
-                                        prelude_string_t *str;
+                                        libiodef_string_t *str;
 
                                         ret = iodef_contact_new_description(contact, &str, IODEF_LIST_APPEND);
                                         if ( ret < 0 )
@@ -829,7 +829,7 @@ static int iodef_contact_read_json(iodef_contact_t *contact, json_data_t *ctrl)
                                 for ( unsigned int j = 0; j < lsize; j++ ) {
 
                                         int ret;
-                                        prelude_string_t *str;
+                                        libiodef_string_t *str;
 
                                         ret = iodef_contact_new_telephone(contact, &str, IODEF_LIST_APPEND);
                                         if ( ret < 0 )
@@ -901,7 +901,7 @@ static int iodef_contact_read_json(iodef_contact_t *contact, json_data_t *ctrl)
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_contact_new_contact_name(contact, &str);
                         if ( ret < 0 )
@@ -917,7 +917,7 @@ static int iodef_contact_read_json(iodef_contact_t *contact, json_data_t *ctrl)
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_contact_new_timezone(contact, &str);
                         if ( ret < 0 )
@@ -1008,7 +1008,7 @@ static int iodef_contact_read_json(iodef_contact_t *contact, json_data_t *ctrl)
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_contact_new_ext_type(contact, &str);
                         if ( ret < 0 )
@@ -1024,7 +1024,7 @@ static int iodef_contact_read_json(iodef_contact_t *contact, json_data_t *ctrl)
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_contact_new_ext_role(contact, &str);
                         if ( ret < 0 )
@@ -1053,7 +1053,7 @@ static int iodef_contact_read_json(iodef_contact_t *contact, json_data_t *ctrl)
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading contact", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading contact", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -1078,7 +1078,7 @@ static int iodef_incident_id_read_json(iodef_incident_id_t *incident_id, json_da
         //printf("READ incident_id idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -1091,7 +1091,7 @@ static int iodef_incident_id_read_json(iodef_incident_id_t *incident_id, json_da
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_incident_id_new_instance(incident_id, &str);
                         if ( ret < 0 )
@@ -1107,7 +1107,7 @@ static int iodef_incident_id_read_json(iodef_incident_id_t *incident_id, json_da
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_incident_id_new_name(incident_id, &str);
                         if ( ret < 0 )
@@ -1136,7 +1136,7 @@ static int iodef_incident_id_read_json(iodef_incident_id_t *incident_id, json_da
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading incident_id", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading incident_id", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -1161,7 +1161,7 @@ static int iodef_alternative_id_read_json(iodef_alternative_id_t *alternative_id
         //printf("READ alternative_id idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -1212,7 +1212,7 @@ static int iodef_alternative_id_read_json(iodef_alternative_id_t *alternative_id
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading alternative_id", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading alternative_id", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -1237,7 +1237,7 @@ static int iodef_related_activity_read_json(iodef_related_activity_t *related_ac
         //printf("READ related_activity idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -1256,7 +1256,7 @@ static int iodef_related_activity_read_json(iodef_related_activity_t *related_ac
                                 for ( unsigned int j = 0; j < lsize; j++ ) {
 
                                         int ret;
-                                        prelude_string_t *str;
+                                        libiodef_string_t *str;
 
                                         ret = iodef_related_activity_new_url(related_activity, &str, IODEF_LIST_APPEND);
                                         if ( ret < 0 )
@@ -1316,7 +1316,7 @@ static int iodef_related_activity_read_json(iodef_related_activity_t *related_ac
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading related_activity", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading related_activity", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -1341,7 +1341,7 @@ static int iodef_history_item_read_json(iodef_history_item_t *history_item, json
         //printf("READ history_item idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -1403,7 +1403,7 @@ static int iodef_history_item_read_json(iodef_history_item_t *history_item, json
                                 for ( unsigned int j = 0; j < lsize; j++ ) {
 
                                         int ret;
-                                        prelude_string_t *str;
+                                        libiodef_string_t *str;
 
                                         ret = iodef_history_item_new_description(history_item, &str, IODEF_LIST_APPEND);
                                         if ( ret < 0 )
@@ -1494,7 +1494,7 @@ static int iodef_history_item_read_json(iodef_history_item_t *history_item, json
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_history_item_new_ext_action(history_item, &str);
                         if ( ret < 0 )
@@ -1507,7 +1507,7 @@ static int iodef_history_item_read_json(iodef_history_item_t *history_item, json
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading history_item", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading history_item", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -1532,7 +1532,7 @@ static int iodef_history_read_json(iodef_history_t *history, json_data_t *ctrl)
         //printf("READ history idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -1583,7 +1583,7 @@ static int iodef_history_read_json(iodef_history_t *history, json_data_t *ctrl)
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading history", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading history", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -1608,7 +1608,7 @@ static int iodef_expectation_read_json(iodef_expectation_t *expectation, json_da
         //printf("READ expectation idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -1646,7 +1646,7 @@ static int iodef_expectation_read_json(iodef_expectation_t *expectation, json_da
                                 for ( unsigned int j = 0; j < lsize; j++ ) {
 
                                         int ret;
-                                        prelude_string_t *str;
+                                        libiodef_string_t *str;
 
                                         ret = iodef_expectation_new_description(expectation, &str, IODEF_LIST_APPEND);
                                         if ( ret < 0 )
@@ -1737,7 +1737,7 @@ static int iodef_expectation_read_json(iodef_expectation_t *expectation, json_da
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_expectation_new_ext_action(expectation, &str);
                         if ( ret < 0 )
@@ -1766,7 +1766,7 @@ static int iodef_expectation_read_json(iodef_expectation_t *expectation, json_da
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading expectation", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading expectation", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -1791,7 +1791,7 @@ static int iodef_record_pattern_read_json(iodef_record_pattern_t *record_pattern
         //printf("READ record_pattern idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -1833,7 +1833,7 @@ static int iodef_record_pattern_read_json(iodef_record_pattern_t *record_pattern
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_record_pattern_new_ext_type(record_pattern, &str);
                         if ( ret < 0 )
@@ -1862,7 +1862,7 @@ static int iodef_record_pattern_read_json(iodef_record_pattern_t *record_pattern
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_record_pattern_new_ext_offsetunit(record_pattern, &str);
                         if ( ret < 0 )
@@ -1891,7 +1891,7 @@ static int iodef_record_pattern_read_json(iodef_record_pattern_t *record_pattern
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading record_pattern", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading record_pattern", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -1916,7 +1916,7 @@ static int iodef_record_item_read_json(iodef_record_item_t *record_item, json_da
         //printf("READ record_item idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -1961,7 +1961,7 @@ static int iodef_record_item_read_json(iodef_record_item_t *record_item, json_da
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_record_item_new_formatid(record_item, &str);
                         if ( ret < 0 )
@@ -1977,7 +1977,7 @@ static int iodef_record_item_read_json(iodef_record_item_t *record_item, json_da
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_record_item_new_meaning(record_item, &str);
                         if ( ret < 0 )
@@ -1993,7 +1993,7 @@ static int iodef_record_item_read_json(iodef_record_item_t *record_item, json_da
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_record_item_new_ext_dtype(record_item, &str);
                         if ( ret < 0 )
@@ -2010,29 +2010,29 @@ static int iodef_record_item_read_json(iodef_record_item_t *record_item, json_da
 
                         int ret;
                         iodef_data_t *data;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_record_item_new_data(record_item, &data);
                         if ( ret < 0 )
                                 return ret;
 
-                        ret = prelude_string_new(&str);
+                        ret = libiodef_string_new(&str);
                         if ( ret < 0 )
                                 return ret;
 
                         ret = __get_string(ctrl, str);
                         if ( ret < 0 ) {
-                                prelude_string_destroy(str);
+                                libiodef_string_destroy(str);
                                 return ret;
                         }
 
-                        ret = iodef_data_set_byte_string_dup(data, (const unsigned char *) prelude_string_get_string(str), prelude_string_get_len(str));
-                        prelude_string_destroy(str);
+                        ret = iodef_data_set_byte_string_dup(data, (const unsigned char *) libiodef_string_get_string(str), libiodef_string_get_len(str));
+                        libiodef_string_destroy(str);
 
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading record_item", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading record_item", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -2057,7 +2057,7 @@ static int iodef_application_read_json(iodef_application_t *application, json_da
         //printf("READ application idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -2070,7 +2070,7 @@ static int iodef_application_read_json(iodef_application_t *application, json_da
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_application_new_url(application, &str);
                         if ( ret < 0 )
@@ -2086,7 +2086,7 @@ static int iodef_application_read_json(iodef_application_t *application, json_da
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_application_new_vendor(application, &str);
                         if ( ret < 0 )
@@ -2102,7 +2102,7 @@ static int iodef_application_read_json(iodef_application_t *application, json_da
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_application_new_name(application, &str);
                         if ( ret < 0 )
@@ -2118,7 +2118,7 @@ static int iodef_application_read_json(iodef_application_t *application, json_da
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_application_new_family(application, &str);
                         if ( ret < 0 )
@@ -2134,7 +2134,7 @@ static int iodef_application_read_json(iodef_application_t *application, json_da
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_application_new_swid(application, &str);
                         if ( ret < 0 )
@@ -2150,7 +2150,7 @@ static int iodef_application_read_json(iodef_application_t *application, json_da
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_application_new_patch(application, &str);
                         if ( ret < 0 )
@@ -2166,7 +2166,7 @@ static int iodef_application_read_json(iodef_application_t *application, json_da
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_application_new_version(application, &str);
                         if ( ret < 0 )
@@ -2182,7 +2182,7 @@ static int iodef_application_read_json(iodef_application_t *application, json_da
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_application_new_configid(application, &str);
                         if ( ret < 0 )
@@ -2195,7 +2195,7 @@ static int iodef_application_read_json(iodef_application_t *application, json_da
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading application", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading application", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -2220,7 +2220,7 @@ static int iodef_record_data_read_json(iodef_record_data_t *record_data, json_da
         //printf("READ record_data idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -2257,7 +2257,7 @@ static int iodef_record_data_read_json(iodef_record_data_t *record_data, json_da
                                 for ( unsigned int j = 0; j < lsize; j++ ) {
 
                                         int ret;
-                                        prelude_string_t *str;
+                                        libiodef_string_t *str;
 
                                         ret = iodef_record_data_new_description(record_data, &str, IODEF_LIST_APPEND);
                                         if ( ret < 0 )
@@ -2379,7 +2379,7 @@ static int iodef_record_data_read_json(iodef_record_data_t *record_data, json_da
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading record_data", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading record_data", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -2404,7 +2404,7 @@ static int iodef_record_read_json(iodef_record_t *record, json_data_t *ctrl)
         //printf("READ record idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -2455,7 +2455,7 @@ static int iodef_record_read_json(iodef_record_t *record, json_data_t *ctrl)
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading record", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading record", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -2480,7 +2480,7 @@ static int iodef_reference_read_json(iodef_reference_t *reference, json_data_t *
         //printf("READ reference idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -2499,7 +2499,7 @@ static int iodef_reference_read_json(iodef_reference_t *reference, json_data_t *
                                 for ( unsigned int j = 0; j < lsize; j++ ) {
 
                                         int ret;
-                                        prelude_string_t *str;
+                                        libiodef_string_t *str;
 
                                         ret = iodef_reference_new_url(reference, &str, IODEF_LIST_APPEND);
                                         if ( ret < 0 )
@@ -2527,7 +2527,7 @@ static int iodef_reference_read_json(iodef_reference_t *reference, json_data_t *
                                 for ( unsigned int j = 0; j < lsize; j++ ) {
 
                                         int ret;
-                                        prelude_string_t *str;
+                                        libiodef_string_t *str;
 
                                         ret = iodef_reference_new_description(reference, &str, IODEF_LIST_APPEND);
                                         if ( ret < 0 )
@@ -2549,7 +2549,7 @@ static int iodef_reference_read_json(iodef_reference_t *reference, json_data_t *
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_reference_new_reference_name(reference, &str);
                         if ( ret < 0 )
@@ -2562,7 +2562,7 @@ static int iodef_reference_read_json(iodef_reference_t *reference, json_data_t *
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading reference", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading reference", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -2587,7 +2587,7 @@ static int iodef_method_read_json(iodef_method_t *method, json_data_t *ctrl)
         //printf("READ method idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -2631,7 +2631,7 @@ static int iodef_method_read_json(iodef_method_t *method, json_data_t *ctrl)
                                 for ( unsigned int j = 0; j < lsize; j++ ) {
 
                                         int ret;
-                                        prelude_string_t *str;
+                                        libiodef_string_t *str;
 
                                         ret = iodef_method_new_description(method, &str, IODEF_LIST_APPEND);
                                         if ( ret < 0 )
@@ -2691,7 +2691,7 @@ static int iodef_method_read_json(iodef_method_t *method, json_data_t *ctrl)
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading method", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading method", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -2716,7 +2716,7 @@ static int iodef_time_impact_read_json(iodef_time_impact_t *time_impact, json_da
         //printf("READ time_impact idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -2729,7 +2729,7 @@ static int iodef_time_impact_read_json(iodef_time_impact_t *time_impact, json_da
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_time_impact_new_ext_metric(time_impact, &str);
                         if ( ret < 0 )
@@ -2793,7 +2793,7 @@ static int iodef_time_impact_read_json(iodef_time_impact_t *time_impact, json_da
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_time_impact_new_ext_duration(time_impact, &str);
                         if ( ret < 0 )
@@ -2806,7 +2806,7 @@ static int iodef_time_impact_read_json(iodef_time_impact_t *time_impact, json_da
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading time_impact", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading time_impact", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -2831,7 +2831,7 @@ static int iodef_impact_read_json(iodef_impact_t *impact, json_data_t *ctrl)
         //printf("READ impact idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -2908,7 +2908,7 @@ static int iodef_impact_read_json(iodef_impact_t *impact, json_data_t *ctrl)
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_impact_new_ext_type(impact, &str);
                         if ( ret < 0 )
@@ -2921,7 +2921,7 @@ static int iodef_impact_read_json(iodef_impact_t *impact, json_data_t *ctrl)
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading impact", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading impact", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -2946,7 +2946,7 @@ static int iodef_confidence_read_json(iodef_confidence_t *confidence, json_data_
         //printf("READ confidence idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -2972,7 +2972,7 @@ static int iodef_confidence_read_json(iodef_confidence_t *confidence, json_data_
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading confidence", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading confidence", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -2997,7 +2997,7 @@ static int iodef_monetary_impact_read_json(iodef_monetary_impact_t *monetary_imp
         //printf("READ monetary_impact idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -3010,7 +3010,7 @@ static int iodef_monetary_impact_read_json(iodef_monetary_impact_t *monetary_imp
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_monetary_impact_new_currency(monetary_impact, &str);
                         if ( ret < 0 )
@@ -3039,7 +3039,7 @@ static int iodef_monetary_impact_read_json(iodef_monetary_impact_t *monetary_imp
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading monetary_impact", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading monetary_impact", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -3064,7 +3064,7 @@ static int iodef_counter_read_json(iodef_counter_t *counter, json_data_t *ctrl)
         //printf("READ counter idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -3109,7 +3109,7 @@ static int iodef_counter_read_json(iodef_counter_t *counter, json_data_t *ctrl)
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_counter_new_ext_duration(counter, &str);
                         if ( ret < 0 )
@@ -3125,7 +3125,7 @@ static int iodef_counter_read_json(iodef_counter_t *counter, json_data_t *ctrl)
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_counter_new_ext_type(counter, &str);
                         if ( ret < 0 )
@@ -3138,7 +3138,7 @@ static int iodef_counter_read_json(iodef_counter_t *counter, json_data_t *ctrl)
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading counter", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading counter", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -3163,7 +3163,7 @@ static int iodef_assessment_read_json(iodef_assessment_t *assessment, json_data_
         //printf("READ assessment idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -3348,7 +3348,7 @@ static int iodef_assessment_read_json(iodef_assessment_t *assessment, json_data_
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading assessment", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading assessment", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -3373,7 +3373,7 @@ static int iodef_service_read_json(iodef_service_t *service, json_data_t *ctrl)
         //printf("READ service idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -3412,7 +3412,7 @@ static int iodef_service_read_json(iodef_service_t *service, json_data_t *ctrl)
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_service_new_portlist(service, &str);
                         if ( ret < 0 )
@@ -3489,7 +3489,7 @@ static int iodef_service_read_json(iodef_service_t *service, json_data_t *ctrl)
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading service", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading service", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -3514,7 +3514,7 @@ static int iodef_address_read_json(iodef_address_t *address, json_data_t *ctrl)
         //printf("READ address idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -3543,7 +3543,7 @@ static int iodef_address_read_json(iodef_address_t *address, json_data_t *ctrl)
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_address_new_vlan_name(address, &str);
                         if ( ret < 0 )
@@ -3559,7 +3559,7 @@ static int iodef_address_read_json(iodef_address_t *address, json_data_t *ctrl)
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_address_new_ext_category(address, &str);
                         if ( ret < 0 )
@@ -3575,7 +3575,7 @@ static int iodef_address_read_json(iodef_address_t *address, json_data_t *ctrl)
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_address_new_vlan_num(address, &str);
                         if ( ret < 0 )
@@ -3588,7 +3588,7 @@ static int iodef_address_read_json(iodef_address_t *address, json_data_t *ctrl)
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading address", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading address", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -3613,7 +3613,7 @@ static int iodef_node_role_read_json(iodef_node_role_t *node_role, json_data_t *
         //printf("READ node_role idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -3658,7 +3658,7 @@ static int iodef_node_role_read_json(iodef_node_role_t *node_role, json_data_t *
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_node_role_new_ext_category(node_role, &str);
                         if ( ret < 0 )
@@ -3671,7 +3671,7 @@ static int iodef_node_role_read_json(iodef_node_role_t *node_role, json_data_t *
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading node_role", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading node_role", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -3696,7 +3696,7 @@ static int iodef_node_read_json(iodef_node_t *node, json_data_t *ctrl)
         //printf("READ node idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -3715,7 +3715,7 @@ static int iodef_node_read_json(iodef_node_t *node, json_data_t *ctrl)
                                 for ( unsigned int j = 0; j < lsize; j++ ) {
 
                                         int ret;
-                                        prelude_string_t *str;
+                                        libiodef_string_t *str;
 
                                         ret = iodef_node_new_node_name(node, &str, IODEF_LIST_APPEND);
                                         if ( ret < 0 )
@@ -3806,7 +3806,7 @@ static int iodef_node_read_json(iodef_node_t *node, json_data_t *ctrl)
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_node_new_location(node, &str);
                         if ( ret < 0 )
@@ -3844,7 +3844,7 @@ static int iodef_node_read_json(iodef_node_t *node, json_data_t *ctrl)
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading node", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading node", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -3869,7 +3869,7 @@ static int iodef_operating_system_read_json(iodef_operating_system_t *operating_
         //printf("READ operating_system idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -3882,7 +3882,7 @@ static int iodef_operating_system_read_json(iodef_operating_system_t *operating_
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_operating_system_new_url(operating_system, &str);
                         if ( ret < 0 )
@@ -3898,7 +3898,7 @@ static int iodef_operating_system_read_json(iodef_operating_system_t *operating_
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_operating_system_new_vendor(operating_system, &str);
                         if ( ret < 0 )
@@ -3914,7 +3914,7 @@ static int iodef_operating_system_read_json(iodef_operating_system_t *operating_
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_operating_system_new_name(operating_system, &str);
                         if ( ret < 0 )
@@ -3930,7 +3930,7 @@ static int iodef_operating_system_read_json(iodef_operating_system_t *operating_
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_operating_system_new_family(operating_system, &str);
                         if ( ret < 0 )
@@ -3946,7 +3946,7 @@ static int iodef_operating_system_read_json(iodef_operating_system_t *operating_
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_operating_system_new_swid(operating_system, &str);
                         if ( ret < 0 )
@@ -3962,7 +3962,7 @@ static int iodef_operating_system_read_json(iodef_operating_system_t *operating_
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_operating_system_new_patch(operating_system, &str);
                         if ( ret < 0 )
@@ -3978,7 +3978,7 @@ static int iodef_operating_system_read_json(iodef_operating_system_t *operating_
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_operating_system_new_version(operating_system, &str);
                         if ( ret < 0 )
@@ -3994,7 +3994,7 @@ static int iodef_operating_system_read_json(iodef_operating_system_t *operating_
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_operating_system_new_configid(operating_system, &str);
                         if ( ret < 0 )
@@ -4007,7 +4007,7 @@ static int iodef_operating_system_read_json(iodef_operating_system_t *operating_
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading operating_system", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading operating_system", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -4032,7 +4032,7 @@ static int iodef_system_read_json(iodef_system_t *system, json_data_t *ctrl)
         //printf("READ system idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -4094,7 +4094,7 @@ static int iodef_system_read_json(iodef_system_t *system, json_data_t *ctrl)
                                 for ( unsigned int j = 0; j < lsize; j++ ) {
 
                                         int ret;
-                                        prelude_string_t *str;
+                                        libiodef_string_t *str;
 
                                         ret = iodef_system_new_description(system, &str, IODEF_LIST_APPEND);
                                         if ( ret < 0 )
@@ -4216,7 +4216,7 @@ static int iodef_system_read_json(iodef_system_t *system, json_data_t *ctrl)
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_system_new_ext_category(system, &str);
                         if ( ret < 0 )
@@ -4248,7 +4248,7 @@ static int iodef_system_read_json(iodef_system_t *system, json_data_t *ctrl)
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_system_new_interface(system, &str);
                         if ( ret < 0 )
@@ -4261,7 +4261,7 @@ static int iodef_system_read_json(iodef_system_t *system, json_data_t *ctrl)
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading system", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading system", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -4286,7 +4286,7 @@ static int iodef_flow_read_json(iodef_flow_t *flow, json_data_t *ctrl)
         //printf("READ flow idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -4321,7 +4321,7 @@ static int iodef_flow_read_json(iodef_flow_t *flow, json_data_t *ctrl)
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading flow", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading flow", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -4346,7 +4346,7 @@ static int iodef_event_data_read_json(iodef_event_data_t *event_data, json_data_
         //printf("READ event_data idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -4409,7 +4409,7 @@ static int iodef_event_data_read_json(iodef_event_data_t *event_data, json_data_
                                 for ( unsigned int j = 0; j < lsize; j++ ) {
 
                                         int ret;
-                                        prelude_string_t *str;
+                                        libiodef_string_t *str;
 
                                         ret = iodef_event_data_new_description(event_data, &str, IODEF_LIST_APPEND);
                                         if ( ret < 0 )
@@ -4643,7 +4643,7 @@ static int iodef_event_data_read_json(iodef_event_data_t *event_data, json_data_
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading event_data", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading event_data", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -4668,7 +4668,7 @@ static int iodef_incident_read_json(iodef_incident_t *incident, json_data_t *ctr
         //printf("READ incident idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -4750,7 +4750,7 @@ static int iodef_incident_read_json(iodef_incident_t *incident, json_data_t *ctr
                                 for ( unsigned int j = 0; j < lsize; j++ ) {
 
                                         int ret;
-                                        prelude_string_t *str;
+                                        libiodef_string_t *str;
 
                                         ret = iodef_incident_new_description(incident, &str, IODEF_LIST_APPEND);
                                         if ( ret < 0 )
@@ -5014,7 +5014,7 @@ static int iodef_incident_read_json(iodef_incident_t *incident, json_data_t *ctr
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_incident_new_ext_purpose(incident, &str);
                         if ( ret < 0 )
@@ -5043,7 +5043,7 @@ static int iodef_incident_read_json(iodef_incident_t *incident, json_data_t *ctr
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading incident", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading incident", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -5068,7 +5068,7 @@ static int iodef_document_read_json(iodef_document_t *document, json_data_t *ctr
         //printf("READ document idx=%u rsize=%lu type=%d\n", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected JSON object type");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected JSON object type");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf("MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\n", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -5122,7 +5122,7 @@ static int iodef_document_read_json(iodef_document_t *document, json_data_t *ctr
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_document_new_formatid(document, &str);
                         if ( ret < 0 )
@@ -5138,7 +5138,7 @@ static int iodef_document_read_json(iodef_document_t *document, json_data_t *ctr
                         ctrl->idx++;
 
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_document_new_version(document, &str);
                         if ( ret < 0 )
@@ -5151,7 +5151,7 @@ static int iodef_document_read_json(iodef_document_t *document, json_data_t *ctr
                 }
 
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unexpected field '%.*s' while reading document", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unexpected field '%.*s' while reading document", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -5170,11 +5170,11 @@ int iodef_object_new_from_json(iodef_object_t **object, const char *json_message
 
         ret = ctrl.jtoksize = jsmn_parse(&parser, json_message, strlen(json_message), ctrl.jtok, sizeof(ctrl.jtok) / sizeof(*ctrl.jtok));
         if ( ret < 0 )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "error parsing json message");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "error parsing json message");
 
         selfkey = __get_json_key(&ctrl, "_self", 0);
         if ( selfkey < 0 )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "json message miss '_self' attribute");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "json message miss '_self' attribute");
 
         if ( jsoneq(&ctrl, &ctrl.jtok[selfkey + 1], "iodef_additional_data_t") == 0 ) {
                 ret = iodef_additional_data_new((iodef_additional_data_t **) object);
@@ -5449,7 +5449,7 @@ int iodef_object_new_from_json(iodef_object_t **object, const char *json_message
         }
         
         else {
-                ret = prelude_error_verbose(PRELUDE_ERROR_GENERIC, "unknown object type '%s'", "");
+                ret = libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "unknown object type '%s'", "");
         }
 
         return ret;

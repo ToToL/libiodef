@@ -1,7 +1,7 @@
 # Copyright (C) 2003-2016 CS-SI. All Rights Reserved.
-# Author: Nicolas Delon <nicolas.delon@prelude-ids.com>
+# Author: Nicolas Delon <nicolas.delon@libiodef-ids.com>
 #
-# This file is part of the Prelude library.
+# This file is part of the LibIodef library.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,10 +34,10 @@ sub     header
 /*****
 *
 * Copyright (C) 2001-2016 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoann.v\@prelude-ids.com>
-* Author: Nicolas Delon <nicolas.delon\@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann.v\@libiodef-ids.com>
+* Author: Nicolas Delon <nicolas.delon\@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -65,12 +65,12 @@ sub     header
 #include <strings.h>
 #include <sys/types.h>
 
-#include \"prelude-inttypes.h\"
-#include \"prelude-list.h\"
-#include \"prelude-string.h\"
+#include \"libiodef-inttypes.h\"
+#include \"libiodef-list.h\"
+#include \"libiodef-string.h\"
 
-#define PRELUDE_ERROR_SOURCE_DEFAULT PRELUDE_ERROR_SOURCE_IODEF_TREE_WRAP
-#include \"prelude-error.h\"
+#define LIBIODEF_ERROR_SOURCE_DEFAULT LIBIODEF_ERROR_SOURCE_IODEF_TREE_WRAP
+#include \"libiodef-error.h\"
 
 #include \"iodef-time.h\"
 #include \"iodef-data.h\"
@@ -87,10 +87,10 @@ sub     header
 #endif
 
 
-#define LISTED_OBJECT(name, type) prelude_list_t name
-#define KEYLISTED_OBJECT(name, type) prelude_list_t name
+#define LISTED_OBJECT(name, type) libiodef_list_t name
+#define KEYLISTED_OBJECT(name, type) libiodef_list_t name
 
-#define IS_KEY_LISTED(keyfield) IODEF_LINKED_OBJECT; prelude_string_t *keyfield
+#define IS_KEY_LISTED(keyfield) IODEF_LINKED_OBJECT; libiodef_string_t *keyfield
 
 #define UNION(type, var) type var; union
 
@@ -157,20 +157,20 @@ static int float_compare(float a, float b)
 
 
 
-static int prelude_string_copy(const prelude_string_t *src, prelude_string_t *dst)
+static int libiodef_string_copy(const libiodef_string_t *src, libiodef_string_t *dst)
 {
-        prelude_return_val_if_fail(src, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(dst, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(src, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(dst, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
-        if ( ! prelude_string_is_empty(src) )
-               return prelude_string_copy_dup(src, dst);
+        if ( ! libiodef_string_is_empty(src) )
+               return libiodef_string_copy_dup(src, dst);
 
         return 0;
 }
 
 
 
-static int get_value_from_string(iodef_value_t **value, prelude_string_t *str, prelude_bool_t is_ptr)
+static int get_value_from_string(iodef_value_t **value, libiodef_string_t *str, libiodef_bool_t is_ptr)
 {
         int ret;
 
@@ -180,26 +180,26 @@ static int get_value_from_string(iodef_value_t **value, prelude_string_t *str, p
         }
 
         if ( ! is_ptr ) {
-                ret = prelude_string_clone(str, &str);
+                ret = libiodef_string_clone(str, &str);
                 if ( ret < 0 )
                         return ret;
         }
 
         ret = iodef_value_new_string(value, str);
         if ( ret < 0 ) {
-                prelude_string_destroy(str);
+                libiodef_string_destroy(str);
                 return ret;
         }
 
         if ( is_ptr )
-                prelude_string_ref(str);
+                libiodef_string_ref(str);
 
         return 0;
 }
 
 
 
-static int get_value_from_data(iodef_value_t **value, iodef_data_t *data, prelude_bool_t is_ptr)
+static int get_value_from_data(iodef_value_t **value, iodef_data_t *data, libiodef_bool_t is_ptr)
 {
         int ret;
 
@@ -227,7 +227,7 @@ static int get_value_from_data(iodef_value_t **value, iodef_data_t *data, prelud
 }
 
 
-static int get_value_from_time(iodef_value_t **value, iodef_time_t *time, prelude_bool_t is_ptr)
+static int get_value_from_time(iodef_value_t **value, iodef_time_t *time, libiodef_bool_t is_ptr)
 {
         int ret;
 
@@ -255,38 +255,38 @@ static int get_value_from_time(iodef_value_t **value, iodef_time_t *time, prelud
 }
 
 
-static void list_insert(prelude_list_t *head, prelude_list_t *item, int pos)
+static void list_insert(libiodef_list_t *head, libiodef_list_t *item, int pos)
 {
         int i = 0;
-        prelude_list_t *tmp;
+        libiodef_list_t *tmp;
 
         if ( pos == IODEF_LIST_APPEND )
-                prelude_list_add_tail(head, item);
+                libiodef_list_add_tail(head, item);
 
         else if ( pos == IODEF_LIST_PREPEND )
-                prelude_list_add(head, item);
+                libiodef_list_add(head, item);
 
         else if ( pos >= 0 ) {
-                prelude_list_for_each(head, tmp) {
+                libiodef_list_for_each(head, tmp) {
                         if ( i == pos )
                                 break;
                         i++;
                 }
 
-                prelude_list_add_tail(tmp, item);
+                libiodef_list_add_tail(tmp, item);
         }
 
         else if ( pos < 0 ) {
                 pos = -pos;
                 pos--;
 
-                prelude_list_for_each_reversed(head, tmp) {
+                libiodef_list_for_each_reversed(head, tmp) {
                         if ( i == pos )
                                 break;
                         i++;
                 }
 
-                prelude_list_add(tmp, item);
+                libiodef_list_add(tmp, item);
         }
 }
 
@@ -335,14 +335,14 @@ int iodef_$struct->{short_typename}_new($struct->{typename} **ret)
 \{
         *ret = calloc(1, sizeof(**ret));
         if ( ! *ret )
-                return prelude_error_from_errno(errno);
+                return libiodef_error_from_errno(errno);
 
         (*ret)->_iodef_object_id = IODEF_CLASS_ID_$maj;
 ");
 
     if ( $struct->{is_listed} ) {
         $self->output("
-        prelude_list_init(&((prelude_linked_object_t *) (*ret))->_list);
+        libiodef_list_init(&((libiodef_linked_object_t *) (*ret))->_list);
 ");
     }
 
@@ -356,7 +356,7 @@ int iodef_$struct->{short_typename}_new($struct->{typename} **ret)
     foreach my $field ( map { $_->{metatype} & &METATYPE_LIST ? $_ : () } @{ $struct->{field_list} } ) {
 
         $self->output("
-        prelude_list_init(&(*ret)->$field->{name});
+        libiodef_list_init(&(*ret)->$field->{name});
 
 ");
 
@@ -365,7 +365,7 @@ int iodef_$struct->{short_typename}_new($struct->{typename} **ret)
     foreach my $field ( @{ $struct->{field_list} } ) {
         my $prefix = "";
 
-        if ( $field->{typename} ne "prelude_string_t" and !($field->{metatype} & (&METATYPE_PRIMITIVE)) ) {
+        if ( $field->{typename} ne "libiodef_string_t" and !($field->{metatype} & (&METATYPE_PRIMITIVE)) ) {
                 $prefix = "iodef_";
         }
 
@@ -374,7 +374,7 @@ int iodef_$struct->{short_typename}_new($struct->{typename} **ret)
         {
 ");
         #if ( $field->{name} eq "version" ) {
-                #$self->output("                int retval = prelude_string_new_ref_fast(&(*ret)->$field->{name}, \"1.0\", 3);");
+                #$self->output("                int retval = libiodef_string_new_ref_fast(&(*ret)->$field->{name}, \"1.0\", 3);");
         #} else {
                 $self->output("                int retval = $prefix$field->{short_typename}_new(&(*ret)->$field->{name});\n");
         #}
@@ -417,7 +417,7 @@ int _iodef_$struct->{short_typename}_get_child(void *p, iodef_class_child_id_t c
 \{
         $struct->{typename} *ptr = p;
 
-        prelude_return_val_if_fail(p, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(p, libiodef_error(LIBIODEF_ERROR_ASSERTION));
         *childptr = NULL;
 
         switch ( child ) \{
@@ -476,7 +476,7 @@ int _iodef_$struct->{short_typename}_get_child(void *p, iodef_class_child_id_t c
                                return 0;");
             }
 
-            if ( $field->{typename} eq "prelude_string_t" ) {
+            if ( $field->{typename} eq "libiodef_string_t" ) {
                 my $refer = $field->{ptr} ? "" : "&";
                 my $owned = $field->{ptr} ? "TRUE" : "FALSE";
                 $self->output("
@@ -514,7 +514,7 @@ int _iodef_$struct->{short_typename}_get_child(void *p, iodef_class_child_id_t c
 
     $self->output("
                 default:
-                        return prelude_error(PRELUDE_ERROR_IODEF_CLASS_UNKNOWN_CHILD);
+                        return libiodef_error(LIBIODEF_ERROR_IODEF_CLASS_UNKNOWN_CHILD);
         \}
 \}
 ");
@@ -534,7 +534,7 @@ int _iodef_$struct->{short_typename}_destroy_child(void *p, iodef_class_child_id
 \{
         $struct->{typename} *ptr = p;
 
-        prelude_return_val_if_fail(p, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(p, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         switch ( child ) \{
 ");
@@ -546,7 +546,7 @@ int _iodef_$struct->{short_typename}_destroy_child(void *p, iodef_class_child_id
 
                 if ( $field->{typename} eq "iodef_time_t" ||
                      $field->{typename} eq "iodef_data_t" ||
-                     $field->{typename} eq "prelude_string_t" ) {
+                     $field->{typename} eq "libiodef_string_t" ) {
                         $type = "$field->{short_typename}"
                 } else {
                         $type = "iodef_$field->{short_typename}"
@@ -555,32 +555,32 @@ int _iodef_$struct->{short_typename}_destroy_child(void *p, iodef_class_child_id
             $self->output("
                 case $n: \{
                         int i = 0;
-                        prelude_list_t *tmp;
+                        libiodef_list_t *tmp;
 
                         if ( n >= 0 ) {
-                               prelude_list_for_each(&ptr->$field->{name}, tmp) {
+                               libiodef_list_for_each(&ptr->$field->{name}, tmp) {
                                        if ( i++ == n ) {
-                                               void *b = prelude_linked_object_get_object(tmp);
+                                               void *b = libiodef_linked_object_get_object(tmp);
                                                ${type}_destroy(b);
                                                return 0;
                                        }
                                }
 
                                if ( i != n )
-                                       return prelude_error(PRELUDE_ERROR_IODEF_TREE_INDEX_UNDEFINED);
+                                       return libiodef_error(LIBIODEF_ERROR_IODEF_TREE_INDEX_UNDEFINED);
                         } else {
                                int pos = (-n) - 1; /* With negative value, -1 is the base, translate to 0 */
 
-                               prelude_list_for_each_reversed(&ptr->$field->{name}, tmp) {
+                               libiodef_list_for_each_reversed(&ptr->$field->{name}, tmp) {
                                        if ( i++ == pos ) {
-                                               void *b = prelude_linked_object_get_object(tmp);
+                                               void *b = libiodef_linked_object_get_object(tmp);
                                                ${type}_destroy(b);
                                                return 0;
                                        }
                                }
 
                                if ( i != pos )
-                                       return prelude_error(PRELUDE_ERROR_IODEF_TREE_INDEX_UNDEFINED);
+                                       return libiodef_error(LIBIODEF_ERROR_IODEF_TREE_INDEX_UNDEFINED);
                         }
                 \}
 ");
@@ -615,7 +615,7 @@ int _iodef_$struct->{short_typename}_destroy_child(void *p, iodef_class_child_id
 
                 if ( $field->{typename} eq "iodef_time_t" ||
                      $field->{typename} eq "iodef_data_t" ||
-                     $field->{typename} eq "prelude_string_t" ) {
+                     $field->{typename} eq "libiodef_string_t" ) {
                         $type = "$field->{short_typename}"
                 } else {
                         $type = "iodef_$field->{short_typename}"
@@ -645,7 +645,7 @@ int _iodef_$struct->{short_typename}_destroy_child(void *p, iodef_class_child_id
                 }
                 elsif ( $field->{typename} eq "iodef_time_t" ||
                      $field->{typename} eq "iodef_data_t" ||
-                     $field->{typename} eq "prelude_string_t" ) {
+                     $field->{typename} eq "libiodef_string_t" ) {
                         $code = "$field->{short_typename}_destroy_internal(&ptr->$field->{name})"
                 } else {
                         $code = "iodef_$field->{short_typename}_destroy_internal(&ptr->$field->{name})"
@@ -665,7 +665,7 @@ int _iodef_$struct->{short_typename}_destroy_child(void *p, iodef_class_child_id
 
     $self->output("
                 default:
-                        return prelude_error(PRELUDE_ERROR_IODEF_CLASS_UNKNOWN_CHILD);
+                        return libiodef_error(LIBIODEF_ERROR_IODEF_CLASS_UNKNOWN_CHILD);
         \}
 \}
 ");
@@ -684,7 +684,7 @@ int _iodef_$struct->{short_typename}_new_child(void *p, iodef_class_child_id_t c
 \{
         $struct->{typename} *ptr = p;
 
-        prelude_return_val_if_fail(p, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(p, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         switch ( child ) \{
 ");
@@ -695,33 +695,33 @@ int _iodef_$struct->{short_typename}_new_child(void *p, iodef_class_child_id_t c
             $self->output("
                 case $n: \{
                         int i = 0;
-                        prelude_list_t *tmp;
+                        libiodef_list_t *tmp;
 
                         if ( n == IODEF_LIST_APPEND || n == IODEF_LIST_PREPEND )
                                return iodef_$struct->{short_typename}_new_$field->{short_name}(ptr, ($field->{typename} **) ret, n);
 
                         if ( n >= 0 ) {
-                               prelude_list_for_each(&ptr->$field->{name}, tmp) {
+                               libiodef_list_for_each(&ptr->$field->{name}, tmp) {
                                        if ( i++ == n ) {
-                                               *ret = prelude_linked_object_get_object(tmp);
+                                               *ret = libiodef_linked_object_get_object(tmp);
                                                return 0;
                                        }
                                }
 
                                if ( i != n )
-                                       return prelude_error(PRELUDE_ERROR_IODEF_TREE_INDEX_UNDEFINED);
+                                       return libiodef_error(LIBIODEF_ERROR_IODEF_TREE_INDEX_UNDEFINED);
                         } else {
                                int pos = (-n) - 1; /* With negative value, -1 is the base, translate to 0 */
 
-                               prelude_list_for_each_reversed(&ptr->$field->{name}, tmp) {
+                               libiodef_list_for_each_reversed(&ptr->$field->{name}, tmp) {
                                        if ( i++ == pos ) {
-                                               *ret = prelude_linked_object_get_object(tmp);
+                                               *ret = libiodef_linked_object_get_object(tmp);
                                                return 0;
                                        }
                                }
 
                                if ( i != pos )
-                                       return prelude_error(PRELUDE_ERROR_IODEF_TREE_INDEX_UNDEFINED);
+                                       return libiodef_error(LIBIODEF_ERROR_IODEF_TREE_INDEX_UNDEFINED);
                         }
 
                         return iodef_$struct->{short_typename}_new_$field->{short_name}(ptr, ($field->{typename} **) ret, n);
@@ -749,7 +749,7 @@ int _iodef_$struct->{short_typename}_new_child(void *p, iodef_class_child_id_t c
 
     $self->output("
                 default:
-                        return prelude_error(PRELUDE_ERROR_IODEF_CLASS_UNKNOWN_CHILD);
+                        return libiodef_error(LIBIODEF_ERROR_IODEF_CLASS_UNKNOWN_CHILD);
         \}
 \}
 ");
@@ -776,8 +776,8 @@ int iodef_$struct->{short_typename}_copy(const $struct->{typename} *src, $struct
 \{
         int ret;
 
-        prelude_return_val_if_fail(src, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(dst, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(src, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(dst, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         ret = 0;
 ");
@@ -796,18 +796,18 @@ int iodef_$struct->{short_typename}_copy(const $struct->{typename} *src, $struct
         if ( $field->{metatype} & &METATYPE_LIST ) {
             $self->output("
         \{
-                prelude_list_t *n, *tmp;
+                libiodef_list_t *n, *tmp;
                 $field->{typename} *entry, *new;
 
-                prelude_list_for_each_safe(&dst->$field->{name}, tmp, n) \{
-                        entry = prelude_linked_object_get_object(tmp);
+                libiodef_list_for_each_safe(&dst->$field->{name}, tmp, n) \{
+                        entry = libiodef_linked_object_get_object(tmp);
                         $destroy_func(entry);
                 \}
 
-                prelude_list_for_each_safe(&src->$field->{name}, tmp, n) \{
-                        entry = prelude_linked_object_get_object(tmp);
+                libiodef_list_for_each_safe(&src->$field->{name}, tmp, n) \{
+                        entry = libiodef_linked_object_get_object(tmp);
                         $clone_func(entry, &new);
-                        prelude_list_add_tail(&dst->$field->{name}, &((prelude_linked_object_t *) new)->_list);
+                        libiodef_list_add_tail(&dst->$field->{name}, &((libiodef_linked_object_t *) new)->_list);
                 \}
         \}
 ");
@@ -925,7 +925,7 @@ int iodef_$struct->{short_typename}_clone($struct->{typename} *src, $struct->{ty
 \{
         int ret;
 
-        prelude_return_val_if_fail(src, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(src, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         ret = iodef_$struct->{short_typename}_new(dst);
         if ( ret < 0 )
@@ -974,20 +974,20 @@ int iodef_$struct->{short_typename}_compare(const $struct->{typename} *obj1, con
         if ( $field->{metatype} & &METATYPE_LIST ) {
             $self->output("
         \{
-                prelude_list_t *tmp1, *tmp2;
+                libiodef_list_t *tmp1, *tmp2;
                 $field->{typename} *entry1, *entry2;
 
                 tmp1 = tmp2 = NULL;
                 do \{
                         entry1 = entry2 = NULL;
 
-                        prelude_list_for_each_continue(&obj1->$field->{name}, tmp1) \{
-                                entry1 = prelude_linked_object_get_object(tmp1);
+                        libiodef_list_for_each_continue(&obj1->$field->{name}, tmp1) \{
+                                entry1 = libiodef_linked_object_get_object(tmp1);
                                 break;
                         \}
 
-                        prelude_list_for_each_continue(&obj2->$field->{name}, tmp2) \{
-                                entry2 = prelude_linked_object_get_object(tmp2);
+                        libiodef_list_for_each_continue(&obj2->$field->{name}, tmp2) \{
+                                entry2 = libiodef_linked_object_get_object(tmp2);
                                 break;
                         \}
 
@@ -1075,12 +1075,12 @@ sub     struct_destroy_internal
     $self->output("
 static void iodef_$struct->{short_typename}_destroy_internal($struct->{typename} *ptr)
 \{
-        prelude_return_if_fail(ptr);
+        libiodef_return_if_fail(ptr);
 ");
 
     $self->output("
-       if ( ! prelude_list_is_empty(&((prelude_linked_object_t *)ptr)->_list) )
-               prelude_list_del_init(&((prelude_linked_object_t *)ptr)->_list);
+       if ( ! libiodef_list_is_empty(&((libiodef_linked_object_t *)ptr)->_list) )
+               libiodef_list_del_init(&((libiodef_linked_object_t *)ptr)->_list);
     ") if ( $struct->{is_listed} );
 
     foreach my $field ( @{ $struct->{field_list} } ) {
@@ -1096,12 +1096,12 @@ static void iodef_$struct->{short_typename}_destroy_internal($struct->{typename}
 
             $self->output("
         \{
-                prelude_list_t *n, *tmp;
+                libiodef_list_t *n, *tmp;
                 $field->{typename} *entry;
 
-                prelude_list_for_each_safe(&ptr->$field->{name}, tmp, n) \{
-                        entry = prelude_linked_object_get_object(tmp);
-                        prelude_list_del_init(tmp);
+                libiodef_list_for_each_safe(&ptr->$field->{name}, tmp, n) \{
+                        entry = libiodef_linked_object_get_object(tmp);
+                        libiodef_list_del_init(tmp);
                         $destroy_func(entry);
                 \}
         \}
@@ -1179,7 +1179,7 @@ sub     struct_destroy
         $self->output("
 void iodef_$struct->{short_typename}_destroy($struct->{typename} *ptr)
 \{
-        prelude_return_if_fail(ptr);
+        libiodef_return_if_fail(ptr);
 
         if ( --ptr->refcount )
                 return;
@@ -1193,7 +1193,7 @@ void iodef_$struct->{short_typename}_destroy($struct->{typename} *ptr)
         $self->output("
 void iodef_$struct->{short_typename}_destroy($struct->{typename} *ptr)
 \{
-        prelude_return_if_fail(ptr);
+        libiodef_return_if_fail(ptr);
 
         iodef_$struct->{short_typename}_destroy_internal(ptr);
         free(ptr);
@@ -1222,7 +1222,7 @@ sub     struct_ref
  */
 $struct->{typename} *iodef_$struct->{short_typename}_ref($struct->{typename} *$struct->{short_typename})
 \{
-        prelude_return_val_if_fail($struct->{short_typename}, NULL);
+        libiodef_return_val_if_fail($struct->{short_typename}, NULL);
         $struct->{short_typename}->refcount++;
 
         return $struct->{short_typename};
@@ -1270,7 +1270,7 @@ sub     struct_field_normal
  */
 $field->{typename} ${ptr}iodef_$struct->{short_typename}_get_${name}($struct->{typename} *ptr)
 \{
-        prelude_return_val_if_fail(ptr, 0); /* FIXME */
+        libiodef_return_val_if_fail(ptr, 0); /* FIXME */
 ");
 
     if ( $field->{metatype} & &METATYPE_OPTIONAL_INT ) {
@@ -1314,7 +1314,7 @@ $field->{typename} ${ptr}iodef_$struct->{short_typename}_get_${name}($struct->{t
         $self->output("
 void iodef_$struct->{short_typename}_set_$field->{name}($struct->{typename} *ptr, $field->{typename} $field_name)
 \{
-        prelude_return_if_fail(ptr);
+        libiodef_return_if_fail(ptr);
         ptr->$field->{name} = $field_name;
         ptr->$field->{name}_is_set = 1;
 \}
@@ -1322,7 +1322,7 @@ void iodef_$struct->{short_typename}_set_$field->{name}($struct->{typename} *ptr
 
 void iodef_$struct->{short_typename}_unset_$field->{name}($struct->{typename} *ptr)
 \{
-        prelude_return_if_fail(ptr);
+        libiodef_return_if_fail(ptr);
         ptr->$field->{name}_is_set = 0;
 \}
 
@@ -1337,7 +1337,7 @@ void iodef_$struct->{short_typename}_unset_$field->{name}($struct->{typename} *p
             $self->output("
 void iodef_$struct->{short_typename}_set_$field->{name}($struct->{typename} *ptr, $field->{typename} *$field_name)
 \{
-        prelude_return_if_fail(ptr);
+        libiodef_return_if_fail(ptr);
 
         if ( ptr->$field->{name} )
                 ${destroy_func}(ptr->$field->{name});
@@ -1353,7 +1353,7 @@ void iodef_$struct->{short_typename}_set_$field->{name}($struct->{typename} *ptr
             $self->output("
 void iodef_$struct->{short_typename}_set_$field->{name}($struct->{typename} *ptr, $field->{typename} *$field_name)
 \{
-        prelude_return_if_fail(ptr);
+        libiodef_return_if_fail(ptr);
 
         ${destroy_internal_func}(&ptr->$field->{name});
         if ( $field_name ) {
@@ -1368,13 +1368,13 @@ void iodef_$struct->{short_typename}_set_$field->{name}($struct->{typename} *ptr
             $self->output("
 void iodef_$struct->{short_typename}_set_$field->{name}($struct->{typename} *ptr, $field->{typename} $field_name)
 \{
-        prelude_return_if_fail(ptr);
+        libiodef_return_if_fail(ptr);
 
         if ( ptr->$field->{name} )
                 free(ptr->$field->{name});
 
         ptr->$field->{name} = malloc(sizeof (*ptr->$field->{name}));
-        prelude_return_if_fail(ptr->$field->{name});
+        libiodef_return_if_fail(ptr->$field->{name});
 
         *ptr->$field->{name} = $field_name;
 \}
@@ -1384,7 +1384,7 @@ void iodef_$struct->{short_typename}_set_$field->{name}($struct->{typename} *ptr
             $self->output("
 void iodef_$struct->{short_typename}_set_$field->{name}($struct->{typename} *ptr, $field->{typename} $field_name)
 \{
-        prelude_return_if_fail(ptr);
+        libiodef_return_if_fail(ptr);
         ptr->$field->{name} = $field_name;
 ");
 
@@ -1422,7 +1422,7 @@ int iodef_$struct->{short_typename}_new_${name}($struct->{typename} *ptr, $field
     if ( $field->{metatype} & &METATYPE_OPTIONAL_INT ) {
         $need_check = 0;
         $self->output("
-        prelude_return_val_if_fail(ptr, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(ptr, libiodef_error(LIBIODEF_ERROR_ASSERTION));
         ptr->$field->{name}_is_set = 1;
 ");
     } elsif ( $field->{metatype} & &METATYPE_PRIMITIVE ) {
@@ -1435,7 +1435,7 @@ int iodef_$struct->{short_typename}_new_${name}($struct->{typename} *ptr, $field
                 $self->output("
         int retval;
 
-        prelude_return_val_if_fail(ptr, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(ptr, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         if ( ! ptr->$field->{name} ) {
                 retval = $field->{short_typename}_new(&ptr->$field->{name});
@@ -1453,7 +1453,7 @@ int iodef_$struct->{short_typename}_new_${name}($struct->{typename} *ptr, $field
                 $self->output("
         int retval;
 
-        prelude_return_val_if_fail(ptr, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(ptr, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         if ( ! ptr->$field->{name} ) {
                 retval = iodef_$field->{short_typename}_new(&ptr->$field->{name});
@@ -1465,8 +1465,8 @@ int iodef_$struct->{short_typename}_new_${name}($struct->{typename} *ptr, $field
                 if ( $tree->{objs}->{$field->{typename}}->{is_listed} ) {
                      $need_check = 0;
                      $self->output("
-        prelude_return_val_if_fail(ptr, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_list_init(&ptr->$field->{name}._list);");
+        libiodef_return_val_if_fail(ptr, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_list_init(&ptr->$field->{name}._list);");
                  }
             }
         }
@@ -1476,7 +1476,7 @@ int iodef_$struct->{short_typename}_new_${name}($struct->{typename} *ptr, $field
 
     if ( $need_check ) {
         $self->output("
-        prelude_return_val_if_fail(ptr, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(ptr, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 ");
     }
 
@@ -1509,7 +1509,7 @@ sub     struct_field_union
  */
 $field->{typename} iodef_$struct->{short_typename}_get_$field->{var}($struct->{typename} *ptr)
 \{
-        prelude_return_val_if_fail(ptr, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(ptr, libiodef_error(LIBIODEF_ERROR_ASSERTION));
         return ptr->$field->{var};
 \}
 ");
@@ -1526,7 +1526,7 @@ $field->{typename} iodef_$struct->{short_typename}_get_$field->{var}($struct->{t
  */
 $member->{typename} *iodef_$struct->{short_typename}_get_$member->{name}($struct->{typename} *ptr)
 \{
-        prelude_return_val_if_fail(ptr, NULL);
+        libiodef_return_val_if_fail(ptr, NULL);
         return (ptr->$field->{var} == $member->{value}) ? ptr->$field->{name}.$member->{name} : NULL;
 \}
 "
@@ -1544,7 +1544,7 @@ $member->{typename} *iodef_$struct->{short_typename}_get_$member->{name}($struct
  */
 void iodef_$struct->{short_typename}_set_$member->{name}($struct->{typename} *ptr, $member->{typename} *$member->{name})
 \{
-        prelude_return_if_fail(ptr);
+        libiodef_return_if_fail(ptr);
 
         switch ( ptr->$field->{var} ) \{
 ");
@@ -1581,7 +1581,7 @@ int iodef_$struct->{short_typename}_new_$member->{name}($struct->{typename} *ptr
 \{
         int retval;
 
-        prelude_return_val_if_fail(ptr, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(ptr, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         switch ( ptr->$field->{var} ) \{
 ");
@@ -1644,12 +1644,12 @@ sub     struct_field_list
  */
 $field->{typename} *iodef_$struct->{short_typename}_get_next_$field->{short_name}($struct->{typename} *$struct->{short_typename}, $field->{typename} *$field->{short_typename}_cur)
 \{
-        prelude_list_t *tmp = ($field->{short_typename}_cur) ? &((prelude_linked_object_t *) $field->{short_typename}_cur)->_list : NULL;
+        libiodef_list_t *tmp = ($field->{short_typename}_cur) ? &((libiodef_linked_object_t *) $field->{short_typename}_cur)->_list : NULL;
 
-        prelude_return_val_if_fail($struct->{short_typename}, NULL);
+        libiodef_return_val_if_fail($struct->{short_typename}, NULL);
 
-        prelude_list_for_each_continue(&$struct->{short_typename}->$field->{name}, tmp)
-                return prelude_linked_object_get_object(tmp);
+        libiodef_list_for_each_continue(&$struct->{short_typename}->$field->{name}, tmp)
+                return libiodef_linked_object_get_object(tmp);
 
         return NULL;
 \}
@@ -1668,13 +1668,13 @@ $field->{typename} *iodef_$struct->{short_typename}_get_next_$field->{short_name
  */
 void iodef_$struct->{short_typename}_set_$field->{short_name}($struct->{typename} *ptr, $field->{typename} *object, int pos)
 \{
-        prelude_return_if_fail(ptr);
-        prelude_return_if_fail(object);
+        libiodef_return_if_fail(ptr);
+        libiodef_return_if_fail(object);
 
-        if ( ! prelude_list_is_empty(&((prelude_linked_object_t *) object)->_list) )
-                prelude_list_del_init(&((prelude_linked_object_t *) object)->_list);
+        if ( ! libiodef_list_is_empty(&((libiodef_linked_object_t *) object)->_list) )
+                libiodef_list_del_init(&((libiodef_linked_object_t *) object)->_list);
 
-        list_insert(&ptr->$field->{name}, &((prelude_linked_object_t *) object)->_list, pos);
+        list_insert(&ptr->$field->{name}, &((libiodef_linked_object_t *) object)->_list, pos);
 \}
 
 
@@ -1697,13 +1697,13 @@ int iodef_$struct->{short_typename}_new_$field->{short_name}($struct->{typename}
 \{
         int retval;
 
-        prelude_return_val_if_fail(ptr, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(ptr, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         retval = $new_field_function;
         if ( retval < 0 )
                 return retval;
 
-        list_insert(&ptr->$field->{name}, &((prelude_linked_object_t *)(*ret))->_list, pos);
+        list_insert(&ptr->$field->{name}, &((libiodef_linked_object_t *)(*ret))->_list, pos);
 
         return 0;
 \}
@@ -1794,14 +1794,14 @@ $enum->{typename} iodef_$enum->{short_typename}_to_numeric(const char *name)
    $self->output("
         };
 
-        prelude_return_val_if_fail(name, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(name, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         for ( i = 0; i < sizeof(tbl) / sizeof(*tbl); i++ ) {
                 if ( strcasecmp(name, tbl[i].name) == 0 )
                         return tbl[i].val;
         }
 
-        return prelude_error_verbose(PRELUDE_ERROR_IODEF_UNKNOWN_ENUM_STRING, \"Unknown enumeration value '%s' for $enum->{short_typename}\", name);
+        return libiodef_error_verbose(LIBIODEF_ERROR_IODEF_UNKNOWN_ENUM_STRING, \"Unknown enumeration value '%s' for $enum->{short_typename}\", name);
 \}
 ");
 
@@ -1881,7 +1881,7 @@ int _iodef_additional_data_type_is_set(iodef_additional_data_t *ad)
  */
 void iodef_document_destroy(iodef_document_t *ptr)
 \{
-        prelude_return_if_fail(ptr);
+        libiodef_return_if_fail(ptr);
 
         if ( --ptr->refcount )
                 return;

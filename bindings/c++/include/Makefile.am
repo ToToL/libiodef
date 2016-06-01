@@ -1,7 +1,7 @@
 includedir = $(prefix)/include/libiodef
 
 include_HEADERS = \
-	prelude-error.hxx \
+	libiodef-error.hxx \
 	iodef.hxx \
 	iodef-class.hxx \
 	iodef-criteria.hxx \

@@ -1,9 +1,9 @@
 /*****
 *
 * Copyright (C) 2002-2016 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoann@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -38,27 +38,27 @@
 # include <sys/mman.h>
 #endif
 
-#include "prelude-error.h"
+#include "libiodef-error.h"
 #include "iodef.h"
-#include "prelude-log.h"
+#include "libiodef-log.h"
 #include "common.h"
 
 
 
 
 
-static prelude_string_t *get_message_ident(prelude_ident_t *ident)
+static libiodef_string_t *get_message_ident(libiodef_ident_t *ident)
 {
         int ret;
-        prelude_string_t *str;
+        libiodef_string_t *str;
 
-        ret = prelude_string_new(&str);
+        ret = libiodef_string_new(&str);
         if ( ret < 0 )
                 return NULL;
 
-        ret = prelude_ident_generate(ident, str);
+        ret = libiodef_ident_generate(ident, str);
         if ( ret < 0 ) {
-                prelude_string_destroy(str);
+                libiodef_string_destroy(str);
                 return NULL;
         }
 
@@ -106,11 +106,11 @@ static int find_absolute_path(const char *cwd, const char *file, char **path)
 
 
 /**
- * _prelude_realloc:
+ * _libiodef_realloc:
  * @ptr: Pointer on a memory block.
  * @size: New size.
  *
- * prelude_realloc() changes the size of the memory block pointed by @ptr
+ * libiodef_realloc() changes the size of the memory block pointed by @ptr
  * to @size bytes. The contents will be unchanged to the minimum of the old
  * and new sizes; newly allocated memory will be uninitialized.  If ptr is NULL,
  * the call is equivalent to malloc(@size); if @size is equal to zero, the call
@@ -126,7 +126,7 @@ static int find_absolute_path(const char *cwd, const char *file, char **path)
  * passed to free() is returned.  If  realloc() fails, the original block is left
  * untouched - it is not freed nor moved.
  */
-void *_prelude_realloc(void *ptr, size_t size)
+void *_libiodef_realloc(void *ptr, size_t size)
 {
         if ( ptr == NULL )
                 return malloc(size);
@@ -138,7 +138,7 @@ void *_prelude_realloc(void *ptr, size_t size)
 
 
 /**
- * prelude_read_multiline:
+ * libiodef_read_multiline:
  * @fd: File descriptor to read input from.
  * @line: Pointer to a line counter.
  * @buf: Pointer to a buffer where the line should be stored.
@@ -148,14 +148,14 @@ void *_prelude_realloc(void *ptr, size_t size)
  *
  * Returns: 0 on success, -1 if an error occured.
  */
-int prelude_read_multiline(FILE *fd, unsigned int *line, char *buf, size_t size)
+int libiodef_read_multiline(FILE *fd, unsigned int *line, char *buf, size_t size)
 {
         size_t i, j, len;
-        prelude_bool_t eol, has_data = FALSE, miss_eol=FALSE;
+        libiodef_bool_t eol, has_data = FALSE, miss_eol=FALSE;
 
         while ( size > 1 ) {
                 if ( ! fgets(buf, size, fd) )
-                        return (has_data) ? 0 : prelude_error(PRELUDE_ERROR_EOF);
+                        return (has_data) ? 0 : libiodef_error(LIBIODEF_ERROR_EOF);
 
                 len = strlen(buf);
                 if ( ! len )
@@ -206,38 +206,38 @@ int prelude_read_multiline(FILE *fd, unsigned int *line, char *buf, size_t size)
                 size -= i;
         }
 
-        return prelude_error_verbose(PRELUDE_ERROR_EINVAL, "buffer is too small to store input line");
+        return libiodef_error_verbose(LIBIODEF_ERROR_EINVAL, "buffer is too small to store input line");
 }
 
 
 
 /**
- * prelude_read_multiline2:
+ * libiodef_read_multiline2:
  * @fd: File descriptor to read input from.
  * @line: Pointer to a line counter.
- * @out: Pointer to a #prelude_string_t object where the line should be stored.
+ * @out: Pointer to a #libiodef_string_t object where the line should be stored.
  *
  * This function handles line reading separated by the '\' character.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int prelude_read_multiline2(FILE *fd, unsigned int *line, prelude_string_t *out)
+int libiodef_read_multiline2(FILE *fd, unsigned int *line, libiodef_string_t *out)
 {
         int ret, r;
         char buf[8192];
 
-        prelude_string_clear(out);
+        libiodef_string_clear(out);
 
         do {
-                ret = prelude_read_multiline(fd, line, buf, sizeof(buf));
-                if ( ret < 0 && (r = prelude_error_get_code(ret)) != PRELUDE_ERROR_EINVAL ) {
-                        if ( r == PRELUDE_ERROR_EOF && ! prelude_string_is_empty(out) )
+                ret = libiodef_read_multiline(fd, line, buf, sizeof(buf));
+                if ( ret < 0 && (r = libiodef_error_get_code(ret)) != LIBIODEF_ERROR_EINVAL ) {
+                        if ( r == LIBIODEF_ERROR_EOF && ! libiodef_string_is_empty(out) )
                                 ret = 0;
 
                         break;
                 }
 
-                r = prelude_string_cat(out, buf);
+                r = libiodef_string_cat(out, buf);
                 if ( r < 0 )
                         return r;
 
@@ -250,19 +250,19 @@ int prelude_read_multiline2(FILE *fd, unsigned int *line, prelude_string_t *out)
 
 
 /**
- * prelude_hton64:
+ * libiodef_hton64:
  * @val: Value to convert to network byte order.
  *
- * The prelude_hton64() function converts the 64 bits unsigned integer @val
+ * The libiodef_hton64() function converts the 64 bits unsigned integer @val
  * from host byte order to network byte order.
  *
  * Returns: @val in the network bytes order.
  */
-uint64_t prelude_hton64(uint64_t val)
+uint64_t libiodef_hton64(uint64_t val)
 {
         uint64_t tmp;
 
-#ifdef PRELUDE_WORDS_BIGENDIAN
+#ifdef LIBIODEF_WORDS_BIGENDIAN
         tmp = val;
 #else
         union {
@@ -284,7 +284,7 @@ uint64_t prelude_hton64(uint64_t val)
 }
 
 
-uint32_t prelude_htonf(float fval)
+uint32_t libiodef_htonf(float fval)
 {
         union {
                 float fval;
@@ -329,13 +329,13 @@ static void normalize_path(char *path)
 
 
 
-int prelude_get_gmt_offset_from_time(const time_t *utc, long *gmtoff)
+int libiodef_get_gmt_offset_from_time(const time_t *utc, long *gmtoff)
 {
         time_t local;
         struct tm lt;
 
         if ( ! localtime_r(utc, &lt) )
-                return prelude_error_from_errno(errno);
+                return libiodef_error_from_errno(errno);
 
         local = timegm(&lt);
 
@@ -346,7 +346,7 @@ int prelude_get_gmt_offset_from_time(const time_t *utc, long *gmtoff)
 
 
 
-int prelude_get_gmt_offset_from_tm(struct tm *tm, long *gmtoff)
+int libiodef_get_gmt_offset_from_tm(struct tm *tm, long *gmtoff)
 {
         int tmp;
         time_t local, utc;
@@ -360,7 +360,7 @@ int prelude_get_gmt_offset_from_tm(struct tm *tm, long *gmtoff)
 
         local = mktime(tm);
         if ( local == (time_t) -1 )
-                return prelude_error_from_errno(errno);
+                return libiodef_error_from_errno(errno);
 
         *gmtoff = utc - mktime(tm);
 
@@ -369,22 +369,22 @@ int prelude_get_gmt_offset_from_tm(struct tm *tm, long *gmtoff)
 
 
 
-int prelude_get_gmt_offset(long *gmtoff)
+int libiodef_get_gmt_offset(long *gmtoff)
 {
         time_t t = time(NULL);
-        return prelude_get_gmt_offset_from_time(&t, gmtoff);
+        return libiodef_get_gmt_offset_from_time(&t, gmtoff);
 }
 
 
 
-time_t prelude_timegm(struct tm *tm)
+time_t libiodef_timegm(struct tm *tm)
 {
         return timegm(tm);
 }
 
 
 
-void *prelude_sockaddr_get_inaddr(struct sockaddr *sa)
+void *libiodef_sockaddr_get_inaddr(struct sockaddr *sa)
 {
         void *ret = NULL;
         union {
@@ -409,7 +409,7 @@ void *prelude_sockaddr_get_inaddr(struct sockaddr *sa)
 
 
 
-int prelude_parse_address(const char *str, char **addr, unsigned int *port)
+int libiodef_parse_address(const char *str, char **addr, unsigned int *port)
 {
         char *input, *endptr = NULL;
         char *ptr, *port_ptr;
@@ -453,7 +453,7 @@ int prelude_parse_address(const char *str, char **addr, unsigned int *port)
 
 
 
-int _prelude_load_file(const char *filename, unsigned char **fdata, size_t *outsize)
+int _libiodef_load_file(const char *filename, unsigned char **fdata, size_t *outsize)
 {
         int ret, fd;
         struct stat st;
@@ -461,17 +461,17 @@ int _prelude_load_file(const char *filename, unsigned char **fdata, size_t *outs
 
         fd = open(filename, O_RDONLY);
         if ( fd < 0 )
-                return prelude_error_from_errno(errno);
+                return libiodef_error_from_errno(errno);
 
         ret = fstat(fd, &st);
         if ( ret < 0 ) {
                 close(fd);
-                return prelude_error_from_errno(errno);
+                return libiodef_error_from_errno(errno);
         }
 
         if ( st.st_size == 0 ) {
                 close(fd);
-                return prelude_error_verbose(prelude_error_code_from_errno(EINVAL), "could not load '%s': empty file", filename);
+                return libiodef_error_verbose(libiodef_error_code_from_errno(EINVAL), "could not load '%s': empty file", filename);
         }
 
         *outsize = st.st_size;
@@ -480,13 +480,13 @@ int _prelude_load_file(const char *filename, unsigned char **fdata, size_t *outs
         dataptr = *fdata = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, fd, 0);
         if ( dataptr == MAP_FAILED ) {
                 close(fd);
-                return prelude_error_from_errno(errno);
+                return libiodef_error_from_errno(errno);
         }
 #else
         dataptr = *fdata = malloc(st.st_size);
         if ( ! dataptr ) {
                 close(fd);
-                return prelude_error_from_errno(errno);
+                return libiodef_error_from_errno(errno);
         }
 
         _setmode(fd, O_BINARY);
@@ -502,7 +502,7 @@ int _prelude_load_file(const char *filename, unsigned char **fdata, size_t *outs
                         close(fd);
                         free(*fdata);
 
-                        return prelude_error_from_errno(errno);
+                        return libiodef_error_from_errno(errno);
                 }
 
                 dataptr += len;
@@ -516,7 +516,7 @@ int _prelude_load_file(const char *filename, unsigned char **fdata, size_t *outs
 }
 
 
-void _prelude_unload_file(unsigned char *fdata, size_t size)
+void _libiodef_unload_file(unsigned char *fdata, size_t size)
 {
 #if !((defined _WIN32 || defined __WIN32__) && !defined __CYGWIN__)
         munmap(fdata, size);
@@ -526,7 +526,7 @@ void _prelude_unload_file(unsigned char *fdata, size_t size)
 }
 
 
-double prelude_simple_strtod(const char *s, char **endptr)
+double libiodef_simple_strtod(const char *s, char **endptr)
 {
         double neg = 1, ret = 0, fp = 1.0;
         int got_point = 0, d;

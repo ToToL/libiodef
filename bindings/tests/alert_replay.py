@@ -6,10 +6,10 @@ sys.path.append('.')
 sys.path.append('./.libs')
 
 try:
-	import PreludeEasy
+	import LibIodefEasy
 except Exception,e:
 	print "Import failed: ",e
-	print "Try 'cd ./.libs && ln -s libprelude_python.so _PreludeEasy.so'"
+	print "Try 'cd ./.libs && ln -s libiodef_python.so _LibIodefEasy.so'"
 	sys.exit(1)
 
 
@@ -31,7 +31,7 @@ def replay(alert):
 for root, dirs, files in os.walk(src_dir):
 	for name in files:
 		if name.endswith(".iodef"):
-			iodef = PreludeEasy.IODEF()
+			iodef = LibIodefEasy.IODEF()
 			f = open( os.path.join(src_dir,name), "r")
 			iodef >> f
 			f.close()

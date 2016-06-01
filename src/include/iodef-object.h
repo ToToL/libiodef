@@ -3,7 +3,7 @@
 * Copyright (C) 2014-2016 CS-SI. All Rights Reserved.
 * Author: Yoann Vandoorselaere <yoannv@gmail.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@
 *
 *****/
 
-#ifndef _LIBPRELUDE_IODEF_OBJECT_H
-#define _LIBPRELUDE_IODEF_OBJECT_H
+#ifndef _LIBIODEF_IODEF_OBJECT_H
+#define _LIBIODEF_IODEF_OBJECT_H
 
 #ifdef __cplusplus
   extern "C" {
@@ -32,8 +32,8 @@
 # include "config.h"
 #endif
 
-#include "prelude-io.h"
-#include "prelude-list.h"
+#include "libiodef-io.h"
+#include "libiodef-list.h"
 
 typedef struct iodef_object iodef_object_t;
 
@@ -49,21 +49,21 @@ int iodef_object_clone(iodef_object_t *obj, iodef_object_t **dst);
 
 int iodef_object_copy(iodef_object_t *src, iodef_object_t *dst);
 
-int iodef_object_print(iodef_object_t *obj, prelude_io_t *fd);
+int iodef_object_print(iodef_object_t *obj, libiodef_io_t *fd);
 
-int iodef_object_print_json(iodef_object_t *obj, prelude_io_t *fd);
+int iodef_object_print_json(iodef_object_t *obj, libiodef_io_t *fd);
 
-int iodef_object_print_binary(iodef_object_t *obj, prelude_io_t *fd);
+int iodef_object_print_binary(iodef_object_t *obj, libiodef_io_t *fd);
 
-void iodef_object_add(prelude_list_t *head, iodef_object_t *obj);
+void iodef_object_add(libiodef_list_t *head, iodef_object_t *obj);
 
-void iodef_object_add_tail(prelude_list_t *head, iodef_object_t *obj);
+void iodef_object_add_tail(libiodef_list_t *head, iodef_object_t *obj);
 
 void iodef_object_del(iodef_object_t *object);
 
 void iodef_object_del_init(iodef_object_t *object);
 
-void *iodef_object_get_list_entry(prelude_list_t *listm);
+void *iodef_object_get_list_entry(libiodef_list_t *listm);
 
 int iodef_object_new_from_json(iodef_object_t **object, const char * json_message);
 
@@ -71,4 +71,4 @@ int iodef_object_new_from_json(iodef_object_t **object, const char * json_messag
   }
 #endif
 
-#endif /* _LIBPRELUDE_IODEF_OBJECT_H */
+#endif /* _LIBIODEF_IODEF_OBJECT_H */

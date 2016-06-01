@@ -19,19 +19,19 @@ include_HEADERS = common.h			\
 		  iodef-tree-wrap.h		\
 		  iodef-value.h			\
 		  iodef-value-type.h		\
-		  prelude-extract.h		\
-		  prelude-hash.h		\
-		  prelude-linked-object.h	\
-		  prelude-list.h		\
-		  prelude-log.h			\
-		  prelude-failover.h		\
-		  prelude-ident.h		\
-		  prelude-io.h			\
-		  prelude-macros.h		\
-		  prelude-message-id.h		\
-		  prelude-string.h
+		  libiodef-extract.h		\
+		  libiodef-hash.h		\
+		  libiodef-linked-object.h	\
+		  libiodef-list.h		\
+		  libiodef-log.h			\
+		  libiodef-failover.h		\
+		  libiodef-ident.h		\
+		  libiodef-io.h			\
+		  libiodef-macros.h		\
+		  libiodef-document-id.h		\
+		  libiodef-string.h
 
-nodist_include_HEADERS = prelude-inttypes.h
+nodist_include_HEADERS = libiodef-inttypes.h
 
 noinst_HEADERS = iodef-object-prv.h libmissing.h iodef-tree-data.h variable.h ntp.h
 

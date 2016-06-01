@@ -1,9 +1,9 @@
 /*****
 *
 * Copyright (C) 2004-2016 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoann.v@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann.v@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 #include <sys/types.h>
 #include <stdarg.h>
 
-#define PRELUDE_ERROR_SOURCE_DEFAULT PRELUDE_ERROR_SOURCE_IODEF_CRITERIA
+#define LIBIODEF_ERROR_SOURCE_DEFAULT LIBIODEF_ERROR_SOURCE_IODEF_CRITERIA
 #include "iodef.h"
 #include "iodef-criteria.h"
 
@@ -44,7 +44,7 @@ struct iodef_criterion {
 
 struct iodef_criteria {
         int refcount;
-        prelude_bool_t negated;
+        libiodef_bool_t negated;
         iodef_criterion_t *criterion;
         struct iodef_criteria *or;
         struct iodef_criteria *and;
@@ -117,12 +117,12 @@ const char *iodef_criterion_operator_to_string(iodef_criterion_operator_t op)
 int iodef_criterion_new(iodef_criterion_t **criterion, iodef_path_t *path,
                         iodef_criterion_value_t *value, iodef_criterion_operator_t op)
 {
-        prelude_return_val_if_fail(path != NULL, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(! (value == NULL && ! (op & IODEF_CRITERION_OPERATOR_NULL)), prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(path != NULL, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(! (value == NULL && ! (op & IODEF_CRITERION_OPERATOR_NULL)), libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         *criterion = calloc(1, sizeof(**criterion));
         if ( ! *criterion )
-                return prelude_error_from_errno(errno);
+                return libiodef_error_from_errno(errno);
 
         (*criterion)->path = path;
         (*criterion)->value = value;
@@ -141,7 +141,7 @@ int iodef_criterion_new(iodef_criterion_t **criterion, iodef_path_t *path,
  */
 void iodef_criterion_destroy(iodef_criterion_t *criterion)
 {
-        prelude_return_if_fail(criterion);
+        libiodef_return_if_fail(criterion);
 
         iodef_path_destroy(criterion->path);
 
@@ -168,7 +168,7 @@ int iodef_criterion_clone(const iodef_criterion_t *criterion, iodef_criterion_t 
         iodef_path_t *path;
         iodef_criterion_value_t *value = NULL;
 
-        prelude_return_val_if_fail(criterion, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(criterion, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         ret = iodef_path_clone(criterion->path, &path);
         if ( ret < 0 )
@@ -197,7 +197,7 @@ int iodef_criterion_clone(const iodef_criterion_t *criterion, iodef_criterion_t 
 /**
  * iodef_criterion_print:
  * @criterion: Pointer to a #iodef_criterion_t object.
- * @fd: Pointer to a #prelude_io_t object.
+ * @fd: Pointer to a #libiodef_io_t object.
  *
  * Dump @criterion to @fd in the form of:
  * [path] [operator] [value]
@@ -207,26 +207,26 @@ int iodef_criterion_clone(const iodef_criterion_t *criterion, iodef_criterion_t 
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_criterion_print(const iodef_criterion_t *criterion, prelude_io_t *fd)
+int iodef_criterion_print(const iodef_criterion_t *criterion, libiodef_io_t *fd)
 {
         int ret;
-        prelude_string_t *out;
+        libiodef_string_t *out;
 
-        prelude_return_val_if_fail(criterion, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(fd, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(criterion, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(fd, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
-        ret = prelude_string_new(&out);
+        ret = libiodef_string_new(&out);
         if ( ret < 0 )
                 return ret;
 
         ret = iodef_criterion_to_string(criterion, out);
         if ( ret < 0 ) {
-                prelude_string_destroy(out);
+                libiodef_string_destroy(out);
                 return ret;
         }
 
-        ret = prelude_io_write(fd, prelude_string_get_string(out), prelude_string_get_len(out));
-        prelude_string_destroy(out);
+        ret = libiodef_io_write(fd, libiodef_string_get_string(out), libiodef_string_get_len(out));
+        libiodef_string_destroy(out);
 
         return ret;
 }
@@ -236,7 +236,7 @@ int iodef_criterion_print(const iodef_criterion_t *criterion, prelude_io_t *fd)
 /**
  * iodef_criterion_to_string:
  * @criterion: Pointer to a #iodef_criterion_t object.
- * @out: Pointer to a #prelude_string_t object.
+ * @out: Pointer to a #libiodef_string_t object.
  *
  * Dump @criterion as a string to the @out buffer in the form of:
  * [path] [operator] [value]
@@ -246,12 +246,12 @@ int iodef_criterion_print(const iodef_criterion_t *criterion, prelude_io_t *fd)
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_criterion_to_string(const iodef_criterion_t *criterion, prelude_string_t *out)
+int iodef_criterion_to_string(const iodef_criterion_t *criterion, libiodef_string_t *out)
 {
         const char *name, *operator;
 
-        prelude_return_val_if_fail(criterion, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(out, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(criterion, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(out, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         operator = iodef_criterion_operator_to_string(criterion->operator);
         if ( ! operator )
@@ -260,9 +260,9 @@ int iodef_criterion_to_string(const iodef_criterion_t *criterion, prelude_string
         name = iodef_path_get_name(criterion->path, -1);
 
         if ( ! criterion->value )
-                return prelude_string_sprintf(out, "%s%s%s", operator, (*operator) ? " " : "", name);
+                return libiodef_string_sprintf(out, "%s%s%s", operator, (*operator) ? " " : "", name);
 
-        prelude_string_sprintf(out, "%s %s ", name, operator);
+        libiodef_string_sprintf(out, "%s %s ", name, operator);
 
         return iodef_criterion_value_to_string(criterion->value, out);
 }
@@ -279,7 +279,7 @@ int iodef_criterion_to_string(const iodef_criterion_t *criterion, prelude_string
  */
 iodef_path_t *iodef_criterion_get_path(const iodef_criterion_t *criterion)
 {
-        prelude_return_val_if_fail(criterion, NULL);
+        libiodef_return_val_if_fail(criterion, NULL);
         return criterion->path;
 }
 
@@ -297,7 +297,7 @@ iodef_path_t *iodef_criterion_get_path(const iodef_criterion_t *criterion)
  */
 iodef_criterion_value_t *iodef_criterion_get_value(const iodef_criterion_t *criterion)
 {
-        prelude_return_val_if_fail(criterion, NULL);
+        libiodef_return_val_if_fail(criterion, NULL);
         return criterion->value;
 }
 
@@ -314,7 +314,7 @@ iodef_criterion_value_t *iodef_criterion_get_value(const iodef_criterion_t *crit
  */
 iodef_criterion_operator_t iodef_criterion_get_operator(const iodef_criterion_t *criterion)
 {
-        prelude_return_val_if_fail(criterion, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(criterion, libiodef_error(LIBIODEF_ERROR_ASSERTION));
         return criterion->operator;
 }
 
@@ -336,8 +336,8 @@ int iodef_criterion_match(const iodef_criterion_t *criterion, void *object)
         int ret;
         iodef_value_t *value = NULL;
 
-        prelude_return_val_if_fail(criterion, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(object, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(criterion, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(object, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         ret = iodef_path_get(criterion->path, object, &value);
         if ( ret < 0 )
@@ -367,7 +367,7 @@ int iodef_criteria_new(iodef_criteria_t **criteria)
 {
         *criteria = calloc(1, sizeof(**criteria));
         if ( ! *criteria )
-                return prelude_error_from_errno(errno);
+                return libiodef_error_from_errno(errno);
 
         (*criteria)->or = NULL;
         (*criteria)->and = NULL;
@@ -386,7 +386,7 @@ int iodef_criteria_new(iodef_criteria_t **criteria)
  */
 void iodef_criteria_destroy(iodef_criteria_t *criteria)
 {
-        prelude_return_if_fail(criteria);
+        libiodef_return_if_fail(criteria);
 
         if ( --criteria->refcount )
                 return;
@@ -418,7 +418,7 @@ void iodef_criteria_destroy(iodef_criteria_t *criteria)
  */
 iodef_criteria_t *iodef_criteria_ref(iodef_criteria_t *criteria)
 {
-        prelude_return_val_if_fail(criteria, NULL);
+        libiodef_return_val_if_fail(criteria, NULL);
 
         criteria->refcount++;
         return criteria;
@@ -439,7 +439,7 @@ int iodef_criteria_clone(iodef_criteria_t *src, iodef_criteria_t **dst)
         int ret;
         iodef_criteria_t *new;
 
-        prelude_return_val_if_fail(src, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(src, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         ret = iodef_criteria_new(dst);
         if ( ret < 0 )
@@ -477,7 +477,7 @@ int iodef_criteria_clone(iodef_criteria_t *src, iodef_criteria_t **dst)
 
 iodef_criteria_t *iodef_criteria_get_or(const iodef_criteria_t *criteria)
 {
-        prelude_return_val_if_fail(criteria, NULL);
+        libiodef_return_val_if_fail(criteria, NULL);
         return criteria->or;
 }
 
@@ -485,21 +485,21 @@ iodef_criteria_t *iodef_criteria_get_or(const iodef_criteria_t *criteria)
 
 iodef_criteria_t *iodef_criteria_get_and(const iodef_criteria_t *criteria)
 {
-        prelude_return_val_if_fail(criteria, NULL);
+        libiodef_return_val_if_fail(criteria, NULL);
         return criteria->and;
 }
 
 
 
-int iodef_criteria_print(const iodef_criteria_t *criteria, prelude_io_t *fd)
+int iodef_criteria_print(const iodef_criteria_t *criteria, libiodef_io_t *fd)
 {
         int ret;
-        prelude_string_t *out;
+        libiodef_string_t *out;
 
-        prelude_return_val_if_fail(criteria, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(fd, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(criteria, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(fd, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
-        ret = prelude_string_new(&out);
+        ret = libiodef_string_new(&out);
         if ( ret < 0 )
                 return ret;
 
@@ -507,33 +507,33 @@ int iodef_criteria_print(const iodef_criteria_t *criteria, prelude_io_t *fd)
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_io_write(fd, prelude_string_get_string(out), prelude_string_get_len(out));
-        prelude_string_destroy(out);
+        ret = libiodef_io_write(fd, libiodef_string_get_string(out), libiodef_string_get_len(out));
+        libiodef_string_destroy(out);
 
         return ret;
 }
 
 
 
-int iodef_criteria_to_string(const iodef_criteria_t *criteria, prelude_string_t *out)
+int iodef_criteria_to_string(const iodef_criteria_t *criteria, libiodef_string_t *out)
 {
-        prelude_return_val_if_fail(criteria, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(out, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(criteria, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(out, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         if ( criteria->or )
-                prelude_string_sprintf(out, "((");
+                libiodef_string_sprintf(out, "((");
 
         iodef_criterion_to_string(criteria->criterion, out);
 
         if ( criteria->and ) {
-                prelude_string_sprintf(out, " && ");
+                libiodef_string_sprintf(out, " && ");
                 iodef_criteria_to_string(criteria->and, out);
         }
 
         if ( criteria->or ) {
-                prelude_string_sprintf(out, ") || (");
+                libiodef_string_sprintf(out, ") || (");
                 iodef_criteria_to_string(criteria->or, out);
-                prelude_string_sprintf(out, "))");
+                libiodef_string_sprintf(out, "))");
         }
 
         return 0;
@@ -541,9 +541,9 @@ int iodef_criteria_to_string(const iodef_criteria_t *criteria, prelude_string_t 
 
 
 
-prelude_bool_t iodef_criteria_is_criterion(const iodef_criteria_t *criteria)
+libiodef_bool_t iodef_criteria_is_criterion(const iodef_criteria_t *criteria)
 {
-        prelude_return_val_if_fail(criteria, FALSE);
+        libiodef_return_val_if_fail(criteria, FALSE);
         return (criteria->criterion != NULL) ? TRUE : FALSE;
 }
 
@@ -551,7 +551,7 @@ prelude_bool_t iodef_criteria_is_criterion(const iodef_criteria_t *criteria)
 
 iodef_criterion_t *iodef_criteria_get_criterion(const iodef_criteria_t *criteria)
 {
-        prelude_return_val_if_fail(criteria, NULL);
+        libiodef_return_val_if_fail(criteria, NULL);
         return criteria->criterion;
 }
 
@@ -559,8 +559,8 @@ iodef_criterion_t *iodef_criteria_get_criterion(const iodef_criteria_t *criteria
 
 void iodef_criteria_or_criteria(iodef_criteria_t *criteria, iodef_criteria_t *criteria2)
 {
-        prelude_return_if_fail(criteria);
-        prelude_return_if_fail(criteria2);
+        libiodef_return_if_fail(criteria);
+        libiodef_return_if_fail(criteria2);
 
         while ( criteria->or )
                 criteria = criteria->or;
@@ -575,8 +575,8 @@ int iodef_criteria_and_criteria(iodef_criteria_t *criteria, iodef_criteria_t *cr
         int ret;
         iodef_criteria_t *new, *last = NULL;
 
-        prelude_return_val_if_fail(criteria, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(criteria2, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(criteria, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(criteria2, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         while ( criteria ) {
                 last = criteria;
@@ -600,24 +600,24 @@ int iodef_criteria_and_criteria(iodef_criteria_t *criteria, iodef_criteria_t *cr
 }
 
 
-void iodef_criteria_set_negation(iodef_criteria_t *criteria, prelude_bool_t negate)
+void iodef_criteria_set_negation(iodef_criteria_t *criteria, libiodef_bool_t negate)
 {
-        prelude_return_if_fail(criteria);
+        libiodef_return_if_fail(criteria);
         criteria->negated = negate;
 }
 
 
-prelude_bool_t iodef_criteria_get_negation(const iodef_criteria_t *criteria)
+libiodef_bool_t iodef_criteria_get_negation(const iodef_criteria_t *criteria)
 {
-        prelude_return_val_if_fail(criteria, FALSE);
+        libiodef_return_val_if_fail(criteria, FALSE);
         return criteria->negated;
 }
 
 
 void iodef_criteria_set_criterion(iodef_criteria_t *criteria, iodef_criterion_t *criterion)
 {
-        prelude_return_if_fail(criteria);
-        prelude_return_if_fail(criterion);
+        libiodef_return_if_fail(criteria);
+        libiodef_return_if_fail(criterion);
 
         criteria->criterion = criterion;
 }
@@ -638,8 +638,8 @@ int iodef_criteria_match(const iodef_criteria_t *criteria, void *object)
 {
         int ret;
 
-        prelude_return_val_if_fail(criteria, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(object, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(criteria, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(object, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         ret = iodef_criterion_match(criteria->criterion, object);
         if ( ret < 0 )

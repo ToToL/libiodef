@@ -2,10 +2,10 @@
 /*****
 *
 * Copyright (C) 2001-2016 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoann.v@prelude-ids.com>
-* Author: Nicolas Delon <nicolas.delon@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann.v@libiodef-ids.com>
+* Author: Nicolas Delon <nicolas.delon@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "prelude-inttypes.h"
-#include "prelude-list.h"
-#include "prelude-log.h"
-#include "prelude-io.h"
-#include "prelude-ident.h"
-#include "prelude-message-id.h"
+#include "libiodef-inttypes.h"
+#include "libiodef-list.h"
+#include "libiodef-log.h"
+#include "libiodef-io.h"
+#include "libiodef-ident.h"
+#include "libiodef-document-id.h"
 #include "iodef-document-id.h"
 #include "iodef.h"
 #include "iodef-tree-wrap.h"
@@ -53,44 +53,44 @@
  * Here we are trying to communicate using a home made, binary version of IODEF.
  */
 
-int binary_write(prelude_io_t *fd, uint8_t tag, uint32_t len, const void *data)
+int binary_write(libiodef_io_t *fd, uint8_t tag, uint32_t len, const void *data)
 {
         uint32_t l;
 
         l = htonl(len);
 
-        prelude_io_write(fd, &tag, sizeof(tag));
-        prelude_io_write(fd, &l, sizeof(l));
+        libiodef_io_write(fd, &tag, sizeof(tag));
+        libiodef_io_write(fd, &l, sizeof(l));
 
         if ( len > 0 )
-                prelude_io_write(fd, data, len);
+                libiodef_io_write(fd, data, len);
 
         return 1;
 }
 
 
-static inline int prelude_string_write(prelude_string_t *string, prelude_io_t *fd, uint8_t tag)
+static inline int libiodef_string_write(libiodef_string_t *string, libiodef_io_t *fd, uint8_t tag)
 {
-        if ( ! string || prelude_string_is_empty(string) )
+        if ( ! string || libiodef_string_is_empty(string) )
                 return 0;
 
-        return binary_write(fd, tag, prelude_string_get_len(string) + 1, prelude_string_get_string(string));
+        return binary_write(fd, tag, libiodef_string_get_len(string) + 1, libiodef_string_get_string(string));
 }
 
 
 
-static inline int uint64_write(uint64_t data, prelude_io_t *fd, uint8_t tag)
+static inline int uint64_write(uint64_t data, libiodef_io_t *fd, uint8_t tag)
 {
         uint64_t dst;
 
-        dst = prelude_hton64(data);
+        dst = libiodef_hton64(data);
 
         return binary_write(fd, tag, sizeof(dst), &dst);
 }
 
 
 
-static inline int uint32_write(uint32_t data, prelude_io_t *fd, uint8_t tag)
+static inline int uint32_write(uint32_t data, libiodef_io_t *fd, uint8_t tag)
 {
         data = htonl(data);
         return binary_write(fd, tag, sizeof(data), &data);
@@ -98,21 +98,21 @@ static inline int uint32_write(uint32_t data, prelude_io_t *fd, uint8_t tag)
 
 
 
-static inline int int32_write(uint32_t data, prelude_io_t *fd, uint8_t tag)
+static inline int int32_write(uint32_t data, libiodef_io_t *fd, uint8_t tag)
 {
         return uint32_write(data, fd, tag);
 }
 
 
 
-static inline int uint8_write(uint8_t data, prelude_io_t *fd, uint8_t tag)
+static inline int uint8_write(uint8_t data, libiodef_io_t *fd, uint8_t tag)
 {
         return binary_write(fd, tag, sizeof (data), &data);
 }
 
 
 
-static inline int uint16_write(uint16_t data, prelude_io_t *fd, uint8_t tag)
+static inline int uint16_write(uint16_t data, libiodef_io_t *fd, uint8_t tag)
 {
         data = htons(data);
         return binary_write(fd, tag, sizeof(data), &data);
@@ -120,14 +120,14 @@ static inline int uint16_write(uint16_t data, prelude_io_t *fd, uint8_t tag)
 
 
 
-static inline int float_write(float data, prelude_io_t *fd, uint8_t tag)
+static inline int float_write(float data, libiodef_io_t *fd, uint8_t tag)
 {
-        uint32_t tmp = prelude_htonf(data);
+        uint32_t tmp = libiodef_htonf(data);
         return binary_write(fd, tag, sizeof(tmp), &tmp);
 }
 
 
-static inline int iodef_time_write(const iodef_time_t *data, prelude_io_t *fd, uint8_t tag)
+static inline int iodef_time_write(const iodef_time_t *data, libiodef_io_t *fd, uint8_t tag)
 {
         uint32_t tmp;
         unsigned char buf[12];
@@ -149,7 +149,7 @@ static inline int iodef_time_write(const iodef_time_t *data, prelude_io_t *fd, u
 
 
 
-static inline int iodef_data_write(iodef_data_t *data, prelude_io_t *fd, uint8_t tag)
+static inline int iodef_data_write(iodef_data_t *data, libiodef_io_t *fd, uint8_t tag)
 {
         int ret;
         iodef_data_type_t type;
@@ -203,14 +203,14 @@ static inline int iodef_data_write(iodef_data_t *data, prelude_io_t *fd, uint8_t
 /**
  * iodef_additional_data_write:
  * @additional_data: Pointer to a #iodef_additional_data_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @additional_data within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_additional_data_write(iodef_additional_data_t *additional_data, prelude_io_t *fd)
+int iodef_additional_data_write(iodef_additional_data_t *additional_data, libiodef_io_t *fd)
 {
         int ret;
         if ( ! additional_data )
@@ -227,15 +227,15 @@ int iodef_additional_data_write(iodef_additional_data_t *additional_data, prelud
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_additional_data_get_formatid(additional_data), fd, IODEF_MSG_ADDITIONAL_DATA_FORMATID);
+        ret = libiodef_string_write(iodef_additional_data_get_formatid(additional_data), fd, IODEF_MSG_ADDITIONAL_DATA_FORMATID);
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_additional_data_get_meaning(additional_data), fd, IODEF_MSG_ADDITIONAL_DATA_MEANING);
+        ret = libiodef_string_write(iodef_additional_data_get_meaning(additional_data), fd, IODEF_MSG_ADDITIONAL_DATA_MEANING);
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_additional_data_get_ext_dtype(additional_data), fd, IODEF_MSG_ADDITIONAL_DATA_EXT_DTYPE);
+        ret = libiodef_string_write(iodef_additional_data_get_ext_dtype(additional_data), fd, IODEF_MSG_ADDITIONAL_DATA_EXT_DTYPE);
         if ( ret < 0 )
                 return ret;
 
@@ -251,14 +251,14 @@ int iodef_additional_data_write(iodef_additional_data_t *additional_data, prelud
 /**
  * iodef_email_write:
  * @email: Pointer to a #iodef_email_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @email within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_email_write(iodef_email_t *email, prelude_io_t *fd)
+int iodef_email_write(iodef_email_t *email, libiodef_io_t *fd)
 {
         int ret;
         if ( ! email )
@@ -271,7 +271,7 @@ int iodef_email_write(iodef_email_t *email, prelude_io_t *fd)
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_email_get_email(email), fd, IODEF_MSG_EMAIL_EMAIL);
+        ret = libiodef_string_write(iodef_email_get_email(email), fd, IODEF_MSG_EMAIL_EMAIL);
         if ( ret < 0 )
                 return ret;
 
@@ -283,14 +283,14 @@ int iodef_email_write(iodef_email_t *email, prelude_io_t *fd)
 /**
  * iodef_registry_handle_write:
  * @registry_handle: Pointer to a #iodef_registry_handle_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @registry_handle within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_registry_handle_write(iodef_registry_handle_t *registry_handle, prelude_io_t *fd)
+int iodef_registry_handle_write(iodef_registry_handle_t *registry_handle, libiodef_io_t *fd)
 {
         int ret;
         if ( ! registry_handle )
@@ -303,7 +303,7 @@ int iodef_registry_handle_write(iodef_registry_handle_t *registry_handle, prelud
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_registry_handle_get_ext_registry(registry_handle), fd, IODEF_MSG_REGISTRY_HANDLE_EXT_REGISTRY);
+        ret = libiodef_string_write(iodef_registry_handle_get_ext_registry(registry_handle), fd, IODEF_MSG_REGISTRY_HANDLE_EXT_REGISTRY);
         if ( ret < 0 )
                 return ret;
 
@@ -315,14 +315,14 @@ int iodef_registry_handle_write(iodef_registry_handle_t *registry_handle, prelud
 /**
  * iodef_postal_address_write:
  * @postal_address: Pointer to a #iodef_postal_address_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @postal_address within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_postal_address_write(iodef_postal_address_t *postal_address, prelude_io_t *fd)
+int iodef_postal_address_write(iodef_postal_address_t *postal_address, libiodef_io_t *fd)
 {
         int ret;
         if ( ! postal_address )
@@ -347,14 +347,14 @@ int iodef_postal_address_write(iodef_postal_address_t *postal_address, prelude_i
 /**
  * iodef_contact_write:
  * @contact: Pointer to a #iodef_contact_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @contact within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_contact_write(iodef_contact_t *contact, prelude_io_t *fd)
+int iodef_contact_write(iodef_contact_t *contact, libiodef_io_t *fd)
 {
         int ret;
         if ( ! contact )
@@ -374,16 +374,16 @@ int iodef_contact_write(iodef_contact_t *contact, prelude_io_t *fd)
                 }
         }
 
-        ret = prelude_string_write(iodef_contact_get_fax(contact), fd, IODEF_MSG_CONTACT_FAX);
+        ret = libiodef_string_write(iodef_contact_get_fax(contact), fd, IODEF_MSG_CONTACT_FAX);
         if ( ret < 0 )
                 return ret;
 
 
         {
-                prelude_string_t *description = NULL;
+                libiodef_string_t *description = NULL;
 
                 while ( (description = iodef_contact_get_next_description(contact, description)) ) {
-                        ret = prelude_string_write(description, fd, IODEF_MSG_CONTACT_DESCRIPTION);
+                        ret = libiodef_string_write(description, fd, IODEF_MSG_CONTACT_DESCRIPTION);
                         if ( ret < 0 )
                                 return ret;
                 }
@@ -391,10 +391,10 @@ int iodef_contact_write(iodef_contact_t *contact, prelude_io_t *fd)
 
 
         {
-                prelude_string_t *telephone = NULL;
+                libiodef_string_t *telephone = NULL;
 
                 while ( (telephone = iodef_contact_get_next_telephone(contact, telephone)) ) {
-                        ret = prelude_string_write(telephone, fd, IODEF_MSG_CONTACT_TELEPHONE);
+                        ret = libiodef_string_write(telephone, fd, IODEF_MSG_CONTACT_TELEPHONE);
                         if ( ret < 0 )
                                 return ret;
                 }
@@ -422,11 +422,11 @@ int iodef_contact_write(iodef_contact_t *contact, prelude_io_t *fd)
                 }
         }
 
-        ret = prelude_string_write(iodef_contact_get_contact_name(contact), fd, IODEF_MSG_CONTACT_CONTACT_NAME);
+        ret = libiodef_string_write(iodef_contact_get_contact_name(contact), fd, IODEF_MSG_CONTACT_CONTACT_NAME);
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_contact_get_timezone(contact), fd, IODEF_MSG_CONTACT_TIMEZONE);
+        ret = libiodef_string_write(iodef_contact_get_timezone(contact), fd, IODEF_MSG_CONTACT_TIMEZONE);
         if ( ret < 0 )
                 return ret;
 
@@ -452,11 +452,11 @@ int iodef_contact_write(iodef_contact_t *contact, prelude_io_t *fd)
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_contact_get_ext_type(contact), fd, IODEF_MSG_CONTACT_EXT_TYPE);
+        ret = libiodef_string_write(iodef_contact_get_ext_type(contact), fd, IODEF_MSG_CONTACT_EXT_TYPE);
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_contact_get_ext_role(contact), fd, IODEF_MSG_CONTACT_EXT_ROLE);
+        ret = libiodef_string_write(iodef_contact_get_ext_role(contact), fd, IODEF_MSG_CONTACT_EXT_ROLE);
         if ( ret < 0 )
                 return ret;
 
@@ -472,14 +472,14 @@ int iodef_contact_write(iodef_contact_t *contact, prelude_io_t *fd)
 /**
  * iodef_incident_id_write:
  * @incident_id: Pointer to a #iodef_incident_id_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @incident_id within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_incident_id_write(iodef_incident_id_t *incident_id, prelude_io_t *fd)
+int iodef_incident_id_write(iodef_incident_id_t *incident_id, libiodef_io_t *fd)
 {
         int ret;
         if ( ! incident_id )
@@ -488,11 +488,11 @@ int iodef_incident_id_write(iodef_incident_id_t *incident_id, prelude_io_t *fd)
         ret = binary_write(fd, IODEF_MSG_INCIDENT_ID_TAG, 0, NULL);
         if ( ret < 0 )
                 return ret;
-        ret = prelude_string_write(iodef_incident_id_get_instance(incident_id), fd, IODEF_MSG_INCIDENT_ID_INSTANCE);
+        ret = libiodef_string_write(iodef_incident_id_get_instance(incident_id), fd, IODEF_MSG_INCIDENT_ID_INSTANCE);
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_incident_id_get_name(incident_id), fd, IODEF_MSG_INCIDENT_ID_NAME);
+        ret = libiodef_string_write(iodef_incident_id_get_name(incident_id), fd, IODEF_MSG_INCIDENT_ID_NAME);
         if ( ret < 0 )
                 return ret;
 
@@ -508,14 +508,14 @@ int iodef_incident_id_write(iodef_incident_id_t *incident_id, prelude_io_t *fd)
 /**
  * iodef_alternative_id_write:
  * @alternative_id: Pointer to a #iodef_alternative_id_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @alternative_id within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_alternative_id_write(iodef_alternative_id_t *alternative_id, prelude_io_t *fd)
+int iodef_alternative_id_write(iodef_alternative_id_t *alternative_id, libiodef_io_t *fd)
 {
         int ret;
         if ( ! alternative_id )
@@ -547,14 +547,14 @@ int iodef_alternative_id_write(iodef_alternative_id_t *alternative_id, prelude_i
 /**
  * iodef_related_activity_write:
  * @related_activity: Pointer to a #iodef_related_activity_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @related_activity within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_related_activity_write(iodef_related_activity_t *related_activity, prelude_io_t *fd)
+int iodef_related_activity_write(iodef_related_activity_t *related_activity, libiodef_io_t *fd)
 {
         int ret;
         if ( ! related_activity )
@@ -565,10 +565,10 @@ int iodef_related_activity_write(iodef_related_activity_t *related_activity, pre
                 return ret;
 
         {
-                prelude_string_t *url = NULL;
+                libiodef_string_t *url = NULL;
 
                 while ( (url = iodef_related_activity_get_next_url(related_activity, url)) ) {
-                        ret = prelude_string_write(url, fd, IODEF_MSG_RELATED_ACTIVITY_URL);
+                        ret = libiodef_string_write(url, fd, IODEF_MSG_RELATED_ACTIVITY_URL);
                         if ( ret < 0 )
                                 return ret;
                 }
@@ -597,14 +597,14 @@ int iodef_related_activity_write(iodef_related_activity_t *related_activity, pre
 /**
  * iodef_history_item_write:
  * @history_item: Pointer to a #iodef_history_item_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @history_item within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_history_item_write(iodef_history_item_t *history_item, prelude_io_t *fd)
+int iodef_history_item_write(iodef_history_item_t *history_item, libiodef_io_t *fd)
 {
         int ret;
         if ( ! history_item )
@@ -629,10 +629,10 @@ int iodef_history_item_write(iodef_history_item_t *history_item, prelude_io_t *f
                 return ret;
 
         {
-                prelude_string_t *description = NULL;
+                libiodef_string_t *description = NULL;
 
                 while ( (description = iodef_history_item_get_next_description(history_item, description)) ) {
-                        ret = prelude_string_write(description, fd, IODEF_MSG_HISTORY_ITEM_DESCRIPTION);
+                        ret = libiodef_string_write(description, fd, IODEF_MSG_HISTORY_ITEM_DESCRIPTION);
                         if ( ret < 0 )
                                 return ret;
                 }
@@ -653,7 +653,7 @@ int iodef_history_item_write(iodef_history_item_t *history_item, prelude_io_t *f
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_history_item_get_ext_action(history_item), fd, IODEF_MSG_HISTORY_ITEM_EXT_ACTION);
+        ret = libiodef_string_write(iodef_history_item_get_ext_action(history_item), fd, IODEF_MSG_HISTORY_ITEM_EXT_ACTION);
         if ( ret < 0 )
                 return ret;
 
@@ -665,14 +665,14 @@ int iodef_history_item_write(iodef_history_item_t *history_item, prelude_io_t *f
 /**
  * iodef_history_write:
  * @history: Pointer to a #iodef_history_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @history within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_history_write(iodef_history_t *history, prelude_io_t *fd)
+int iodef_history_write(iodef_history_t *history, libiodef_io_t *fd)
 {
         int ret;
         if ( ! history )
@@ -704,14 +704,14 @@ int iodef_history_write(iodef_history_t *history, prelude_io_t *fd)
 /**
  * iodef_expectation_write:
  * @expectation: Pointer to a #iodef_expectation_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @expectation within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_expectation_write(iodef_expectation_t *expectation, prelude_io_t *fd)
+int iodef_expectation_write(iodef_expectation_t *expectation, libiodef_io_t *fd)
 {
         int ret;
         if ( ! expectation )
@@ -726,10 +726,10 @@ int iodef_expectation_write(iodef_expectation_t *expectation, prelude_io_t *fd)
 
 
         {
-                prelude_string_t *description = NULL;
+                libiodef_string_t *description = NULL;
 
                 while ( (description = iodef_expectation_get_next_description(expectation, description)) ) {
-                        ret = prelude_string_write(description, fd, IODEF_MSG_EXPECTATION_DESCRIPTION);
+                        ret = libiodef_string_write(description, fd, IODEF_MSG_EXPECTATION_DESCRIPTION);
                         if ( ret < 0 )
                                 return ret;
                 }
@@ -750,7 +750,7 @@ int iodef_expectation_write(iodef_expectation_t *expectation, prelude_io_t *fd)
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_expectation_get_ext_action(expectation), fd, IODEF_MSG_EXPECTATION_EXT_ACTION);
+        ret = libiodef_string_write(iodef_expectation_get_ext_action(expectation), fd, IODEF_MSG_EXPECTATION_EXT_ACTION);
         if ( ret < 0 )
                 return ret;
 
@@ -766,14 +766,14 @@ int iodef_expectation_write(iodef_expectation_t *expectation, prelude_io_t *fd)
 /**
  * iodef_record_pattern_write:
  * @record_pattern: Pointer to a #iodef_record_pattern_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @record_pattern within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_record_pattern_write(iodef_record_pattern_t *record_pattern, prelude_io_t *fd)
+int iodef_record_pattern_write(iodef_record_pattern_t *record_pattern, libiodef_io_t *fd)
 {
         int ret;
         if ( ! record_pattern )
@@ -797,7 +797,7 @@ int iodef_record_pattern_write(iodef_record_pattern_t *record_pattern, prelude_i
                                 return ret;
                 }
         }
-        ret = prelude_string_write(iodef_record_pattern_get_ext_type(record_pattern), fd, IODEF_MSG_RECORD_PATTERN_EXT_TYPE);
+        ret = libiodef_string_write(iodef_record_pattern_get_ext_type(record_pattern), fd, IODEF_MSG_RECORD_PATTERN_EXT_TYPE);
         if ( ret < 0 )
                 return ret;
 
@@ -812,7 +812,7 @@ int iodef_record_pattern_write(iodef_record_pattern_t *record_pattern, prelude_i
                                 return ret;
                 }
         }
-        ret = prelude_string_write(iodef_record_pattern_get_ext_offsetunit(record_pattern), fd, IODEF_MSG_RECORD_PATTERN_EXT_OFFSETUNIT);
+        ret = libiodef_string_write(iodef_record_pattern_get_ext_offsetunit(record_pattern), fd, IODEF_MSG_RECORD_PATTERN_EXT_OFFSETUNIT);
         if ( ret < 0 )
                 return ret;
 
@@ -828,14 +828,14 @@ int iodef_record_pattern_write(iodef_record_pattern_t *record_pattern, prelude_i
 /**
  * iodef_record_item_write:
  * @record_item: Pointer to a #iodef_record_item_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @record_item within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_record_item_write(iodef_record_item_t *record_item, prelude_io_t *fd)
+int iodef_record_item_write(iodef_record_item_t *record_item, libiodef_io_t *fd)
 {
         int ret;
         if ( ! record_item )
@@ -852,15 +852,15 @@ int iodef_record_item_write(iodef_record_item_t *record_item, prelude_io_t *fd)
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_record_item_get_formatid(record_item), fd, IODEF_MSG_RECORD_ITEM_FORMATID);
+        ret = libiodef_string_write(iodef_record_item_get_formatid(record_item), fd, IODEF_MSG_RECORD_ITEM_FORMATID);
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_record_item_get_meaning(record_item), fd, IODEF_MSG_RECORD_ITEM_MEANING);
+        ret = libiodef_string_write(iodef_record_item_get_meaning(record_item), fd, IODEF_MSG_RECORD_ITEM_MEANING);
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_record_item_get_ext_dtype(record_item), fd, IODEF_MSG_RECORD_ITEM_EXT_DTYPE);
+        ret = libiodef_string_write(iodef_record_item_get_ext_dtype(record_item), fd, IODEF_MSG_RECORD_ITEM_EXT_DTYPE);
         if ( ret < 0 )
                 return ret;
 
@@ -876,14 +876,14 @@ int iodef_record_item_write(iodef_record_item_t *record_item, prelude_io_t *fd)
 /**
  * iodef_application_write:
  * @application: Pointer to a #iodef_application_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @application within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_application_write(iodef_application_t *application, prelude_io_t *fd)
+int iodef_application_write(iodef_application_t *application, libiodef_io_t *fd)
 {
         int ret;
         if ( ! application )
@@ -892,35 +892,35 @@ int iodef_application_write(iodef_application_t *application, prelude_io_t *fd)
         ret = binary_write(fd, IODEF_MSG_APPLICATION_TAG, 0, NULL);
         if ( ret < 0 )
                 return ret;
-        ret = prelude_string_write(iodef_application_get_url(application), fd, IODEF_MSG_APPLICATION_URL);
+        ret = libiodef_string_write(iodef_application_get_url(application), fd, IODEF_MSG_APPLICATION_URL);
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_application_get_vendor(application), fd, IODEF_MSG_APPLICATION_VENDOR);
+        ret = libiodef_string_write(iodef_application_get_vendor(application), fd, IODEF_MSG_APPLICATION_VENDOR);
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_application_get_name(application), fd, IODEF_MSG_APPLICATION_NAME);
+        ret = libiodef_string_write(iodef_application_get_name(application), fd, IODEF_MSG_APPLICATION_NAME);
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_application_get_family(application), fd, IODEF_MSG_APPLICATION_FAMILY);
+        ret = libiodef_string_write(iodef_application_get_family(application), fd, IODEF_MSG_APPLICATION_FAMILY);
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_application_get_swid(application), fd, IODEF_MSG_APPLICATION_SWID);
+        ret = libiodef_string_write(iodef_application_get_swid(application), fd, IODEF_MSG_APPLICATION_SWID);
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_application_get_patch(application), fd, IODEF_MSG_APPLICATION_PATCH);
+        ret = libiodef_string_write(iodef_application_get_patch(application), fd, IODEF_MSG_APPLICATION_PATCH);
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_application_get_version(application), fd, IODEF_MSG_APPLICATION_VERSION);
+        ret = libiodef_string_write(iodef_application_get_version(application), fd, IODEF_MSG_APPLICATION_VERSION);
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_application_get_configid(application), fd, IODEF_MSG_APPLICATION_CONFIGID);
+        ret = libiodef_string_write(iodef_application_get_configid(application), fd, IODEF_MSG_APPLICATION_CONFIGID);
         if ( ret < 0 )
                 return ret;
 
@@ -932,14 +932,14 @@ int iodef_application_write(iodef_application_t *application, prelude_io_t *fd)
 /**
  * iodef_record_data_write:
  * @record_data: Pointer to a #iodef_record_data_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @record_data within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_record_data_write(iodef_record_data_t *record_data, prelude_io_t *fd)
+int iodef_record_data_write(iodef_record_data_t *record_data, libiodef_io_t *fd)
 {
         int ret;
         if ( ! record_data )
@@ -953,10 +953,10 @@ int iodef_record_data_write(iodef_record_data_t *record_data, prelude_io_t *fd)
                 return ret;
 
         {
-                prelude_string_t *description = NULL;
+                libiodef_string_t *description = NULL;
 
                 while ( (description = iodef_record_data_get_next_description(record_data, description)) ) {
-                        ret = prelude_string_write(description, fd, IODEF_MSG_RECORD_DATA_DESCRIPTION);
+                        ret = libiodef_string_write(description, fd, IODEF_MSG_RECORD_DATA_DESCRIPTION);
                         if ( ret < 0 )
                                 return ret;
                 }
@@ -1003,14 +1003,14 @@ int iodef_record_data_write(iodef_record_data_t *record_data, prelude_io_t *fd)
 /**
  * iodef_record_write:
  * @record: Pointer to a #iodef_record_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @record within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_record_write(iodef_record_t *record, prelude_io_t *fd)
+int iodef_record_write(iodef_record_t *record, libiodef_io_t *fd)
 {
         int ret;
         if ( ! record )
@@ -1042,14 +1042,14 @@ int iodef_record_write(iodef_record_t *record, prelude_io_t *fd)
 /**
  * iodef_reference_write:
  * @reference: Pointer to a #iodef_reference_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @reference within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_reference_write(iodef_reference_t *reference, prelude_io_t *fd)
+int iodef_reference_write(iodef_reference_t *reference, libiodef_io_t *fd)
 {
         int ret;
         if ( ! reference )
@@ -1060,10 +1060,10 @@ int iodef_reference_write(iodef_reference_t *reference, prelude_io_t *fd)
                 return ret;
 
         {
-                prelude_string_t *url = NULL;
+                libiodef_string_t *url = NULL;
 
                 while ( (url = iodef_reference_get_next_url(reference, url)) ) {
-                        ret = prelude_string_write(url, fd, IODEF_MSG_REFERENCE_URL);
+                        ret = libiodef_string_write(url, fd, IODEF_MSG_REFERENCE_URL);
                         if ( ret < 0 )
                                 return ret;
                 }
@@ -1071,16 +1071,16 @@ int iodef_reference_write(iodef_reference_t *reference, prelude_io_t *fd)
 
 
         {
-                prelude_string_t *description = NULL;
+                libiodef_string_t *description = NULL;
 
                 while ( (description = iodef_reference_get_next_description(reference, description)) ) {
-                        ret = prelude_string_write(description, fd, IODEF_MSG_REFERENCE_DESCRIPTION);
+                        ret = libiodef_string_write(description, fd, IODEF_MSG_REFERENCE_DESCRIPTION);
                         if ( ret < 0 )
                                 return ret;
                 }
         }
 
-        ret = prelude_string_write(iodef_reference_get_reference_name(reference), fd, IODEF_MSG_REFERENCE_REFERENCE_NAME);
+        ret = libiodef_string_write(iodef_reference_get_reference_name(reference), fd, IODEF_MSG_REFERENCE_REFERENCE_NAME);
         if ( ret < 0 )
                 return ret;
 
@@ -1092,14 +1092,14 @@ int iodef_reference_write(iodef_reference_t *reference, prelude_io_t *fd)
 /**
  * iodef_method_write:
  * @method: Pointer to a #iodef_method_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @method within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_method_write(iodef_method_t *method, prelude_io_t *fd)
+int iodef_method_write(iodef_method_t *method, libiodef_io_t *fd)
 {
         int ret;
         if ( ! method )
@@ -1121,10 +1121,10 @@ int iodef_method_write(iodef_method_t *method, prelude_io_t *fd)
 
 
         {
-                prelude_string_t *description = NULL;
+                libiodef_string_t *description = NULL;
 
                 while ( (description = iodef_method_get_next_description(method, description)) ) {
-                        ret = prelude_string_write(description, fd, IODEF_MSG_METHOD_DESCRIPTION);
+                        ret = libiodef_string_write(description, fd, IODEF_MSG_METHOD_DESCRIPTION);
                         if ( ret < 0 )
                                 return ret;
                 }
@@ -1153,14 +1153,14 @@ int iodef_method_write(iodef_method_t *method, prelude_io_t *fd)
 /**
  * iodef_time_impact_write:
  * @time_impact: Pointer to a #iodef_time_impact_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @time_impact within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_time_impact_write(iodef_time_impact_t *time_impact, prelude_io_t *fd)
+int iodef_time_impact_write(iodef_time_impact_t *time_impact, libiodef_io_t *fd)
 {
         int ret;
         if ( ! time_impact )
@@ -1169,7 +1169,7 @@ int iodef_time_impact_write(iodef_time_impact_t *time_impact, prelude_io_t *fd)
         ret = binary_write(fd, IODEF_MSG_TIME_IMPACT_TAG, 0, NULL);
         if ( ret < 0 )
                 return ret;
-        ret = prelude_string_write(iodef_time_impact_get_ext_metric(time_impact), fd, IODEF_MSG_TIME_IMPACT_EXT_METRIC);
+        ret = libiodef_string_write(iodef_time_impact_get_ext_metric(time_impact), fd, IODEF_MSG_TIME_IMPACT_EXT_METRIC);
         if ( ret < 0 )
                 return ret;
 
@@ -1185,7 +1185,7 @@ int iodef_time_impact_write(iodef_time_impact_t *time_impact, prelude_io_t *fd)
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_time_impact_get_ext_duration(time_impact), fd, IODEF_MSG_TIME_IMPACT_EXT_DURATION);
+        ret = libiodef_string_write(iodef_time_impact_get_ext_duration(time_impact), fd, IODEF_MSG_TIME_IMPACT_EXT_DURATION);
         if ( ret < 0 )
                 return ret;
 
@@ -1197,14 +1197,14 @@ int iodef_time_impact_write(iodef_time_impact_t *time_impact, prelude_io_t *fd)
 /**
  * iodef_impact_write:
  * @impact: Pointer to a #iodef_impact_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @impact within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_impact_write(iodef_impact_t *impact, prelude_io_t *fd)
+int iodef_impact_write(iodef_impact_t *impact, libiodef_io_t *fd)
 {
         int ret;
         if ( ! impact )
@@ -1229,7 +1229,7 @@ int iodef_impact_write(iodef_impact_t *impact, prelude_io_t *fd)
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_impact_get_ext_type(impact), fd, IODEF_MSG_IMPACT_EXT_TYPE);
+        ret = libiodef_string_write(iodef_impact_get_ext_type(impact), fd, IODEF_MSG_IMPACT_EXT_TYPE);
         if ( ret < 0 )
                 return ret;
 
@@ -1241,14 +1241,14 @@ int iodef_impact_write(iodef_impact_t *impact, prelude_io_t *fd)
 /**
  * iodef_confidence_write:
  * @confidence: Pointer to a #iodef_confidence_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @confidence within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_confidence_write(iodef_confidence_t *confidence, prelude_io_t *fd)
+int iodef_confidence_write(iodef_confidence_t *confidence, libiodef_io_t *fd)
 {
         int ret;
         if ( ! confidence )
@@ -1269,14 +1269,14 @@ int iodef_confidence_write(iodef_confidence_t *confidence, prelude_io_t *fd)
 /**
  * iodef_monetary_impact_write:
  * @monetary_impact: Pointer to a #iodef_monetary_impact_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @monetary_impact within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_monetary_impact_write(iodef_monetary_impact_t *monetary_impact, prelude_io_t *fd)
+int iodef_monetary_impact_write(iodef_monetary_impact_t *monetary_impact, libiodef_io_t *fd)
 {
         int ret;
         if ( ! monetary_impact )
@@ -1285,7 +1285,7 @@ int iodef_monetary_impact_write(iodef_monetary_impact_t *monetary_impact, prelud
         ret = binary_write(fd, IODEF_MSG_MONETARY_IMPACT_TAG, 0, NULL);
         if ( ret < 0 )
                 return ret;
-        ret = prelude_string_write(iodef_monetary_impact_get_currency(monetary_impact), fd, IODEF_MSG_MONETARY_IMPACT_CURRENCY);
+        ret = libiodef_string_write(iodef_monetary_impact_get_currency(monetary_impact), fd, IODEF_MSG_MONETARY_IMPACT_CURRENCY);
         if ( ret < 0 )
                 return ret;
 
@@ -1301,14 +1301,14 @@ int iodef_monetary_impact_write(iodef_monetary_impact_t *monetary_impact, prelud
 /**
  * iodef_counter_write:
  * @counter: Pointer to a #iodef_counter_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @counter within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_counter_write(iodef_counter_t *counter, prelude_io_t *fd)
+int iodef_counter_write(iodef_counter_t *counter, libiodef_io_t *fd)
 {
         int ret;
         if ( ! counter )
@@ -1325,11 +1325,11 @@ int iodef_counter_write(iodef_counter_t *counter, prelude_io_t *fd)
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_counter_get_ext_duration(counter), fd, IODEF_MSG_COUNTER_EXT_DURATION);
+        ret = libiodef_string_write(iodef_counter_get_ext_duration(counter), fd, IODEF_MSG_COUNTER_EXT_DURATION);
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_counter_get_ext_type(counter), fd, IODEF_MSG_COUNTER_EXT_TYPE);
+        ret = libiodef_string_write(iodef_counter_get_ext_type(counter), fd, IODEF_MSG_COUNTER_EXT_TYPE);
         if ( ret < 0 )
                 return ret;
 
@@ -1341,14 +1341,14 @@ int iodef_counter_write(iodef_counter_t *counter, prelude_io_t *fd)
 /**
  * iodef_assessment_write:
  * @assessment: Pointer to a #iodef_assessment_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @assessment within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_assessment_write(iodef_assessment_t *assessment, prelude_io_t *fd)
+int iodef_assessment_write(iodef_assessment_t *assessment, libiodef_io_t *fd)
 {
         int ret;
         if ( ! assessment )
@@ -1431,14 +1431,14 @@ int iodef_assessment_write(iodef_assessment_t *assessment, prelude_io_t *fd)
 /**
  * iodef_service_write:
  * @service: Pointer to a #iodef_service_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @service within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_service_write(iodef_service_t *service, prelude_io_t *fd)
+int iodef_service_write(iodef_service_t *service, libiodef_io_t *fd)
 {
         int ret;
         if ( ! service )
@@ -1469,7 +1469,7 @@ int iodef_service_write(iodef_service_t *service, prelude_io_t *fd)
                                 return ret;
                 }
         }
-        ret = prelude_string_write(iodef_service_get_portlist(service), fd, IODEF_MSG_SERVICE_PORTLIST);
+        ret = libiodef_string_write(iodef_service_get_portlist(service), fd, IODEF_MSG_SERVICE_PORTLIST);
         if ( ret < 0 )
                 return ret;
 
@@ -1525,14 +1525,14 @@ int iodef_service_write(iodef_service_t *service, prelude_io_t *fd)
 /**
  * iodef_address_write:
  * @address: Pointer to a #iodef_address_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @address within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_address_write(iodef_address_t *address, prelude_io_t *fd)
+int iodef_address_write(iodef_address_t *address, libiodef_io_t *fd)
 {
         int ret;
         if ( ! address )
@@ -1545,15 +1545,15 @@ int iodef_address_write(iodef_address_t *address, prelude_io_t *fd)
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_address_get_vlan_name(address), fd, IODEF_MSG_ADDRESS_VLAN_NAME);
+        ret = libiodef_string_write(iodef_address_get_vlan_name(address), fd, IODEF_MSG_ADDRESS_VLAN_NAME);
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_address_get_ext_category(address), fd, IODEF_MSG_ADDRESS_EXT_CATEGORY);
+        ret = libiodef_string_write(iodef_address_get_ext_category(address), fd, IODEF_MSG_ADDRESS_EXT_CATEGORY);
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_address_get_vlan_num(address), fd, IODEF_MSG_ADDRESS_VLAN_NUM);
+        ret = libiodef_string_write(iodef_address_get_vlan_num(address), fd, IODEF_MSG_ADDRESS_VLAN_NUM);
         if ( ret < 0 )
                 return ret;
 
@@ -1565,14 +1565,14 @@ int iodef_address_write(iodef_address_t *address, prelude_io_t *fd)
 /**
  * iodef_node_role_write:
  * @node_role: Pointer to a #iodef_node_role_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @node_role within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_node_role_write(iodef_node_role_t *node_role, prelude_io_t *fd)
+int iodef_node_role_write(iodef_node_role_t *node_role, libiodef_io_t *fd)
 {
         int ret;
         if ( ! node_role )
@@ -1589,7 +1589,7 @@ int iodef_node_role_write(iodef_node_role_t *node_role, prelude_io_t *fd)
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_node_role_get_ext_category(node_role), fd, IODEF_MSG_NODE_ROLE_EXT_CATEGORY);
+        ret = libiodef_string_write(iodef_node_role_get_ext_category(node_role), fd, IODEF_MSG_NODE_ROLE_EXT_CATEGORY);
         if ( ret < 0 )
                 return ret;
 
@@ -1601,14 +1601,14 @@ int iodef_node_role_write(iodef_node_role_t *node_role, prelude_io_t *fd)
 /**
  * iodef_node_write:
  * @node: Pointer to a #iodef_node_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @node within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_node_write(iodef_node_t *node, prelude_io_t *fd)
+int iodef_node_write(iodef_node_t *node, libiodef_io_t *fd)
 {
         int ret;
         if ( ! node )
@@ -1619,10 +1619,10 @@ int iodef_node_write(iodef_node_t *node, prelude_io_t *fd)
                 return ret;
 
         {
-                prelude_string_t *node_name = NULL;
+                libiodef_string_t *node_name = NULL;
 
                 while ( (node_name = iodef_node_get_next_node_name(node, node_name)) ) {
-                        ret = prelude_string_write(node_name, fd, IODEF_MSG_NODE_NODE_NAME);
+                        ret = libiodef_string_write(node_name, fd, IODEF_MSG_NODE_NODE_NAME);
                         if ( ret < 0 )
                                 return ret;
                 }
@@ -1654,7 +1654,7 @@ int iodef_node_write(iodef_node_t *node, prelude_io_t *fd)
                 }
         }
 
-        ret = prelude_string_write(iodef_node_get_location(node), fd, IODEF_MSG_NODE_LOCATION);
+        ret = libiodef_string_write(iodef_node_get_location(node), fd, IODEF_MSG_NODE_LOCATION);
         if ( ret < 0 )
                 return ret;
 
@@ -1677,14 +1677,14 @@ int iodef_node_write(iodef_node_t *node, prelude_io_t *fd)
 /**
  * iodef_operating_system_write:
  * @operating_system: Pointer to a #iodef_operating_system_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @operating_system within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_operating_system_write(iodef_operating_system_t *operating_system, prelude_io_t *fd)
+int iodef_operating_system_write(iodef_operating_system_t *operating_system, libiodef_io_t *fd)
 {
         int ret;
         if ( ! operating_system )
@@ -1693,35 +1693,35 @@ int iodef_operating_system_write(iodef_operating_system_t *operating_system, pre
         ret = binary_write(fd, IODEF_MSG_OPERATING_SYSTEM_TAG, 0, NULL);
         if ( ret < 0 )
                 return ret;
-        ret = prelude_string_write(iodef_operating_system_get_url(operating_system), fd, IODEF_MSG_OPERATING_SYSTEM_URL);
+        ret = libiodef_string_write(iodef_operating_system_get_url(operating_system), fd, IODEF_MSG_OPERATING_SYSTEM_URL);
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_operating_system_get_vendor(operating_system), fd, IODEF_MSG_OPERATING_SYSTEM_VENDOR);
+        ret = libiodef_string_write(iodef_operating_system_get_vendor(operating_system), fd, IODEF_MSG_OPERATING_SYSTEM_VENDOR);
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_operating_system_get_name(operating_system), fd, IODEF_MSG_OPERATING_SYSTEM_NAME);
+        ret = libiodef_string_write(iodef_operating_system_get_name(operating_system), fd, IODEF_MSG_OPERATING_SYSTEM_NAME);
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_operating_system_get_family(operating_system), fd, IODEF_MSG_OPERATING_SYSTEM_FAMILY);
+        ret = libiodef_string_write(iodef_operating_system_get_family(operating_system), fd, IODEF_MSG_OPERATING_SYSTEM_FAMILY);
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_operating_system_get_swid(operating_system), fd, IODEF_MSG_OPERATING_SYSTEM_SWID);
+        ret = libiodef_string_write(iodef_operating_system_get_swid(operating_system), fd, IODEF_MSG_OPERATING_SYSTEM_SWID);
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_operating_system_get_patch(operating_system), fd, IODEF_MSG_OPERATING_SYSTEM_PATCH);
+        ret = libiodef_string_write(iodef_operating_system_get_patch(operating_system), fd, IODEF_MSG_OPERATING_SYSTEM_PATCH);
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_operating_system_get_version(operating_system), fd, IODEF_MSG_OPERATING_SYSTEM_VERSION);
+        ret = libiodef_string_write(iodef_operating_system_get_version(operating_system), fd, IODEF_MSG_OPERATING_SYSTEM_VERSION);
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_operating_system_get_configid(operating_system), fd, IODEF_MSG_OPERATING_SYSTEM_CONFIGID);
+        ret = libiodef_string_write(iodef_operating_system_get_configid(operating_system), fd, IODEF_MSG_OPERATING_SYSTEM_CONFIGID);
         if ( ret < 0 )
                 return ret;
 
@@ -1733,14 +1733,14 @@ int iodef_operating_system_write(iodef_operating_system_t *operating_system, pre
 /**
  * iodef_system_write:
  * @system: Pointer to a #iodef_system_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @system within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_system_write(iodef_system_t *system, prelude_io_t *fd)
+int iodef_system_write(iodef_system_t *system, libiodef_io_t *fd)
 {
         int ret;
         if ( ! system )
@@ -1765,10 +1765,10 @@ int iodef_system_write(iodef_system_t *system, prelude_io_t *fd)
 
 
         {
-                prelude_string_t *description = NULL;
+                libiodef_string_t *description = NULL;
 
                 while ( (description = iodef_system_get_next_description(system, description)) ) {
-                        ret = prelude_string_write(description, fd, IODEF_MSG_SYSTEM_DESCRIPTION);
+                        ret = libiodef_string_write(description, fd, IODEF_MSG_SYSTEM_DESCRIPTION);
                         if ( ret < 0 )
                                 return ret;
                 }
@@ -1807,7 +1807,7 @@ int iodef_system_write(iodef_system_t *system, prelude_io_t *fd)
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_system_get_ext_category(system), fd, IODEF_MSG_SYSTEM_EXT_CATEGORY);
+        ret = libiodef_string_write(iodef_system_get_ext_category(system), fd, IODEF_MSG_SYSTEM_EXT_CATEGORY);
         if ( ret < 0 )
                 return ret;
 
@@ -1815,7 +1815,7 @@ int iodef_system_write(iodef_system_t *system, prelude_io_t *fd)
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_system_get_interface(system), fd, IODEF_MSG_SYSTEM_INTERFACE);
+        ret = libiodef_string_write(iodef_system_get_interface(system), fd, IODEF_MSG_SYSTEM_INTERFACE);
         if ( ret < 0 )
                 return ret;
 
@@ -1827,14 +1827,14 @@ int iodef_system_write(iodef_system_t *system, prelude_io_t *fd)
 /**
  * iodef_flow_write:
  * @flow: Pointer to a #iodef_flow_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @flow within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_flow_write(iodef_flow_t *flow, prelude_io_t *fd)
+int iodef_flow_write(iodef_flow_t *flow, libiodef_io_t *fd)
 {
         int ret;
         if ( ! flow )
@@ -1862,14 +1862,14 @@ int iodef_flow_write(iodef_flow_t *flow, prelude_io_t *fd)
 /**
  * iodef_event_data_write:
  * @event_data: Pointer to a #iodef_event_data_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @event_data within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_event_data_write(iodef_event_data_t *event_data, prelude_io_t *fd)
+int iodef_event_data_write(iodef_event_data_t *event_data, libiodef_io_t *fd)
 {
         int ret;
         if ( ! event_data )
@@ -1895,10 +1895,10 @@ int iodef_event_data_write(iodef_event_data_t *event_data, prelude_io_t *fd)
 
 
         {
-                prelude_string_t *description = NULL;
+                libiodef_string_t *description = NULL;
 
                 while ( (description = iodef_event_data_get_next_description(event_data, description)) ) {
-                        ret = prelude_string_write(description, fd, IODEF_MSG_EVENT_DATA_DESCRIPTION);
+                        ret = libiodef_string_write(description, fd, IODEF_MSG_EVENT_DATA_DESCRIPTION);
                         if ( ret < 0 )
                                 return ret;
                 }
@@ -1985,14 +1985,14 @@ int iodef_event_data_write(iodef_event_data_t *event_data, prelude_io_t *fd)
 /**
  * iodef_incident_write:
  * @incident: Pointer to a #iodef_incident_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @incident within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_incident_write(iodef_incident_t *incident, prelude_io_t *fd)
+int iodef_incident_write(iodef_incident_t *incident, libiodef_io_t *fd)
 {
         int ret;
         if ( ! incident )
@@ -2022,10 +2022,10 @@ int iodef_incident_write(iodef_incident_t *incident, prelude_io_t *fd)
 
 
         {
-                prelude_string_t *description = NULL;
+                libiodef_string_t *description = NULL;
 
                 while ( (description = iodef_incident_get_next_description(incident, description)) ) {
-                        ret = prelude_string_write(description, fd, IODEF_MSG_INCIDENT_DESCRIPTION);
+                        ret = libiodef_string_write(description, fd, IODEF_MSG_INCIDENT_DESCRIPTION);
                         if ( ret < 0 )
                                 return ret;
                 }
@@ -2103,7 +2103,7 @@ int iodef_incident_write(iodef_incident_t *incident, prelude_io_t *fd)
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_incident_get_ext_purpose(incident), fd, IODEF_MSG_INCIDENT_EXT_PURPOSE);
+        ret = libiodef_string_write(iodef_incident_get_ext_purpose(incident), fd, IODEF_MSG_INCIDENT_EXT_PURPOSE);
         if ( ret < 0 )
                 return ret;
 
@@ -2119,14 +2119,14 @@ int iodef_incident_write(iodef_incident_t *incident, prelude_io_t *fd)
 /**
  * iodef_document_write:
  * @document: Pointer to a #iodef_document_t object.
- * @msg: Pointer to a #prelude_msgbuf_t object, where the message should be written.
+ * @msg: Pointer to a #libiodef_msgbuf_t object, where the message should be written.
  *
  * Write @document within @msg message buffer. The buffer is
- * associated with a #prelude_io_t file descriptor where the data will be written.
+ * associated with a #libiodef_io_t file descriptor where the data will be written.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_document_write(iodef_document_t *document, prelude_io_t *fd)
+int iodef_document_write(iodef_document_t *document, libiodef_io_t *fd)
 {
         int ret;
         if ( ! document )
@@ -2147,11 +2147,11 @@ int iodef_document_write(iodef_document_t *document, prelude_io_t *fd)
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_document_get_formatid(document), fd, IODEF_MSG_DOCUMENT_FORMATID);
+        ret = libiodef_string_write(iodef_document_get_formatid(document), fd, IODEF_MSG_DOCUMENT_FORMATID);
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_write(iodef_document_get_version(document), fd, IODEF_MSG_DOCUMENT_VERSION);
+        ret = libiodef_string_write(iodef_document_get_version(document), fd, IODEF_MSG_DOCUMENT_VERSION);
         if ( ret < 0 )
                 return ret;
 

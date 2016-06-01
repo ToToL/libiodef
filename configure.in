@@ -123,11 +123,11 @@ AC_CACHE_CHECK([for an ANSI C99-conforming __func__], ac_cv_cpp_func,
   [ac_cv_cpp_func=no])])])
 
 if test $ac_cv_cpp_func = yes; then
-   AC_DEFINE(__PRELUDE_FUNC__, __func__, [Define to __FUNCTION__ or "" if `__func__' does not conform to ANSI C.])
+   AC_DEFINE(__LIBIODEF_FUNC__, __func__, [Define to __FUNCTION__ or "" if `__func__' does not conform to ANSI C.])
 elif test $ac_cv_cpp_func = __FUNCTION__; then
-   AC_DEFINE(__PRELUDE_FUNC__, __FUNCTION__, [Define to __FUNCTION__ or "" if `__func__' does not conform to ANSI C.])
+   AC_DEFINE(__LIBIODEF_FUNC__, __FUNCTION__, [Define to __FUNCTION__ or "" if `__func__' does not conform to ANSI C.])
 elif test $ac_cv_cpp_func = no; then
-   AC_DEFINE(__PRELUDE_FUNC__, "", [Define to __FUNCTION__ or "" if `__func__' does not conform to ANSI C.])
+   AC_DEFINE(__LIBIODEF_FUNC__, "", [Define to __FUNCTION__ or "" if `__func__' does not conform to ANSI C.])
 fi
 ])
 
@@ -138,7 +138,7 @@ AC_CPP_FUNC
 dnl **************************************************
 dnl * Check endianess                                *
 dnl **************************************************
-AC_C_BIGENDIAN(AC_DEFINE_UNQUOTED(PRELUDE_WORDS_BIGENDIAN, , Byte ordering))
+AC_C_BIGENDIAN(AC_DEFINE_UNQUOTED(LIBIODEF_WORDS_BIGENDIAN, , Byte ordering))
 
 
 
@@ -191,7 +191,7 @@ dnl **************************************************
 
 AX_CHECK_ALIGNED_ACCESS_REQUIRED
 if test "$ax_cv_have_aligned_access_required" = yes; then
-        AC_DEFINE_UNQUOTED(PRELUDE_ALIGNED_ACCESS, , Define wether we need to take care with alignment)
+        AC_DEFINE_UNQUOTED(LIBIODEF_ALIGNED_ACCESS, , Define wether we need to take care with alignment)
 fi
 
 
@@ -203,7 +203,7 @@ dnl
 dnl we currently check for all three va_copy possibilities, so we get
 dnl all results in config.log for bug reports.
 
-AC_CACHE_CHECK([for an implementation of va_copy()],prelude_cv_va_copy,[
+AC_CACHE_CHECK([for an implementation of va_copy()],libiodef_cv_va_copy,[
         AC_LINK_IFELSE([AC_LANG_SOURCE([#include <stdarg.h>
         void f (int i, ...) {
         va_list args1, args2;
@@ -217,10 +217,10 @@ AC_CACHE_CHECK([for an implementation of va_copy()],prelude_cv_va_copy,[
           f (0, 42);
           return 0;
         }])],
-        [prelude_cv_va_copy=yes],
-        [prelude_cv_va_copy=no])
+        [libiodef_cv_va_copy=yes],
+        [libiodef_cv_va_copy=no])
 ])
-AC_CACHE_CHECK([for an implementation of __va_copy()],prelude_cv___va_copy,[
+AC_CACHE_CHECK([for an implementation of __va_copy()],libiodef_cv___va_copy,[
         AC_LINK_IFELSE([AC_LANG_SOURCE([#include <stdarg.h>
         void f (int i, ...) {
         va_list args1, args2;
@@ -234,22 +234,22 @@ AC_CACHE_CHECK([for an implementation of __va_copy()],prelude_cv___va_copy,[
           f (0, 42);
           return 0;
         }])],
-        [prelude_cv___va_copy=yes],
-        [prelude_cv___va_copy=no])
+        [libiodef_cv___va_copy=yes],
+        [libiodef_cv___va_copy=no])
 ])
 
-if test "x$prelude_cv_va_copy" = "xyes"; then
+if test "x$libiodef_cv_va_copy" = "xyes"; then
   g_va_copy_func=va_copy
-else if test "x$prelude_cv___va_copy" = "xyes"; then
+else if test "x$libiodef_cv___va_copy" = "xyes"; then
   g_va_copy_func=__va_copy
 fi
 fi
 
 if test -n "$g_va_copy_func"; then
-  AC_DEFINE_UNQUOTED(PRELUDE_VA_COPY,$g_va_copy_func,[A 'va_copy' style function])
+  AC_DEFINE_UNQUOTED(LIBIODEF_VA_COPY,$g_va_copy_func,[A 'va_copy' style function])
 fi
 
-AC_CACHE_CHECK([whether va_lists can be copied by value],prelude_cv_va_val_copy,[
+AC_CACHE_CHECK([whether va_lists can be copied by value],libiodef_cv_va_val_copy,[
         AC_TRY_RUN([#include <stdarg.h>
         void f (int i, ...) {
         va_list args1, args2;
@@ -263,13 +263,13 @@ AC_CACHE_CHECK([whether va_lists can be copied by value],prelude_cv_va_val_copy,
           f (0, 42);
           return 0;
         }],
-        [prelude_cv_va_val_copy=yes],
-        [prelude_cv_va_val_copy=no],
-        [prelude_cv_va_val_copy=yes])
+        [libiodef_cv_va_val_copy=yes],
+        [libiodef_cv_va_val_copy=no],
+        [libiodef_cv_va_val_copy=yes])
 ])
 
-if test "x$prelude_cv_va_val_copy" = "xno"; then
-  AC_DEFINE(PRELUDE_VA_COPY_AS_ARRAY,1, ['va_lists' cannot be copies as values])
+if test "x$libiodef_cv_va_val_copy" = "xno"; then
+  AC_DEFINE(LIBIODEF_VA_COPY_AS_ARRAY,1, ['va_lists' cannot be copies as values])
 fi
 
 
@@ -566,7 +566,7 @@ dnl Needed for FIONREAD under solaris
 
 AC_CHECK_HEADERS_ONCE(sys/filio.h sys/un.h netinet/tcp.h)
 AC_CHECK_FUNCS(ftruncate chsize)
-AX_CREATE_PRELUDE_INTTYPES_H(src/include/prelude-inttypes.h)
+AX_CREATE_LIBIODEF_INTTYPES_H(src/include/libiodef-inttypes.h)
 
 
 
@@ -631,9 +631,9 @@ AC_SUBST(LIBIODEF_MINOR_VERSION)
 AC_SUBST(LIBIODEF_MICRO_VERSION)
 AC_SUBST(LIBIODEF_LEVEL_VERSION)
 AC_SUBST(LIBIODEF_SERIAL_VERSION)
-AC_SUBST(PRELUDE_ADMIN_LIBS)
-AC_SUBST(PRELUDE_SPOOL_DIR)
-AC_SUBST(PRELUDE_CONFIG_DIR)
+AC_SUBST(LIBIODEF_ADMIN_LIBS)
+AC_SUBST(LIBIODEF_SPOOL_DIR)
+AC_SUBST(LIBIODEF_CONFIG_DIR)
 AC_SUBST(SWIG_DATA_DIR)
 
 AS_AC_EXPAND(SYSCONFDIR, $sysconfdir)
@@ -643,11 +643,11 @@ AS_AC_EXPAND(BINDIR, $bindir)
 AS_AC_EXPAND(DATADIR, $datadir)
 
 SWIG_DATA_DIR=$DATADIR/libiodef/swig
-PRELUDE_SPOOL_DIR=$LOCALSTATEDIR/spool/prelude
-PRELUDE_CONFIG_DIR=$SYSCONFDIR/prelude
+LIBIODEF_SPOOL_DIR=$LOCALSTATEDIR/spool/libiodef
+LIBIODEF_CONFIG_DIR=$SYSCONFDIR/libiodef
 
-AC_DEFINE_UNQUOTED(PRELUDE_SPOOL_DIR, "$PRELUDE_SPOOL_DIR", Prelude spool directory)
-AC_DEFINE_UNQUOTED(PRELUDE_CONFIG_DIR, "$PRELUDE_CONFIG_DIR", Prelude config directory)
+AC_DEFINE_UNQUOTED(LIBIODEF_SPOOL_DIR, "$LIBIODEF_SPOOL_DIR", LibIodef spool directory)
+AC_DEFINE_UNQUOTED(LIBIODEF_CONFIG_DIR, "$LIBIODEF_CONFIG_DIR", LibIodef config directory)
 
 case "${host}" in
         i[[3456789]]86-*-mingw32*) WIN32="yes" ;;
@@ -656,9 +656,9 @@ case "${host}" in
 esac
 
 if test x$WIN32 = xyes; then
-        AC_DEFINE_UNQUOTED(INSTALLDIR, "$BINDIR", Prelude library install directory)
+        AC_DEFINE_UNQUOTED(INSTALLDIR, "$BINDIR", LibIodef library install directory)
 else
-        AC_DEFINE_UNQUOTED(INSTALLDIR, "$LIBDIR", Prelude library install directory)
+        AC_DEFINE_UNQUOTED(INSTALLDIR, "$LIBDIR", LibIodef library install directory)
 fi
 
 
@@ -678,7 +678,7 @@ src/Makefile
 src/libiodef-error/Makefile
 src/include/Makefile
 
-src/include/prelude-inttypes.h
+src/include/libiodef-inttypes.h
 
 docs/Makefile
 docs/api/Makefile

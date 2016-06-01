@@ -1,9 +1,9 @@
 /*****
 *
 * Copyright (C) 2005-2016 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoann.v@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann.v@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -98,16 +98,16 @@
 %exception {
         try {
                 $action
-        } catch(Iodef::PreludeError &e) {
-                SWIG_Python_Raise(SWIG_NewPointerObj(new PreludeError(e),
-                                                     SWIGTYPE_p_Iodef__PreludeError, SWIG_POINTER_OWN),
-                                  "PreludeError", SWIGTYPE_p_Iodef__PreludeError);
+        } catch(Iodef::LibIodefError &e) {
+                SWIG_Python_Raise(SWIG_NewPointerObj(new LibIodefError(e),
+                                                     SWIGTYPE_p_Iodef__LibIodefError, SWIG_POINTER_OWN),
+                                  "LibIodefError", SWIGTYPE_p_Iodef__LibIodefError);
                 SWIG_fail;
         }
 }
 
 
-#ifdef SWIG_COMPILE_LIBPRELUDE
+#ifdef SWIG_COMPILE_LIBIODEF
 
 %{
 typedef PyObject SwigPyObjectState;
@@ -140,7 +140,7 @@ typedef PyObject SwigPyObjectState;
         }
 
         if ( ret < 0 )
-                throw PreludeError("error setting internal __iodef_data__ key");
+                throw LibIodefError("error setting internal __iodef_data__ key");
 
         $result = state;
 }
@@ -160,7 +160,7 @@ typedef PyObject SwigPyObjectState;
         if ( ! pytype ) {
                 swig_type_info *sti = SWIG_TypeQuery("Iodef::IODEF *");
                 if ( ! sti )
-                        throw PreludeError("could not find type SWIG type info for 'Iodef::IODEF'");
+                        throw LibIodefError("could not find type SWIG type info for 'Iodef::IODEF'");
 
                 pytype = ((SwigPyClientData *) sti->clientdata)->pytype;
         }
@@ -170,7 +170,7 @@ typedef PyObject SwigPyObjectState;
         Py_DECREF(obj);
 
         if ( ret < 0 )
-                throw PreludeError("error calling Iodef::IODEF tp_init()");
+                throw LibIodefError("error calling Iodef::IODEF tp_init()");
 
 }
 
@@ -189,10 +189,10 @@ typedef PyObject SwigPyObjectState;
                  */
                 pyobj->dict = arg2;
                 Py_INCREF(arg2);
-        } catch(Iodef::PreludeError &e) {
-                SWIG_Python_Raise(SWIG_NewPointerObj(new PreludeError(e),
-                                                     SWIGTYPE_p_Iodef__PreludeError, SWIG_POINTER_OWN),
-                                  "PreludeError", SWIGTYPE_p_Iodef__PreludeError);
+        } catch(Iodef::LibIodefError &e) {
+                SWIG_Python_Raise(SWIG_NewPointerObj(new LibIodefError(e),
+                                                     SWIGTYPE_p_Iodef__LibIodefError, SWIG_POINTER_OWN),
+                                  "LibIodefError", SWIGTYPE_p_Iodef__LibIodefError);
                 SWIG_fail;
         }
 }
@@ -232,9 +232,9 @@ typedef PyObject SwigPyObjectState;
 %exception Iodef::IODEFClass::_get2 {
         try {
                 $action;
-        } catch(Iodef::PreludeError &e) {
-                if ( e.getCode() == PRELUDE_ERROR_IODEF_CLASS_UNKNOWN_CHILD ||
-                     e.getCode() == PRELUDE_ERROR_IODEF_PATH_DEPTH )
+        } catch(Iodef::LibIodefError &e) {
+                if ( e.getCode() == LIBIODEF_ERROR_IODEF_CLASS_UNKNOWN_CHILD ||
+                     e.getCode() == LIBIODEF_ERROR_IODEF_PATH_DEPTH )
                         SWIG_exception_fail(SWIG_IndexError, e.what());
         }
 }

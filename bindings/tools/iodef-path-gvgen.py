@@ -15,15 +15,15 @@ sys.path.append('../.libs')
 import gvgen
 
 try:
-       import PreludeEasy
+       import LibIodefEasy
 except Exception,e:
        print "Import failed: ",e
-       print "Try 'cd ./.libs && ln -s libprelude_python.so _PreludeEasy.so'"
+       print "Try 'cd ./.libs && ln -s libiodef_python.so _LibIodefEasy.so'"
        sys.exit(1)
 
 
 
-client = PreludeEasy.Client("PreludeGvGen")
+client = LibIodefEasy.Client("LibIodefGvGen")
 client.Init()
 
 client.PoolInit("localhost", 1)

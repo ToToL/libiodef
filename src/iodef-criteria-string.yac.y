@@ -2,9 +2,9 @@
 *
 * Copyright (C) 2003-2016 CS-SI. All Rights Reserved.
 * Author: Krzysztof Zaraska <kzaraska@student.uci.agh.edu.pl>
-* Author: Nicolas Delon <nicolas.delon@prelude-ids.com>
+* Author: Nicolas Delon <nicolas.delon@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 %}
 
 %{
-#define PRELUDE_ERROR_SOURCE_DEFAULT PRELUDE_ERROR_SOURCE_IODEF_CRITERIA
+#define LIBIODEF_ERROR_SOURCE_DEFAULT LIBIODEF_ERROR_SOURCE_IODEF_CRITERIA
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,9 +38,9 @@
 
 #include "glthread/lock.h"
 
-#include "prelude-log.h"
-#include "prelude-error.h"
-#include "prelude-inttypes.h"
+#include "libiodef-log.h"
+#include "libiodef-error.h"
+#include "libiodef-inttypes.h"
 
 #include "iodef.h"
 #include "iodef-criteria.h"
@@ -296,7 +296,7 @@ relation:
 | TOK_RELATION_NOT_EQUAL            { cur_operator = $$ = IODEF_CRITERION_OPERATOR_EQUAL|IODEF_CRITERION_OPERATOR_NOT; }
 | TOK_RELATION_NOT_EQUAL_NOCASE     { cur_operator = $$ = IODEF_CRITERION_OPERATOR_EQUAL|IODEF_CRITERION_OPERATOR_NOCASE|IODEF_CRITERION_OPERATOR_NOT; }
 | TOK_NOT                           { cur_operator = $$ = IODEF_CRITERION_OPERATOR_NULL; }
-| TOK_ERROR                         { real_ret = prelude_error_verbose(PRELUDE_ERROR_IODEF_CRITERIA_PARSE,
+| TOK_ERROR                         { real_ret = libiodef_error_verbose(LIBIODEF_ERROR_IODEF_CRITERIA_PARSE,
                                                                        "Criteria parser reported: Invalid operator found"); YYERROR; }
 ;
 
@@ -308,8 +308,8 @@ operator:       TOK_OPERATOR_AND        { $$ = operator_and; }
 
 static void yyerror(char *s)  /* Called by yyparse on error */
 {
-        real_ret = prelude_error_verbose_make(PRELUDE_ERROR_SOURCE_IODEF_CRITERIA,
-                                              PRELUDE_ERROR_IODEF_CRITERIA_PARSE,
+        real_ret = libiodef_error_verbose_make(LIBIODEF_ERROR_SOURCE_IODEF_CRITERIA,
+                                              LIBIODEF_ERROR_IODEF_CRITERIA_PARSE,
                                               "IODEF-Criteria parser: %s", s);
 }
 
@@ -319,7 +319,7 @@ int iodef_criteria_new_from_string(iodef_criteria_t **new_criteria, const char *
         int ret;
         void *state;
 
-        prelude_return_val_if_fail(str, -1);
+        libiodef_return_val_if_fail(str, -1);
 
         gl_lock_lock(_criteria_parse_mutex);
 
@@ -336,7 +336,7 @@ int iodef_criteria_new_from_string(iodef_criteria_t **new_criteria, const char *
                 if ( real_ret )
                         ret = real_ret;
                 else
-                        ret = prelude_error_make(PRELUDE_ERROR_SOURCE_IODEF_CRITERIA, PRELUDE_ERROR_IODEF_CRITERIA_PARSE);
+                        ret = libiodef_error_make(LIBIODEF_ERROR_SOURCE_IODEF_CRITERIA, LIBIODEF_ERROR_IODEF_CRITERIA_PARSE);
 
                 if ( processed_criteria )
                         iodef_criteria_destroy(processed_criteria);

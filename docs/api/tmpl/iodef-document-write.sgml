@@ -7,7 +7,7 @@ Writing IODEF class to a message buffer
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
-If you're not willing to use the prelude_client_send_iodef() function, because for
+If you're not willing to use the libiodef_client_send_iodef() function, because for
 example you want more control over how a message is sent, you can use the iodef-document-write
 API to send your message manually.
 </para>
@@ -16,13 +16,13 @@ API to send your message manually.
 The functions defined in this API all take an IODEF object as an argument and
 dump this object in a format suitable for writing it to a socket or a file 
 (covering, for example, convertion from host byte order to network byte order), 
-to the provided #prelude_msgbuf_t buffer.
+to the provided #libiodef_msgbuf_t buffer.
 </para>
 
 <para>
-The #prelude_msgbuf_t object is just a buffer holding a #prelude_msg_t object. When
-the buffer is full, the user defined function for #prelude_msgbuf_t will be called,
-and the user can write his message using the prelude_msg_write() function.
+The #libiodef_msgbuf_t object is just a buffer holding a #libiodef_msg_t object. When
+the buffer is full, the user defined function for #libiodef_msgbuf_t will be called,
+and the user can write his message using the libiodef_msg_write() function.
 </para>
 
 <para>
@@ -33,8 +33,8 @@ iodef_document_write(message, msgbuf);
 
 <!-- ##### SECTION See_Also ##### -->
 <para>
-#prelude_msgbuf_t
-#prelude_msg_t
+#libiodef_msgbuf_t
+#libiodef_msg_t
 </para>
 
 <!-- ##### SECTION Stability_Level ##### -->

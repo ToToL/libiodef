@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+               "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"
+[
+  <!ENTITY % local.common.attrib "xmlns:xi  CDATA  #FIXED 'http://www.w3.org/2003/XInclude'">
+]>
+<book id="index">
+  <bookinfo>
+    <title>libiodef Reference Manual</title>
+    <releaseinfo>
+      for libiodef [VERSION].
+      The latest version of this documentation can be found on-line at
+      <ulink role="online-location" url="http://[SERVER]/libiodef/index.html">http://[SERVER]/libiodef/</ulink>.
+    </releaseinfo>
+  </bookinfo>
+
+  <chapter>
+    <title>[Insert title here]</title>
+        <xi:include href="xml/libiodef-error.xml"/>
+    <xi:include href="xml/libiodef-linked-object.xml"/>
+    <xi:include href="xml/iodef-tree-wrap.xml"/>
+    <xi:include href="xml/libiodef-io.xml"/>
+    <xi:include href="xml/libiodef-log.xml"/>
+    <xi:include href="xml/libiodef-msg.xml"/>
+    <xi:include href="xml/libiodef-option.xml"/>
+    <xi:include href="xml/libiodef-connection.xml"/>
+    <xi:include href="xml/libiodef-string.xml"/>
+    <xi:include href="xml/iodef-document-print.xml"/>
+    <xi:include href="xml/libiodef-msgbuf.xml"/>
+    <xi:include href="xml/iodef-document-write.xml"/>
+    <xi:include href="xml/libiodef-ident.xml"/>
+    <xi:include href="xml/libiodef-client.xml"/>
+    <xi:include href="xml/libiodef-client-profile.xml"/>
+    <xi:include href="xml/libiodef-plugin.xml"/>
+    <xi:include href="xml/libiodef-hash.xml"/>
+    <xi:include href="xml/libiodef-failover.xml"/>
+    <xi:include href="xml/libiodef-connection-pool.xml"/>
+    <xi:include href="xml/libiodef-async.xml"/>
+    <xi:include href="xml/iodef-document-read.xml"/>
+    <xi:include href="xml/libiodef-list.xml"/>
+    <xi:include href="xml/libiodef-inttypes.xml"/>
+    <xi:include href="xml/libiodef.xml"/>
+    <xi:include href="xml/libiodef-option-wide.xml"/>
+    <xi:include href="xml/iodef-criteria.xml"/>
+    <xi:include href="xml/iodef-data.xml"/>
+    <xi:include href="xml/iodef-criterion-value.xml"/>
+    <xi:include href="xml/iodef-path.xml"/>
+    <xi:include href="xml/iodef-additional-data.xml"/>
+    <xi:include href="xml/iodef-time.xml"/>
+    <xi:include href="xml/libiodef-timer.xml"/>
+    <xi:include href="xml/iodef-value.xml"/>
+
+  </chapter>
+  <chapter id="object-tree">
+    <title>Object Hierarchy</title>
+     <xi:include href="xml/tree_index.sgml"/>
+  </chapter>
+  <index id="api-index-full">
+    <title>API Index</title>
+    <xi:include href="xml/api-index-full.xml"><xi:fallback /></xi:include>
+  </index>
+  <index id="deprecated-api-index" role="deprecated">
+    <title>Index of deprecated API</title>
+    <xi:include href="xml/api-index-deprecated.xml"><xi:fallback /></xi:include>
+  </index>
+
+  <xi:include href="xml/annotation-glossary.xml"><xi:fallback /></xi:include>
+</book>

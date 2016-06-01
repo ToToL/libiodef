@@ -1,9 +1,9 @@
 /*****
 *
 * Copyright (C) 2004-2016 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoann.v@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann.v@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@
 *
 *****/
 
-#ifndef _LIBPRELUDE_IODEF_CRITERIA_H
-#define _LIBPRELUDE_IODEF_CRITERIA_H
+#ifndef _LIBIODEF_IODEF_CRITERIA_H
+#define _LIBIODEF_IODEF_CRITERIA_H
 
 #ifdef __cplusplus
  extern "C" {
@@ -72,8 +72,8 @@ int iodef_criterion_new(iodef_criterion_t **criterion, iodef_path_t *path,
 void iodef_criterion_destroy(iodef_criterion_t *criterion);
 iodef_criteria_t *iodef_criteria_ref(iodef_criteria_t *criteria);
 int iodef_criterion_clone(const iodef_criterion_t *criterion, iodef_criterion_t **dst);
-int iodef_criterion_print(const iodef_criterion_t *criterion, prelude_io_t *fd);
-int iodef_criterion_to_string(const iodef_criterion_t *criterion, prelude_string_t *out);
+int iodef_criterion_print(const iodef_criterion_t *criterion, libiodef_io_t *fd);
+int iodef_criterion_to_string(const iodef_criterion_t *criterion, libiodef_string_t *out);
 iodef_path_t *iodef_criterion_get_path(const iodef_criterion_t *criterion);
 iodef_criterion_value_t *iodef_criterion_get_value(const iodef_criterion_t *criterion);
 iodef_criterion_operator_t iodef_criterion_get_operator(const iodef_criterion_t *criterion);
@@ -82,9 +82,9 @@ int iodef_criterion_match(const iodef_criterion_t *criterion, void *object);
 int iodef_criteria_new(iodef_criteria_t **criteria);
 void iodef_criteria_destroy(iodef_criteria_t *criteria);
 int iodef_criteria_clone(iodef_criteria_t *src, iodef_criteria_t **dst);
-int iodef_criteria_print(const iodef_criteria_t *criteria, prelude_io_t *fd);
-int iodef_criteria_to_string(const iodef_criteria_t *criteria, prelude_string_t *out);
-prelude_bool_t iodef_criteria_is_criterion(const iodef_criteria_t *criteria);
+int iodef_criteria_print(const iodef_criteria_t *criteria, libiodef_io_t *fd);
+int iodef_criteria_to_string(const iodef_criteria_t *criteria, libiodef_string_t *out);
+libiodef_bool_t iodef_criteria_is_criterion(const iodef_criteria_t *criteria);
 iodef_criterion_t *iodef_criteria_get_criterion(const iodef_criteria_t *criteria);
 void iodef_criteria_set_criterion(iodef_criteria_t *criteria, iodef_criterion_t *criterion);
 
@@ -100,12 +100,12 @@ iodef_criteria_t *iodef_criteria_get_and(const iodef_criteria_t *criteria);
 
 int iodef_criteria_new_from_string(iodef_criteria_t **criteria, const char *str);
 
-void iodef_criteria_set_negation(iodef_criteria_t *criteria, prelude_bool_t negate);
+void iodef_criteria_set_negation(iodef_criteria_t *criteria, libiodef_bool_t negate);
 
-prelude_bool_t iodef_criteria_get_negation(const iodef_criteria_t *criteria);
+libiodef_bool_t iodef_criteria_get_negation(const iodef_criteria_t *criteria);
 
 #ifdef __cplusplus
  }
 #endif
 
-#endif /* _LIBPRELUDE_IODEF_CRITERIA_H */
+#endif /* _LIBIODEF_IODEF_CRITERIA_H */

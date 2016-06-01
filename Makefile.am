@@ -41,7 +41,7 @@ MAINTAINERCLEANFILES = \
 # Spool directory for report saving is mode 
 
 install-data-local:
-	$(INSTALL) -d -m 711 $(DESTDIR)$(PRELUDE_SPOOL_DIR);
+	$(INSTALL) -d -m 711 $(DESTDIR)$(LIBIODEF_SPOOL_DIR);
 
 dist-hook:
 	@if test -d "$(srcdir)/.git"; then	\

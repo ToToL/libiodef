@@ -5,12 +5,12 @@ sys.path.append('.')
 sys.path.append('./.libs')
 
 try:
-	import PreludeEasy
+	import LibIodefEasy
 except Exception,e:
 	print "Import failed: ",e
-	print "Try 'cd ./.libs && ln -s libprelude_python.so _PreludeEasy.so'"
+	print "Try 'cd ./.libs && ln -s libiodef_python.so _LibIodefEasy.so'"
 	sys.exit(1)
 
-iodef = PreludeEasy.IODEF()
+iodef = LibIodefEasy.IODEF()
 iodef.ReadFromFile("foo.bin")
 iodef.PrintToStdout()

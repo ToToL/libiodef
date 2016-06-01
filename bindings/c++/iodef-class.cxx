@@ -3,7 +3,7 @@
 * Copyright (C) 2014-2016 CS-SI. All Rights Reserved.
 * Author: Yoann Vandoorselaere <yoannv@gmail.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ IODEFClass::IODEFClass(IODEFClass &parent, int child_id, int depth)
         IODEFClass::IODEFClassElem elem;
 
         if ( depth >= 16 )
-                throw PreludeError(prelude_error(PRELUDE_ERROR_IODEF_PATH_DEPTH));
+                throw LibIodefError(libiodef_error(LIBIODEF_ERROR_IODEF_PATH_DEPTH));
 
         _depth = depth;
         _pathelem = parent._pathelem;
@@ -100,7 +100,7 @@ std::string IODEFClass::toString(void)
 bool IODEFClass::isList(void)
 {
         if ( _pathelem.size() == 0 )
-                throw PreludeError("Already in rootclass, cannot retrieve parents info");
+                throw LibIodefError("Already in rootclass, cannot retrieve parents info");
 
         return iodef_class_is_child_list(_pathelem.back().parent_id, _pathelem.back().idx);
 }
@@ -109,7 +109,7 @@ bool IODEFClass::isList(void)
 bool IODEFClass::isKeyedList(void)
 {
         if ( _pathelem.size() == 0 )
-                throw PreludeError("Already in rootclass, cannot retrieve parents info");
+                throw LibIodefError("Already in rootclass, cannot retrieve parents info");
 
         return iodef_class_is_child_keyed_list(_pathelem.back().parent_id, _pathelem.back().idx);
 }
@@ -118,7 +118,7 @@ bool IODEFClass::isKeyedList(void)
 Iodef::IODEFValue::IODEFValueTypeEnum IODEFClass::getValueType(void)
 {
         if ( _pathelem.size() == 0 )
-                throw PreludeError("Already in rootclass, cannot retrieve parents info");
+                throw LibIodefError("Already in rootclass, cannot retrieve parents info");
 
         return (Iodef::IODEFValue::IODEFValueTypeEnum) iodef_class_get_child_value_type(_pathelem.back().parent_id, _pathelem.back().idx);
 }
@@ -171,7 +171,7 @@ IODEFClass IODEFClass::get(const std::string &name)
         int i = iodef_class_find_child(_id, name.c_str());
 
         if ( i < 0 )
-                throw PreludeError(i);
+                throw LibIodefError(i);
 
         return get(i);
 }
@@ -186,7 +186,7 @@ IODEFClass IODEFClass::get(int i)
         if ( cl < 0 ) {
                 vl = (iodef_value_type_id_t) iodef_class_get_child_value_type(_id, i);
                 if ( vl < 0 )
-                        throw PreludeError(vl);
+                        throw LibIodefError(vl);
         }
 
         return IODEFClass(*this, i, _depth + 1);
@@ -201,7 +201,7 @@ std::vector<std::string> IODEFClass::getEnumValues(void)
         std::vector<std::string> ev;
 
         if ( getValueType() != IODEFValue::TYPE_ENUM )
-                throw PreludeError("Input class is not enumeration");
+                throw LibIodefError("Input class is not enumeration");
 
         do {
                 ret = iodef_class_enum_to_string(_id, i++);
@@ -222,7 +222,7 @@ IODEFCriterion::IODEFCriterionOperatorEnum IODEFClass::getApplicableOperator(voi
 
         ret = iodef_value_type_get_applicable_operators((iodef_value_type_id_t) getValueType(), &op);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 
         return (IODEFCriterion::IODEFCriterionOperatorEnum) ret;
 }

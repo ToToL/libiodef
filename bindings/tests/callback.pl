@@ -7,14 +7,14 @@ push @INC,".";
 push @INC,"./perl";
 push @INC,"./.libs";
 
-eval  { require PreludeEasy; };
-die "Could not load PreludeEasy ($@).\nTry 'cd ./.libs && ln -s libprelude_perl.so PreludeEasy.so'" if $@;
+eval  { require LibIodefEasy; };
+die "Could not load LibIodefEasy ($@).\nTry 'cd ./.libs && ln -s libiodef_perl.so LibIodefEasy.so'" if $@;
 
 sub PrintUID
 {
 	print "UID is $<\n";
 }
 
-PreludeEasy::set_perlmethod(\&PrintUID);
+LibIodefEasy::set_perlmethod(\&PrintUID);
 
-PreludeEasy::test_fct();
+LibIodefEasy::test_fct();

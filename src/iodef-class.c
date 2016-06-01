@@ -1,10 +1,10 @@
 /*****
 *
 * Copyright (C) 2002-2016 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoann.v@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann.v@libiodef-ids.com>
 * Author: Krzysztof Zaraska
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -31,13 +31,13 @@
 #include <stdarg.h>
 
 #include "libmissing.h"
-#include "prelude-list.h"
-#include "prelude-log.h"
-#include "prelude-inttypes.h"
-#include "prelude-string.h"
+#include "libiodef-list.h"
+#include "libiodef-log.h"
+#include "libiodef-inttypes.h"
+#include "libiodef-string.h"
 
-#define PRELUDE_ERROR_SOURCE_DEFAULT PRELUDE_ERROR_SOURCE_IODEF_TYPE
-#include "prelude-error.h"
+#define LIBIODEF_ERROR_SOURCE_DEFAULT LIBIODEF_ERROR_SOURCE_IODEF_TYPE
+#include "libiodef-error.h"
 
 #include "iodef-time.h"
 #include "iodef-data.h"
@@ -56,7 +56,7 @@
 static inline int is_class_valid(iodef_class_id_t class)
 {
         if ( class < 0 || (size_t) class >= sizeof(object_data) / sizeof(*object_data) )
-                return prelude_error_verbose(PRELUDE_ERROR_IODEF_CLASS_UNKNOWN, "Unknown IODEF class '%d'", (int) class);
+                return libiodef_error_verbose(LIBIODEF_ERROR_IODEF_CLASS_UNKNOWN, "Unknown IODEF class '%d'", (int) class);
 
         return 0;
 }
@@ -71,7 +71,7 @@ static inline int is_child_valid(iodef_class_id_t class, iodef_class_child_id_t 
                 return ret;
 
         if ( child < 0 || (size_t) child >= object_data[class].children_list_elem )
-                return prelude_error_verbose(PRELUDE_ERROR_IODEF_CLASS_UNKNOWN_CHILD, "Unknown IODEF child '%d' for class '%s'",
+                return libiodef_error_verbose(LIBIODEF_ERROR_IODEF_CLASS_UNKNOWN_CHILD, "Unknown IODEF child '%d' for class '%s'",
                                              (int) child, object_data[class].name);
 
         return 0;
@@ -98,13 +98,13 @@ iodef_class_child_id_t iodef_class_find_child(iodef_class_id_t class, const char
                                 return i;
         }
 
-        return prelude_error_verbose(PRELUDE_ERROR_IODEF_CLASS_UNKNOWN_CHILD, "Unknown IODEF child '%s' for class '%s'", name, iodef_class_get_name(class));
+        return libiodef_error_verbose(LIBIODEF_ERROR_IODEF_CLASS_UNKNOWN_CHILD, "Unknown IODEF child '%s' for class '%s'", name, iodef_class_get_name(class));
 }
 
 
 
 
-prelude_bool_t iodef_class_is_child_union_member(iodef_class_id_t class, iodef_class_child_id_t child)
+libiodef_bool_t iodef_class_is_child_union_member(iodef_class_id_t class, iodef_class_child_id_t child)
 {
         int ret;
 
@@ -117,7 +117,7 @@ prelude_bool_t iodef_class_is_child_union_member(iodef_class_id_t class, iodef_c
 
 
 
-prelude_bool_t iodef_class_is_child_list(iodef_class_id_t class, iodef_class_child_id_t child)
+libiodef_bool_t iodef_class_is_child_list(iodef_class_id_t class, iodef_class_child_id_t child)
 {
         int ret;
 
@@ -130,7 +130,7 @@ prelude_bool_t iodef_class_is_child_list(iodef_class_id_t class, iodef_class_chi
 
 
 
-prelude_bool_t iodef_class_is_child_keyed_list(iodef_class_id_t class, iodef_class_child_id_t child)
+libiodef_bool_t iodef_class_is_child_keyed_list(iodef_class_id_t class, iodef_class_child_id_t child)
 {
         int ret;
 
@@ -180,7 +180,7 @@ int iodef_class_get_child_union_id(iodef_class_id_t class, iodef_class_child_id_
 
         c = &object_data[class].children_list[child];
         if ( ! c->union_id )
-                return prelude_error(PRELUDE_ERROR_IODEF_CLASS_CHILD_NOT_UNION);
+                return libiodef_error(LIBIODEF_ERROR_IODEF_CLASS_CHILD_NOT_UNION);
 
         return c->union_id;
 }
@@ -198,7 +198,7 @@ iodef_class_id_t iodef_class_get_child_class(iodef_class_id_t class, iodef_class
 
         c = &object_data[class].children_list[child];
         if ( c->type != IODEF_VALUE_TYPE_CLASS && c->type != IODEF_VALUE_TYPE_ENUM )
-                return prelude_error(PRELUDE_ERROR_IODEF_CLASS_CHILD_NOT_CLASS);
+                return libiodef_error(LIBIODEF_ERROR_IODEF_CLASS_CHILD_NOT_CLASS);
 
         return c->class;
 }
@@ -227,7 +227,7 @@ iodef_class_id_t iodef_class_find(const char *name)
                 if ( strcasecmp(object_data[i].name, name) == 0 )
                         return i;
 
-        return prelude_error_verbose(PRELUDE_ERROR_IODEF_CLASS_UNKNOWN_NAME, "Unknown IODEF class '%s'", name);
+        return libiodef_error_verbose(LIBIODEF_ERROR_IODEF_CLASS_UNKNOWN_NAME, "Unknown IODEF class '%s'", name);
 }
 
 
@@ -369,7 +369,7 @@ int iodef_class_ref(iodef_class_id_t class, void *obj)
 
 
 
-int iodef_class_print(iodef_class_id_t class, void *obj, prelude_io_t *fd)
+int iodef_class_print(iodef_class_id_t class, void *obj, libiodef_io_t *fd)
 {
         int ret;
 
@@ -381,7 +381,7 @@ int iodef_class_print(iodef_class_id_t class, void *obj, prelude_io_t *fd)
 }
 
 
-int iodef_class_print_json(iodef_class_id_t class, void *obj, prelude_io_t *fd)
+int iodef_class_print_json(iodef_class_id_t class, void *obj, libiodef_io_t *fd)
 {
         int ret;
         ret = is_class_valid(class);
@@ -392,7 +392,7 @@ int iodef_class_print_json(iodef_class_id_t class, void *obj, prelude_io_t *fd)
 }
 
 
-int iodef_class_print_binary(iodef_class_id_t class, void *obj, prelude_io_t *fd)
+int iodef_class_print_binary(iodef_class_id_t class, void *obj, libiodef_io_t *fd)
 {
         int ret;
         ret = is_class_valid(class);
@@ -413,7 +413,7 @@ const char *iodef_class_get_name(iodef_class_id_t class)
 
 
 
-prelude_bool_t iodef_class_is_listed(iodef_class_id_t class)
+libiodef_bool_t iodef_class_is_listed(iodef_class_id_t class)
 {
         int ret;
 

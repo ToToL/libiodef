@@ -2,10 +2,10 @@
 /*****
 *
 * Copyright (C) 2004-2016 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoann.v@prelude-ids.com>
-* Author: Nicolas Delon <nicolas.delon@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann.v@libiodef-ids.com>
+* Author: Nicolas Delon <nicolas.delon@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -37,27 +37,27 @@
 
 static int indent = 0;
 
-static void print_indent(prelude_io_t *fd)
+static void print_indent(libiodef_io_t *fd)
 {
         int cnt;
 
         for ( cnt = 0; cnt < indent; cnt++ )
-                prelude_io_write(fd, " ", 1);
+                libiodef_io_write(fd, " ", 1);
 }
 
 
 
-static void print_string(prelude_string_t *string, prelude_io_t *fd)
+static void print_string(libiodef_string_t *string, libiodef_io_t *fd)
 {
-        if ( prelude_string_is_empty(string) )
-                prelude_io_write(fd, "<empty>", 7);
+        if ( libiodef_string_is_empty(string) )
+                libiodef_io_write(fd, "<empty>", 7);
         else
-                prelude_io_write(fd, prelude_string_get_string(string), prelude_string_get_len(string));
+                libiodef_io_write(fd, libiodef_string_get_string(string), libiodef_string_get_len(string));
 }
 
 
 
-static void print_uint8(uint8_t i, prelude_io_t *fd)
+static void print_uint8(uint8_t i, libiodef_io_t *fd)
 {
         int len;
         char buf[sizeof("255")];
@@ -66,65 +66,65 @@ static void print_uint8(uint8_t i, prelude_io_t *fd)
          * %hh convertion specifier is not portable.
          */
         len = snprintf(buf, sizeof(buf), "%u", (unsigned int) i);
-        prelude_io_write(fd, buf, len);
+        libiodef_io_write(fd, buf, len);
 }
 
 
-static void print_uint16(uint16_t i, prelude_io_t *fd)
+static void print_uint16(uint16_t i, libiodef_io_t *fd)
 {
         int len;
         char buf[sizeof("65535")];
 
         len = snprintf(buf, sizeof(buf), "%hu", i);
-        prelude_io_write(fd, buf, len);
+        libiodef_io_write(fd, buf, len);
 }
 
 
-static void print_int32(int32_t i, prelude_io_t *fd)
+static void print_int32(int32_t i, libiodef_io_t *fd)
 {
         int len;
         char buf[sizeof("4294967296")];
 
         len = snprintf(buf, sizeof(buf), "%d", i);
-        prelude_io_write(fd, buf, len);
+        libiodef_io_write(fd, buf, len);
 }
 
 
-static void print_uint32(uint32_t i, prelude_io_t *fd)
+static void print_uint32(uint32_t i, libiodef_io_t *fd)
 {
         int len;
         char buf[sizeof("4294967296")];
 
         len = snprintf(buf, sizeof(buf), "%u", i);
-        prelude_io_write(fd, buf, len);
+        libiodef_io_write(fd, buf, len);
 }
 
 
 
-static void print_uint64(uint64_t i, prelude_io_t *fd)
+static void print_uint64(uint64_t i, libiodef_io_t *fd)
 {
         int len;
         char buf[sizeof("18446744073709551616")];
 
-        len = snprintf(buf, sizeof(buf), "%" PRELUDE_PRIu64, i);
-        prelude_io_write(fd, buf, len);
+        len = snprintf(buf, sizeof(buf), "%" LIBIODEF_PRIu64, i);
+        libiodef_io_write(fd, buf, len);
 }
 
 
 
-static void print_float(float f, prelude_io_t *fd)
+static void print_float(float f, libiodef_io_t *fd)
 {
         int len;
         char buf[32];
 
         len = snprintf(buf, sizeof(buf), "%f", f);
-        prelude_io_write(fd, buf, len);
+        libiodef_io_write(fd, buf, len);
 }
 
 
 
 
-static void print_time(iodef_time_t *t, prelude_io_t *fd)
+static void print_time(iodef_time_t *t, libiodef_io_t *fd)
 {
         int len;
         time_t _time;
@@ -144,37 +144,37 @@ static void print_time(iodef_time_t *t, prelude_io_t *fd)
                        tmp, iodef_time_get_usec(t), iodef_time_get_gmt_offset(t) / 3600,
                        iodef_time_get_gmt_offset(t) % 3600 / 60);
 
-        prelude_io_write(fd, buf, len);
+        libiodef_io_write(fd, buf, len);
 }
 
 
 
 /* print data as a string */
 
-static int print_data(iodef_data_t *data, prelude_io_t *fd)
+static int print_data(iodef_data_t *data, libiodef_io_t *fd)
 {
         int ret;
-        prelude_string_t *out;
+        libiodef_string_t *out;
 
-        ret = prelude_string_new(&out);
+        ret = libiodef_string_new(&out);
         if ( ret < 0 )
                 return ret;
 
         ret = iodef_data_to_string(data, out);
         if ( ret < 0 ) {
-                prelude_string_destroy(out);
+                libiodef_string_destroy(out);
                 return ret;
         }
 
-        prelude_io_write(fd, prelude_string_get_string(out), prelude_string_get_len(out));
-        prelude_string_destroy(out);
+        libiodef_io_write(fd, libiodef_string_get_string(out), libiodef_string_get_len(out));
+        libiodef_string_destroy(out);
 
         return 0;
 }
 
 
 
-static void print_enum(const char *s, int i, prelude_io_t *fd)
+static void print_enum(const char *s, int i, libiodef_io_t *fd)
 {
         int len;
         char buf[512];
@@ -183,19 +183,19 @@ static void print_enum(const char *s, int i, prelude_io_t *fd)
                 s = "<invalid enum value>";
 
         len = snprintf(buf, sizeof(buf), "%s (%d)", s, i);
-        prelude_io_write(fd, buf, len);
+        libiodef_io_write(fd, buf, len);
 }
 
 
 /**
  * iodef_additional_data_print:
  * @ptr: Pointer to an iodef_additional_data_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_additional_data_print(iodef_additional_data_t *ptr, prelude_io_t *fd)
+void iodef_additional_data_print(iodef_additional_data_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -209,9 +209,9 @@ void iodef_additional_data_print(iodef_additional_data_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
+                        libiodef_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
                         print_enum(iodef_additional_data_restriction_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -222,51 +222,51 @@ void iodef_additional_data_print(iodef_additional_data_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "type: ", sizeof("type: ") - 1);
+                        libiodef_io_write(fd, "type: ", sizeof("type: ") - 1);
                         print_enum(iodef_additional_data_type_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "formatid: ";
 
                 field = iodef_additional_data_get_formatid(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "meaning: ";
 
                 field = iodef_additional_data_get_meaning(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "ext_dtype: ";
 
                 field = iodef_additional_data_get_ext_dtype(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -278,7 +278,7 @@ void iodef_additional_data_print(iodef_additional_data_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
 
                         if ( iodef_additional_data_get_type(ptr) != IODEF_ADDITIONAL_DATA_TYPE_NTPSTAMP )
                                 print_data(field, fd);
@@ -286,23 +286,23 @@ void iodef_additional_data_print(iodef_additional_data_t *ptr, prelude_io_t *fd)
                         else {
                                 int ret;
                                 uint64_t i;
-                                prelude_string_t *out;
+                                libiodef_string_t *out;
 
-                                ret = prelude_string_new(&out);
+                                ret = libiodef_string_new(&out);
                                 if ( ret < 0 )
                                         return;
 
                                 i = iodef_data_get_int(field);
-                                ret = prelude_string_sprintf(out, "0x%" PRELUDE_PRIx32 ".0x%" PRELUDE_PRIx32 "", (uint32_t) (i >> 32), (uint32_t) i);
+                                ret = libiodef_string_sprintf(out, "0x%" LIBIODEF_PRIx32 ".0x%" LIBIODEF_PRIx32 "", (uint32_t) (i >> 32), (uint32_t) i);
                                 if ( ret < 0 ) {
-                                        prelude_string_destroy(out);
+                                        libiodef_string_destroy(out);
                                         return;
                                 }
 
-                                prelude_io_write(fd, prelude_string_get_string(out), prelude_string_get_len(out));
-                                prelude_string_destroy(out);
+                                libiodef_io_write(fd, libiodef_string_get_string(out), libiodef_string_get_len(out));
+                                libiodef_string_destroy(out);
                         }
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -312,12 +312,12 @@ void iodef_additional_data_print(iodef_additional_data_t *ptr, prelude_io_t *fd)
 /**
  * iodef_email_print:
  * @ptr: Pointer to an iodef_email_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_email_print(iodef_email_t *ptr, prelude_io_t *fd)
+void iodef_email_print(iodef_email_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -331,23 +331,23 @@ void iodef_email_print(iodef_email_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "meaning: ", sizeof("meaning: ") - 1);
+                        libiodef_io_write(fd, "meaning: ", sizeof("meaning: ") - 1);
                         print_enum(iodef_email_meaning_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "email: ";
 
                 field = iodef_email_get_email(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -357,12 +357,12 @@ void iodef_email_print(iodef_email_t *ptr, prelude_io_t *fd)
 /**
  * iodef_registry_handle_print:
  * @ptr: Pointer to an iodef_registry_handle_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_registry_handle_print(iodef_registry_handle_t *ptr, prelude_io_t *fd)
+void iodef_registry_handle_print(iodef_registry_handle_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -376,23 +376,23 @@ void iodef_registry_handle_print(iodef_registry_handle_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "registry: ", sizeof("registry: ") - 1);
+                        libiodef_io_write(fd, "registry: ", sizeof("registry: ") - 1);
                         print_enum(iodef_registry_handle_registry_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "ext_registry: ";
 
                 field = iodef_registry_handle_get_ext_registry(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -402,12 +402,12 @@ void iodef_registry_handle_print(iodef_registry_handle_t *ptr, prelude_io_t *fd)
 /**
  * iodef_postal_address_print:
  * @ptr: Pointer to an iodef_postal_address_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_postal_address_print(iodef_postal_address_t *ptr, prelude_io_t *fd)
+void iodef_postal_address_print(iodef_postal_address_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -421,9 +421,9 @@ void iodef_postal_address_print(iodef_postal_address_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "lang: ", sizeof("lang: ") - 1);
+                        libiodef_io_write(fd, "lang: ", sizeof("lang: ") - 1);
                         print_enum(iodef_postal_address_lang_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -434,9 +434,9 @@ void iodef_postal_address_print(iodef_postal_address_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "meaning: ", sizeof("meaning: ") - 1);
+                        libiodef_io_write(fd, "meaning: ", sizeof("meaning: ") - 1);
                         print_enum(iodef_postal_address_meaning_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -446,12 +446,12 @@ void iodef_postal_address_print(iodef_postal_address_t *ptr, prelude_io_t *fd)
 /**
  * iodef_contact_print:
  * @ptr: Pointer to an iodef_contact_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_contact_print(iodef_contact_t *ptr, prelude_io_t *fd)
+void iodef_contact_print(iodef_contact_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -467,7 +467,7 @@ void iodef_contact_print(iodef_contact_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "additional_data(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_additional_data_print(elem, fd);
 
                         cnt++;
@@ -475,31 +475,31 @@ void iodef_contact_print(iodef_contact_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "fax: ";
 
                 field = iodef_contact_get_fax(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
                 char buf[128];
-                prelude_string_t *elem = NULL;
+                libiodef_string_t *elem = NULL;
                 int cnt = 0, len;
 
                 while ( (elem = iodef_contact_get_next_description(ptr, elem)) ) {
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "description(%d): ", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         print_string(elem, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
 
                         cnt++;
                 }
@@ -507,16 +507,16 @@ void iodef_contact_print(iodef_contact_t *ptr, prelude_io_t *fd)
 
         {
                 char buf[128];
-                prelude_string_t *elem = NULL;
+                libiodef_string_t *elem = NULL;
                 int cnt = 0, len;
 
                 while ( (elem = iodef_contact_get_next_telephone(ptr, elem)) ) {
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "telephone(%d): ", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         print_string(elem, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
 
                         cnt++;
                 }
@@ -531,7 +531,7 @@ void iodef_contact_print(iodef_contact_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "registry_handle(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_registry_handle_print(elem, fd);
 
                         cnt++;
@@ -547,7 +547,7 @@ void iodef_contact_print(iodef_contact_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "contact(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_contact_print(elem, fd);
 
                         cnt++;
@@ -555,30 +555,30 @@ void iodef_contact_print(iodef_contact_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "contact_name: ";
 
                 field = iodef_contact_get_contact_name(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "timezone: ";
 
                 field = iodef_contact_get_timezone(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -589,7 +589,7 @@ void iodef_contact_print(iodef_contact_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, "postal_address:\n", sizeof("postal_address:\n") - 1);
+                        libiodef_io_write(fd, "postal_address:\n", sizeof("postal_address:\n") - 1);
                         iodef_postal_address_print(field, fd);
                 }
         }
@@ -603,7 +603,7 @@ void iodef_contact_print(iodef_contact_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "email(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_email_print(elem, fd);
 
                         cnt++;
@@ -617,9 +617,9 @@ void iodef_contact_print(iodef_contact_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "type: ", sizeof("type: ") - 1);
+                        libiodef_io_write(fd, "type: ", sizeof("type: ") - 1);
                         print_enum(iodef_contact_type_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -630,37 +630,37 @@ void iodef_contact_print(iodef_contact_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "role: ", sizeof("role: ") - 1);
+                        libiodef_io_write(fd, "role: ", sizeof("role: ") - 1);
                         print_enum(iodef_contact_role_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "ext_type: ";
 
                 field = iodef_contact_get_ext_type(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "ext_role: ";
 
                 field = iodef_contact_get_ext_role(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -671,9 +671,9 @@ void iodef_contact_print(iodef_contact_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
+                        libiodef_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
                         print_enum(iodef_contact_restriction_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -683,12 +683,12 @@ void iodef_contact_print(iodef_contact_t *ptr, prelude_io_t *fd)
 /**
  * iodef_incident_id_print:
  * @ptr: Pointer to an iodef_incident_id_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_incident_id_print(iodef_incident_id_t *ptr, prelude_io_t *fd)
+void iodef_incident_id_print(iodef_incident_id_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -696,30 +696,30 @@ void iodef_incident_id_print(iodef_incident_id_t *ptr, prelude_io_t *fd)
         indent += 8;
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "instance: ";
 
                 field = iodef_incident_id_get_instance(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "name: ";
 
                 field = iodef_incident_id_get_name(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -730,9 +730,9 @@ void iodef_incident_id_print(iodef_incident_id_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
+                        libiodef_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
                         print_enum(iodef_incident_id_restriction_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -742,12 +742,12 @@ void iodef_incident_id_print(iodef_incident_id_t *ptr, prelude_io_t *fd)
 /**
  * iodef_alternative_id_print:
  * @ptr: Pointer to an iodef_alternative_id_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_alternative_id_print(iodef_alternative_id_t *ptr, prelude_io_t *fd)
+void iodef_alternative_id_print(iodef_alternative_id_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -763,7 +763,7 @@ void iodef_alternative_id_print(iodef_alternative_id_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "incident_id(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_incident_id_print(elem, fd);
 
                         cnt++;
@@ -777,9 +777,9 @@ void iodef_alternative_id_print(iodef_alternative_id_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
+                        libiodef_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
                         print_enum(iodef_alternative_id_restriction_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -789,12 +789,12 @@ void iodef_alternative_id_print(iodef_alternative_id_t *ptr, prelude_io_t *fd)
 /**
  * iodef_related_activity_print:
  * @ptr: Pointer to an iodef_related_activity_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_related_activity_print(iodef_related_activity_t *ptr, prelude_io_t *fd)
+void iodef_related_activity_print(iodef_related_activity_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -803,16 +803,16 @@ void iodef_related_activity_print(iodef_related_activity_t *ptr, prelude_io_t *f
 
         {
                 char buf[128];
-                prelude_string_t *elem = NULL;
+                libiodef_string_t *elem = NULL;
                 int cnt = 0, len;
 
                 while ( (elem = iodef_related_activity_get_next_url(ptr, elem)) ) {
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "url(%d): ", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         print_string(elem, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
 
                         cnt++;
                 }
@@ -827,7 +827,7 @@ void iodef_related_activity_print(iodef_related_activity_t *ptr, prelude_io_t *f
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "incident_id(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_incident_id_print(elem, fd);
 
                         cnt++;
@@ -841,9 +841,9 @@ void iodef_related_activity_print(iodef_related_activity_t *ptr, prelude_io_t *f
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
+                        libiodef_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
                         print_enum(iodef_related_activity_restriction_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -853,12 +853,12 @@ void iodef_related_activity_print(iodef_related_activity_t *ptr, prelude_io_t *f
 /**
  * iodef_history_item_print:
  * @ptr: Pointer to an iodef_history_item_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_history_item_print(iodef_history_item_t *ptr, prelude_io_t *fd)
+void iodef_history_item_print(iodef_history_item_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -874,7 +874,7 @@ void iodef_history_item_print(iodef_history_item_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "additional_data(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_additional_data_print(elem, fd);
 
                         cnt++;
@@ -888,23 +888,23 @@ void iodef_history_item_print(iodef_history_item_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, "incident_id:\n", sizeof("incident_id:\n") - 1);
+                        libiodef_io_write(fd, "incident_id:\n", sizeof("incident_id:\n") - 1);
                         iodef_incident_id_print(field, fd);
                 }
         }
 
         {
                 char buf[128];
-                prelude_string_t *elem = NULL;
+                libiodef_string_t *elem = NULL;
                 int cnt = 0, len;
 
                 while ( (elem = iodef_history_item_get_next_description(ptr, elem)) ) {
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "description(%d): ", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         print_string(elem, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
 
                         cnt++;
                 }
@@ -917,7 +917,7 @@ void iodef_history_item_print(iodef_history_item_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, "contact:\n", sizeof("contact:\n") - 1);
+                        libiodef_io_write(fd, "contact:\n", sizeof("contact:\n") - 1);
                         iodef_contact_print(field, fd);
                 }
         }
@@ -930,9 +930,9 @@ void iodef_history_item_print(iodef_history_item_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_time(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -943,9 +943,9 @@ void iodef_history_item_print(iodef_history_item_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "action: ", sizeof("action: ") - 1);
+                        libiodef_io_write(fd, "action: ", sizeof("action: ") - 1);
                         print_enum(iodef_history_item_action_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -956,23 +956,23 @@ void iodef_history_item_print(iodef_history_item_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
+                        libiodef_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
                         print_enum(iodef_history_item_restriction_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "ext_action: ";
 
                 field = iodef_history_item_get_ext_action(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -982,12 +982,12 @@ void iodef_history_item_print(iodef_history_item_t *ptr, prelude_io_t *fd)
 /**
  * iodef_history_print:
  * @ptr: Pointer to an iodef_history_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_history_print(iodef_history_t *ptr, prelude_io_t *fd)
+void iodef_history_print(iodef_history_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -1003,7 +1003,7 @@ void iodef_history_print(iodef_history_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "history_item(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_history_item_print(elem, fd);
 
                         cnt++;
@@ -1017,9 +1017,9 @@ void iodef_history_print(iodef_history_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
+                        libiodef_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
                         print_enum(iodef_history_restriction_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -1029,12 +1029,12 @@ void iodef_history_print(iodef_history_t *ptr, prelude_io_t *fd)
 /**
  * iodef_expectation_print:
  * @ptr: Pointer to an iodef_expectation_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_expectation_print(iodef_expectation_t *ptr, prelude_io_t *fd)
+void iodef_expectation_print(iodef_expectation_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -1049,24 +1049,24 @@ void iodef_expectation_print(iodef_expectation_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_time(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
                 char buf[128];
-                prelude_string_t *elem = NULL;
+                libiodef_string_t *elem = NULL;
                 int cnt = 0, len;
 
                 while ( (elem = iodef_expectation_get_next_description(ptr, elem)) ) {
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "description(%d): ", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         print_string(elem, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
 
                         cnt++;
                 }
@@ -1080,9 +1080,9 @@ void iodef_expectation_print(iodef_expectation_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_time(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -1093,7 +1093,7 @@ void iodef_expectation_print(iodef_expectation_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, "contact:\n", sizeof("contact:\n") - 1);
+                        libiodef_io_write(fd, "contact:\n", sizeof("contact:\n") - 1);
                         iodef_contact_print(field, fd);
                 }
         }
@@ -1105,9 +1105,9 @@ void iodef_expectation_print(iodef_expectation_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "action: ", sizeof("action: ") - 1);
+                        libiodef_io_write(fd, "action: ", sizeof("action: ") - 1);
                         print_enum(iodef_expectation_action_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -1118,23 +1118,23 @@ void iodef_expectation_print(iodef_expectation_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
+                        libiodef_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
                         print_enum(iodef_expectation_restriction_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "ext_action: ";
 
                 field = iodef_expectation_get_ext_action(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -1145,9 +1145,9 @@ void iodef_expectation_print(iodef_expectation_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "severity: ", sizeof("severity: ") - 1);
+                        libiodef_io_write(fd, "severity: ", sizeof("severity: ") - 1);
                         print_enum(iodef_expectation_severity_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -1157,12 +1157,12 @@ void iodef_expectation_print(iodef_expectation_t *ptr, prelude_io_t *fd)
 /**
  * iodef_record_pattern_print:
  * @ptr: Pointer to an iodef_record_pattern_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_record_pattern_print(iodef_record_pattern_t *ptr, prelude_io_t *fd)
+void iodef_record_pattern_print(iodef_record_pattern_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -1176,9 +1176,9 @@ void iodef_record_pattern_print(iodef_record_pattern_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "offsetunit: ", sizeof("offsetunit: ") - 1);
+                        libiodef_io_write(fd, "offsetunit: ", sizeof("offsetunit: ") - 1);
                         print_enum(iodef_record_pattern_offsetunit_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -1190,23 +1190,23 @@ void iodef_record_pattern_print(iodef_record_pattern_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_uint32(*field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "ext_type: ";
 
                 field = iodef_record_pattern_get_ext_type(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -1218,23 +1218,23 @@ void iodef_record_pattern_print(iodef_record_pattern_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_uint32(*field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "ext_offsetunit: ";
 
                 field = iodef_record_pattern_get_ext_offsetunit(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -1245,9 +1245,9 @@ void iodef_record_pattern_print(iodef_record_pattern_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "type: ", sizeof("type: ") - 1);
+                        libiodef_io_write(fd, "type: ", sizeof("type: ") - 1);
                         print_enum(iodef_record_pattern_type_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -1257,12 +1257,12 @@ void iodef_record_pattern_print(iodef_record_pattern_t *ptr, prelude_io_t *fd)
 /**
  * iodef_record_item_print:
  * @ptr: Pointer to an iodef_record_item_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_record_item_print(iodef_record_item_t *ptr, prelude_io_t *fd)
+void iodef_record_item_print(iodef_record_item_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -1276,9 +1276,9 @@ void iodef_record_item_print(iodef_record_item_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
+                        libiodef_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
                         print_enum(iodef_record_item_restriction_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -1289,51 +1289,51 @@ void iodef_record_item_print(iodef_record_item_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "dtype: ", sizeof("dtype: ") - 1);
+                        libiodef_io_write(fd, "dtype: ", sizeof("dtype: ") - 1);
                         print_enum(iodef_record_item_dtype_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "formatid: ";
 
                 field = iodef_record_item_get_formatid(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "meaning: ";
 
                 field = iodef_record_item_get_meaning(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "ext_dtype: ";
 
                 field = iodef_record_item_get_ext_dtype(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -1345,9 +1345,9 @@ void iodef_record_item_print(iodef_record_item_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_data(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -1357,12 +1357,12 @@ void iodef_record_item_print(iodef_record_item_t *ptr, prelude_io_t *fd)
 /**
  * iodef_application_print:
  * @ptr: Pointer to an iodef_application_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_application_print(iodef_application_t *ptr, prelude_io_t *fd)
+void iodef_application_print(iodef_application_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -1370,114 +1370,114 @@ void iodef_application_print(iodef_application_t *ptr, prelude_io_t *fd)
         indent += 8;
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "url: ";
 
                 field = iodef_application_get_url(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "vendor: ";
 
                 field = iodef_application_get_vendor(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "name: ";
 
                 field = iodef_application_get_name(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "family: ";
 
                 field = iodef_application_get_family(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "swid: ";
 
                 field = iodef_application_get_swid(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "patch: ";
 
                 field = iodef_application_get_patch(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "version: ";
 
                 field = iodef_application_get_version(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "configid: ";
 
                 field = iodef_application_get_configid(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -1487,12 +1487,12 @@ void iodef_application_print(iodef_application_t *ptr, prelude_io_t *fd)
 /**
  * iodef_record_data_print:
  * @ptr: Pointer to an iodef_record_data_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_record_data_print(iodef_record_data_t *ptr, prelude_io_t *fd)
+void iodef_record_data_print(iodef_record_data_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -1506,23 +1506,23 @@ void iodef_record_data_print(iodef_record_data_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, "additional_data:\n", sizeof("additional_data:\n") - 1);
+                        libiodef_io_write(fd, "additional_data:\n", sizeof("additional_data:\n") - 1);
                         iodef_additional_data_print(field, fd);
                 }
         }
 
         {
                 char buf[128];
-                prelude_string_t *elem = NULL;
+                libiodef_string_t *elem = NULL;
                 int cnt = 0, len;
 
                 while ( (elem = iodef_record_data_get_next_description(ptr, elem)) ) {
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "description(%d): ", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         print_string(elem, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
 
                         cnt++;
                 }
@@ -1537,7 +1537,7 @@ void iodef_record_data_print(iodef_record_data_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "record_pattern(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_record_pattern_print(elem, fd);
 
                         cnt++;
@@ -1552,9 +1552,9 @@ void iodef_record_data_print(iodef_record_data_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_time(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -1565,7 +1565,7 @@ void iodef_record_data_print(iodef_record_data_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, "application:\n", sizeof("application:\n") - 1);
+                        libiodef_io_write(fd, "application:\n", sizeof("application:\n") - 1);
                         iodef_application_print(field, fd);
                 }
         }
@@ -1579,7 +1579,7 @@ void iodef_record_data_print(iodef_record_data_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "record_item(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_record_item_print(elem, fd);
 
                         cnt++;
@@ -1593,9 +1593,9 @@ void iodef_record_data_print(iodef_record_data_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
+                        libiodef_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
                         print_enum(iodef_record_data_restriction_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -1605,12 +1605,12 @@ void iodef_record_data_print(iodef_record_data_t *ptr, prelude_io_t *fd)
 /**
  * iodef_record_print:
  * @ptr: Pointer to an iodef_record_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_record_print(iodef_record_t *ptr, prelude_io_t *fd)
+void iodef_record_print(iodef_record_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -1626,7 +1626,7 @@ void iodef_record_print(iodef_record_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "record_data(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_record_data_print(elem, fd);
 
                         cnt++;
@@ -1640,9 +1640,9 @@ void iodef_record_print(iodef_record_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
+                        libiodef_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
                         print_enum(iodef_record_restriction_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -1652,12 +1652,12 @@ void iodef_record_print(iodef_record_t *ptr, prelude_io_t *fd)
 /**
  * iodef_reference_print:
  * @ptr: Pointer to an iodef_reference_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_reference_print(iodef_reference_t *ptr, prelude_io_t *fd)
+void iodef_reference_print(iodef_reference_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -1666,16 +1666,16 @@ void iodef_reference_print(iodef_reference_t *ptr, prelude_io_t *fd)
 
         {
                 char buf[128];
-                prelude_string_t *elem = NULL;
+                libiodef_string_t *elem = NULL;
                 int cnt = 0, len;
 
                 while ( (elem = iodef_reference_get_next_url(ptr, elem)) ) {
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "url(%d): ", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         print_string(elem, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
 
                         cnt++;
                 }
@@ -1683,32 +1683,32 @@ void iodef_reference_print(iodef_reference_t *ptr, prelude_io_t *fd)
 
         {
                 char buf[128];
-                prelude_string_t *elem = NULL;
+                libiodef_string_t *elem = NULL;
                 int cnt = 0, len;
 
                 while ( (elem = iodef_reference_get_next_description(ptr, elem)) ) {
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "description(%d): ", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         print_string(elem, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
 
                         cnt++;
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "reference_name: ";
 
                 field = iodef_reference_get_reference_name(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -1718,12 +1718,12 @@ void iodef_reference_print(iodef_reference_t *ptr, prelude_io_t *fd)
 /**
  * iodef_method_print:
  * @ptr: Pointer to an iodef_method_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_method_print(iodef_method_t *ptr, prelude_io_t *fd)
+void iodef_method_print(iodef_method_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -1739,7 +1739,7 @@ void iodef_method_print(iodef_method_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "additional_data(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_additional_data_print(elem, fd);
 
                         cnt++;
@@ -1748,16 +1748,16 @@ void iodef_method_print(iodef_method_t *ptr, prelude_io_t *fd)
 
         {
                 char buf[128];
-                prelude_string_t *elem = NULL;
+                libiodef_string_t *elem = NULL;
                 int cnt = 0, len;
 
                 while ( (elem = iodef_method_get_next_description(ptr, elem)) ) {
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "description(%d): ", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         print_string(elem, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
 
                         cnt++;
                 }
@@ -1772,7 +1772,7 @@ void iodef_method_print(iodef_method_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "reference(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_reference_print(elem, fd);
 
                         cnt++;
@@ -1786,9 +1786,9 @@ void iodef_method_print(iodef_method_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
+                        libiodef_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
                         print_enum(iodef_method_restriction_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -1798,12 +1798,12 @@ void iodef_method_print(iodef_method_t *ptr, prelude_io_t *fd)
 /**
  * iodef_time_impact_print:
  * @ptr: Pointer to an iodef_time_impact_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_time_impact_print(iodef_time_impact_t *ptr, prelude_io_t *fd)
+void iodef_time_impact_print(iodef_time_impact_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -1811,16 +1811,16 @@ void iodef_time_impact_print(iodef_time_impact_t *ptr, prelude_io_t *fd)
         indent += 8;
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "ext_metric: ";
 
                 field = iodef_time_impact_get_ext_metric(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -1831,9 +1831,9 @@ void iodef_time_impact_print(iodef_time_impact_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "duration: ", sizeof("duration: ") - 1);
+                        libiodef_io_write(fd, "duration: ", sizeof("duration: ") - 1);
                         print_enum(iodef_time_impact_duration_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -1844,9 +1844,9 @@ void iodef_time_impact_print(iodef_time_impact_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "metric: ", sizeof("metric: ") - 1);
+                        libiodef_io_write(fd, "metric: ", sizeof("metric: ") - 1);
                         print_enum(iodef_time_impact_metric_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -1857,23 +1857,23 @@ void iodef_time_impact_print(iodef_time_impact_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "severity: ", sizeof("severity: ") - 1);
+                        libiodef_io_write(fd, "severity: ", sizeof("severity: ") - 1);
                         print_enum(iodef_time_impact_severity_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "ext_duration: ";
 
                 field = iodef_time_impact_get_ext_duration(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -1883,12 +1883,12 @@ void iodef_time_impact_print(iodef_time_impact_t *ptr, prelude_io_t *fd)
 /**
  * iodef_impact_print:
  * @ptr: Pointer to an iodef_impact_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_impact_print(iodef_impact_t *ptr, prelude_io_t *fd)
+void iodef_impact_print(iodef_impact_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -1902,9 +1902,9 @@ void iodef_impact_print(iodef_impact_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "lang: ", sizeof("lang: ") - 1);
+                        libiodef_io_write(fd, "lang: ", sizeof("lang: ") - 1);
                         print_enum(iodef_impact_lang_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -1915,9 +1915,9 @@ void iodef_impact_print(iodef_impact_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "completion: ", sizeof("completion: ") - 1);
+                        libiodef_io_write(fd, "completion: ", sizeof("completion: ") - 1);
                         print_enum(iodef_impact_completion_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -1928,9 +1928,9 @@ void iodef_impact_print(iodef_impact_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "type: ", sizeof("type: ") - 1);
+                        libiodef_io_write(fd, "type: ", sizeof("type: ") - 1);
                         print_enum(iodef_impact_type_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -1941,23 +1941,23 @@ void iodef_impact_print(iodef_impact_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "severity: ", sizeof("severity: ") - 1);
+                        libiodef_io_write(fd, "severity: ", sizeof("severity: ") - 1);
                         print_enum(iodef_impact_severity_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "ext_type: ";
 
                 field = iodef_impact_get_ext_type(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -1967,12 +1967,12 @@ void iodef_impact_print(iodef_impact_t *ptr, prelude_io_t *fd)
 /**
  * iodef_confidence_print:
  * @ptr: Pointer to an iodef_confidence_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_confidence_print(iodef_confidence_t *ptr, prelude_io_t *fd)
+void iodef_confidence_print(iodef_confidence_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -1986,9 +1986,9 @@ void iodef_confidence_print(iodef_confidence_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "rating: ", sizeof("rating: ") - 1);
+                        libiodef_io_write(fd, "rating: ", sizeof("rating: ") - 1);
                         print_enum(iodef_confidence_rating_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -1998,12 +1998,12 @@ void iodef_confidence_print(iodef_confidence_t *ptr, prelude_io_t *fd)
 /**
  * iodef_monetary_impact_print:
  * @ptr: Pointer to an iodef_monetary_impact_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_monetary_impact_print(iodef_monetary_impact_t *ptr, prelude_io_t *fd)
+void iodef_monetary_impact_print(iodef_monetary_impact_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -2011,16 +2011,16 @@ void iodef_monetary_impact_print(iodef_monetary_impact_t *ptr, prelude_io_t *fd)
         indent += 8;
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "currency: ";
 
                 field = iodef_monetary_impact_get_currency(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -2031,9 +2031,9 @@ void iodef_monetary_impact_print(iodef_monetary_impact_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "severity: ", sizeof("severity: ") - 1);
+                        libiodef_io_write(fd, "severity: ", sizeof("severity: ") - 1);
                         print_enum(iodef_monetary_impact_severity_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -2043,12 +2043,12 @@ void iodef_monetary_impact_print(iodef_monetary_impact_t *ptr, prelude_io_t *fd)
 /**
  * iodef_counter_print:
  * @ptr: Pointer to an iodef_counter_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_counter_print(iodef_counter_t *ptr, prelude_io_t *fd)
+void iodef_counter_print(iodef_counter_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -2062,9 +2062,9 @@ void iodef_counter_print(iodef_counter_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "duration: ", sizeof("duration: ") - 1);
+                        libiodef_io_write(fd, "duration: ", sizeof("duration: ") - 1);
                         print_enum(iodef_counter_duration_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -2075,37 +2075,37 @@ void iodef_counter_print(iodef_counter_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "type: ", sizeof("type: ") - 1);
+                        libiodef_io_write(fd, "type: ", sizeof("type: ") - 1);
                         print_enum(iodef_counter_type_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "ext_duration: ";
 
                 field = iodef_counter_get_ext_duration(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "ext_type: ";
 
                 field = iodef_counter_get_ext_type(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -2115,12 +2115,12 @@ void iodef_counter_print(iodef_counter_t *ptr, prelude_io_t *fd)
 /**
  * iodef_assessment_print:
  * @ptr: Pointer to an iodef_assessment_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_assessment_print(iodef_assessment_t *ptr, prelude_io_t *fd)
+void iodef_assessment_print(iodef_assessment_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -2136,7 +2136,7 @@ void iodef_assessment_print(iodef_assessment_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "impact(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_impact_print(elem, fd);
 
                         cnt++;
@@ -2152,7 +2152,7 @@ void iodef_assessment_print(iodef_assessment_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "additional_data(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_additional_data_print(elem, fd);
 
                         cnt++;
@@ -2166,7 +2166,7 @@ void iodef_assessment_print(iodef_assessment_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, "confidence:\n", sizeof("confidence:\n") - 1);
+                        libiodef_io_write(fd, "confidence:\n", sizeof("confidence:\n") - 1);
                         iodef_confidence_print(field, fd);
                 }
         }
@@ -2180,7 +2180,7 @@ void iodef_assessment_print(iodef_assessment_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "time_impact(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_time_impact_print(elem, fd);
 
                         cnt++;
@@ -2196,7 +2196,7 @@ void iodef_assessment_print(iodef_assessment_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "monetary_impact(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_monetary_impact_print(elem, fd);
 
                         cnt++;
@@ -2212,7 +2212,7 @@ void iodef_assessment_print(iodef_assessment_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "counter(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_counter_print(elem, fd);
 
                         cnt++;
@@ -2226,9 +2226,9 @@ void iodef_assessment_print(iodef_assessment_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
+                        libiodef_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
                         print_enum(iodef_assessment_restriction_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -2239,9 +2239,9 @@ void iodef_assessment_print(iodef_assessment_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "occurrence: ", sizeof("occurrence: ") - 1);
+                        libiodef_io_write(fd, "occurrence: ", sizeof("occurrence: ") - 1);
                         print_enum(iodef_assessment_occurrence_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -2251,12 +2251,12 @@ void iodef_assessment_print(iodef_assessment_t *ptr, prelude_io_t *fd)
 /**
  * iodef_service_print:
  * @ptr: Pointer to an iodef_service_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_service_print(iodef_service_t *ptr, prelude_io_t *fd)
+void iodef_service_print(iodef_service_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -2271,9 +2271,9 @@ void iodef_service_print(iodef_service_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_uint32(*field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -2285,23 +2285,23 @@ void iodef_service_print(iodef_service_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_uint32(*field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "portlist: ";
 
                 field = iodef_service_get_portlist(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -2314,7 +2314,7 @@ void iodef_service_print(iodef_service_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "application(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_application_print(elem, fd);
 
                         cnt++;
@@ -2329,9 +2329,9 @@ void iodef_service_print(iodef_service_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_uint32(*field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -2343,9 +2343,9 @@ void iodef_service_print(iodef_service_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_uint32(*field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -2357,9 +2357,9 @@ void iodef_service_print(iodef_service_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_uint32(*field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -2369,12 +2369,12 @@ void iodef_service_print(iodef_service_t *ptr, prelude_io_t *fd)
 /**
  * iodef_address_print:
  * @ptr: Pointer to an iodef_address_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_address_print(iodef_address_t *ptr, prelude_io_t *fd)
+void iodef_address_print(iodef_address_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -2388,51 +2388,51 @@ void iodef_address_print(iodef_address_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "category: ", sizeof("category: ") - 1);
+                        libiodef_io_write(fd, "category: ", sizeof("category: ") - 1);
                         print_enum(iodef_address_category_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "vlan_name: ";
 
                 field = iodef_address_get_vlan_name(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "ext_category: ";
 
                 field = iodef_address_get_ext_category(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "vlan_num: ";
 
                 field = iodef_address_get_vlan_num(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -2442,12 +2442,12 @@ void iodef_address_print(iodef_address_t *ptr, prelude_io_t *fd)
 /**
  * iodef_node_role_print:
  * @ptr: Pointer to an iodef_node_role_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_node_role_print(iodef_node_role_t *ptr, prelude_io_t *fd)
+void iodef_node_role_print(iodef_node_role_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -2461,9 +2461,9 @@ void iodef_node_role_print(iodef_node_role_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "category: ", sizeof("category: ") - 1);
+                        libiodef_io_write(fd, "category: ", sizeof("category: ") - 1);
                         print_enum(iodef_node_role_category_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -2474,23 +2474,23 @@ void iodef_node_role_print(iodef_node_role_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "lang: ", sizeof("lang: ") - 1);
+                        libiodef_io_write(fd, "lang: ", sizeof("lang: ") - 1);
                         print_enum(iodef_node_role_lang_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "ext_category: ";
 
                 field = iodef_node_role_get_ext_category(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -2500,12 +2500,12 @@ void iodef_node_role_print(iodef_node_role_t *ptr, prelude_io_t *fd)
 /**
  * iodef_node_print:
  * @ptr: Pointer to an iodef_node_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_node_print(iodef_node_t *ptr, prelude_io_t *fd)
+void iodef_node_print(iodef_node_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -2514,16 +2514,16 @@ void iodef_node_print(iodef_node_t *ptr, prelude_io_t *fd)
 
         {
                 char buf[128];
-                prelude_string_t *elem = NULL;
+                libiodef_string_t *elem = NULL;
                 int cnt = 0, len;
 
                 while ( (elem = iodef_node_get_next_node_name(ptr, elem)) ) {
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "node_name(%d): ", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         print_string(elem, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
 
                         cnt++;
                 }
@@ -2538,7 +2538,7 @@ void iodef_node_print(iodef_node_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "counter(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_counter_print(elem, fd);
 
                         cnt++;
@@ -2553,9 +2553,9 @@ void iodef_node_print(iodef_node_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_time(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -2568,7 +2568,7 @@ void iodef_node_print(iodef_node_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "node_role(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_node_role_print(elem, fd);
 
                         cnt++;
@@ -2576,16 +2576,16 @@ void iodef_node_print(iodef_node_t *ptr, prelude_io_t *fd)
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "location: ";
 
                 field = iodef_node_get_location(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -2598,7 +2598,7 @@ void iodef_node_print(iodef_node_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "address(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_address_print(elem, fd);
 
                         cnt++;
@@ -2611,12 +2611,12 @@ void iodef_node_print(iodef_node_t *ptr, prelude_io_t *fd)
 /**
  * iodef_operating_system_print:
  * @ptr: Pointer to an iodef_operating_system_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_operating_system_print(iodef_operating_system_t *ptr, prelude_io_t *fd)
+void iodef_operating_system_print(iodef_operating_system_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -2624,114 +2624,114 @@ void iodef_operating_system_print(iodef_operating_system_t *ptr, prelude_io_t *f
         indent += 8;
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "url: ";
 
                 field = iodef_operating_system_get_url(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "vendor: ";
 
                 field = iodef_operating_system_get_vendor(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "name: ";
 
                 field = iodef_operating_system_get_name(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "family: ";
 
                 field = iodef_operating_system_get_family(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "swid: ";
 
                 field = iodef_operating_system_get_swid(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "patch: ";
 
                 field = iodef_operating_system_get_patch(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "version: ";
 
                 field = iodef_operating_system_get_version(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "configid: ";
 
                 field = iodef_operating_system_get_configid(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -2741,12 +2741,12 @@ void iodef_operating_system_print(iodef_operating_system_t *ptr, prelude_io_t *f
 /**
  * iodef_system_print:
  * @ptr: Pointer to an iodef_system_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_system_print(iodef_system_t *ptr, prelude_io_t *fd)
+void iodef_system_print(iodef_system_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -2760,7 +2760,7 @@ void iodef_system_print(iodef_system_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, "node:\n", sizeof("node:\n") - 1);
+                        libiodef_io_write(fd, "node:\n", sizeof("node:\n") - 1);
                         iodef_node_print(field, fd);
                 }
         }
@@ -2774,7 +2774,7 @@ void iodef_system_print(iodef_system_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "additional_data(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_additional_data_print(elem, fd);
 
                         cnt++;
@@ -2783,16 +2783,16 @@ void iodef_system_print(iodef_system_t *ptr, prelude_io_t *fd)
 
         {
                 char buf[128];
-                prelude_string_t *elem = NULL;
+                libiodef_string_t *elem = NULL;
                 int cnt = 0, len;
 
                 while ( (elem = iodef_system_get_next_description(ptr, elem)) ) {
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "description(%d): ", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         print_string(elem, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
 
                         cnt++;
                 }
@@ -2807,7 +2807,7 @@ void iodef_system_print(iodef_system_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "service(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_service_print(elem, fd);
 
                         cnt++;
@@ -2823,7 +2823,7 @@ void iodef_system_print(iodef_system_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "counter(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_counter_print(elem, fd);
 
                         cnt++;
@@ -2837,7 +2837,7 @@ void iodef_system_print(iodef_system_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, "operating_system:\n", sizeof("operating_system:\n") - 1);
+                        libiodef_io_write(fd, "operating_system:\n", sizeof("operating_system:\n") - 1);
                         iodef_operating_system_print(field, fd);
                 }
         }
@@ -2849,9 +2849,9 @@ void iodef_system_print(iodef_system_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "category: ", sizeof("category: ") - 1);
+                        libiodef_io_write(fd, "category: ", sizeof("category: ") - 1);
                         print_enum(iodef_system_category_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -2862,23 +2862,23 @@ void iodef_system_print(iodef_system_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
+                        libiodef_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
                         print_enum(iodef_system_restriction_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "ext_category: ";
 
                 field = iodef_system_get_ext_category(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -2889,23 +2889,23 @@ void iodef_system_print(iodef_system_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "spoofed: ", sizeof("spoofed: ") - 1);
+                        libiodef_io_write(fd, "spoofed: ", sizeof("spoofed: ") - 1);
                         print_enum(iodef_system_spoofed_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "interface: ";
 
                 field = iodef_system_get_interface(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -2915,12 +2915,12 @@ void iodef_system_print(iodef_system_t *ptr, prelude_io_t *fd)
 /**
  * iodef_flow_print:
  * @ptr: Pointer to an iodef_flow_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_flow_print(iodef_flow_t *ptr, prelude_io_t *fd)
+void iodef_flow_print(iodef_flow_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -2936,7 +2936,7 @@ void iodef_flow_print(iodef_flow_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "system(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_system_print(elem, fd);
 
                         cnt++;
@@ -2949,12 +2949,12 @@ void iodef_flow_print(iodef_flow_t *ptr, prelude_io_t *fd)
 /**
  * iodef_event_data_print:
  * @ptr: Pointer to an iodef_event_data_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_event_data_print(iodef_event_data_t *ptr, prelude_io_t *fd)
+void iodef_event_data_print(iodef_event_data_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -2969,9 +2969,9 @@ void iodef_event_data_print(iodef_event_data_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_time(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -2984,7 +2984,7 @@ void iodef_event_data_print(iodef_event_data_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "additional_data(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_additional_data_print(elem, fd);
 
                         cnt++;
@@ -2993,16 +2993,16 @@ void iodef_event_data_print(iodef_event_data_t *ptr, prelude_io_t *fd)
 
         {
                 char buf[128];
-                prelude_string_t *elem = NULL;
+                libiodef_string_t *elem = NULL;
                 int cnt = 0, len;
 
                 while ( (elem = iodef_event_data_get_next_description(ptr, elem)) ) {
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "description(%d): ", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         print_string(elem, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
 
                         cnt++;
                 }
@@ -3017,7 +3017,7 @@ void iodef_event_data_print(iodef_event_data_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "flow(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_flow_print(elem, fd);
 
                         cnt++;
@@ -3033,7 +3033,7 @@ void iodef_event_data_print(iodef_event_data_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "expectation(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_expectation_print(elem, fd);
 
                         cnt++;
@@ -3047,7 +3047,7 @@ void iodef_event_data_print(iodef_event_data_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, "record:\n", sizeof("record:\n") - 1);
+                        libiodef_io_write(fd, "record:\n", sizeof("record:\n") - 1);
                         iodef_record_print(field, fd);
                 }
         }
@@ -3061,7 +3061,7 @@ void iodef_event_data_print(iodef_event_data_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "contact(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_contact_print(elem, fd);
 
                         cnt++;
@@ -3076,9 +3076,9 @@ void iodef_event_data_print(iodef_event_data_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_time(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -3091,7 +3091,7 @@ void iodef_event_data_print(iodef_event_data_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "event_data(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_event_data_print(elem, fd);
 
                         cnt++;
@@ -3106,9 +3106,9 @@ void iodef_event_data_print(iodef_event_data_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_time(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -3119,7 +3119,7 @@ void iodef_event_data_print(iodef_event_data_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, "assessment:\n", sizeof("assessment:\n") - 1);
+                        libiodef_io_write(fd, "assessment:\n", sizeof("assessment:\n") - 1);
                         iodef_assessment_print(field, fd);
                 }
         }
@@ -3133,7 +3133,7 @@ void iodef_event_data_print(iodef_event_data_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "method(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_method_print(elem, fd);
 
                         cnt++;
@@ -3147,9 +3147,9 @@ void iodef_event_data_print(iodef_event_data_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
+                        libiodef_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
                         print_enum(iodef_event_data_restriction_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -3159,12 +3159,12 @@ void iodef_event_data_print(iodef_event_data_t *ptr, prelude_io_t *fd)
 /**
  * iodef_incident_print:
  * @ptr: Pointer to an iodef_incident_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_incident_print(iodef_incident_t *ptr, prelude_io_t *fd)
+void iodef_incident_print(iodef_incident_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -3179,9 +3179,9 @@ void iodef_incident_print(iodef_incident_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_time(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -3194,7 +3194,7 @@ void iodef_incident_print(iodef_incident_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "additional_data(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_additional_data_print(elem, fd);
 
                         cnt++;
@@ -3209,24 +3209,24 @@ void iodef_incident_print(iodef_incident_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_time(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
                 char buf[128];
-                prelude_string_t *elem = NULL;
+                libiodef_string_t *elem = NULL;
                 int cnt = 0, len;
 
                 while ( (elem = iodef_incident_get_next_description(ptr, elem)) ) {
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "description(%d): ", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         print_string(elem, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
 
                         cnt++;
                 }
@@ -3241,7 +3241,7 @@ void iodef_incident_print(iodef_incident_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "contact(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_contact_print(elem, fd);
 
                         cnt++;
@@ -3255,7 +3255,7 @@ void iodef_incident_print(iodef_incident_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, "alternative_id:\n", sizeof("alternative_id:\n") - 1);
+                        libiodef_io_write(fd, "alternative_id:\n", sizeof("alternative_id:\n") - 1);
                         iodef_alternative_id_print(field, fd);
                 }
         }
@@ -3268,9 +3268,9 @@ void iodef_incident_print(iodef_incident_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_time(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -3282,9 +3282,9 @@ void iodef_incident_print(iodef_incident_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_time(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -3297,7 +3297,7 @@ void iodef_incident_print(iodef_incident_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "event_data(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_event_data_print(elem, fd);
 
                         cnt++;
@@ -3311,7 +3311,7 @@ void iodef_incident_print(iodef_incident_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, "related_activity:\n", sizeof("related_activity:\n") - 1);
+                        libiodef_io_write(fd, "related_activity:\n", sizeof("related_activity:\n") - 1);
                         iodef_related_activity_print(field, fd);
                 }
         }
@@ -3323,7 +3323,7 @@ void iodef_incident_print(iodef_incident_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, "incident_id:\n", sizeof("incident_id:\n") - 1);
+                        libiodef_io_write(fd, "incident_id:\n", sizeof("incident_id:\n") - 1);
                         iodef_incident_id_print(field, fd);
                 }
         }
@@ -3337,7 +3337,7 @@ void iodef_incident_print(iodef_incident_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "assessment(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_assessment_print(elem, fd);
 
                         cnt++;
@@ -3353,7 +3353,7 @@ void iodef_incident_print(iodef_incident_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "method(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_method_print(elem, fd);
 
                         cnt++;
@@ -3367,7 +3367,7 @@ void iodef_incident_print(iodef_incident_t *ptr, prelude_io_t *fd)
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, "history:\n", sizeof("history:\n") - 1);
+                        libiodef_io_write(fd, "history:\n", sizeof("history:\n") - 1);
                         iodef_history_print(field, fd);
                 }
         }
@@ -3379,9 +3379,9 @@ void iodef_incident_print(iodef_incident_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "lang: ", sizeof("lang: ") - 1);
+                        libiodef_io_write(fd, "lang: ", sizeof("lang: ") - 1);
                         print_enum(iodef_incident_lang_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -3392,23 +3392,23 @@ void iodef_incident_print(iodef_incident_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
+                        libiodef_io_write(fd, "restriction: ", sizeof("restriction: ") - 1);
                         print_enum(iodef_incident_restriction_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "ext_purpose: ";
 
                 field = iodef_incident_get_ext_purpose(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -3419,9 +3419,9 @@ void iodef_incident_print(iodef_incident_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "purpose: ", sizeof("purpose: ") - 1);
+                        libiodef_io_write(fd, "purpose: ", sizeof("purpose: ") - 1);
                         print_enum(iodef_incident_purpose_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
@@ -3431,12 +3431,12 @@ void iodef_incident_print(iodef_incident_t *ptr, prelude_io_t *fd)
 /**
  * iodef_document_print:
  * @ptr: Pointer to an iodef_document_t object.
- * @fd: Pointer to a #prelude_io_t object where to print @ptr to.
+ * @fd: Pointer to a #libiodef_io_t object where to print @ptr to.
  *
  * This function will convert @ptr to a string suitable for writing,
  * and write it to the provided @fd descriptor.
  */
-void iodef_document_print(iodef_document_t *ptr, prelude_io_t *fd)
+void iodef_document_print(iodef_document_t *ptr, libiodef_io_t *fd)
 {
         if ( ! ptr )
                 return;
@@ -3452,7 +3452,7 @@ void iodef_document_print(iodef_document_t *ptr, prelude_io_t *fd)
                         print_indent(fd);
 
                         len = snprintf(buf, sizeof(buf), "incident(%d): \n", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_incident_print(elem, fd);
 
                         cnt++;
@@ -3466,37 +3466,37 @@ void iodef_document_print(iodef_document_t *ptr, prelude_io_t *fd)
 
                 {
                         print_indent(fd);
-                        prelude_io_write(fd, "lang: ", sizeof("lang: ") - 1);
+                        libiodef_io_write(fd, "lang: ", sizeof("lang: ") - 1);
                         print_enum(iodef_document_lang_to_string(i), i, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "formatid: ";
 
                 field = iodef_document_get_formatid(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 
         {
-                prelude_string_t *field;
+                libiodef_string_t *field;
                 const char tmp[] = "version: ";
 
                 field = iodef_document_get_version(ptr);
 
                 if ( field ) {
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
                         print_string(field, fd);
-                        prelude_io_write(fd, "\n", sizeof("\n") - 1);
+                        libiodef_io_write(fd, "\n", sizeof("\n") - 1);
                 }
         }
 

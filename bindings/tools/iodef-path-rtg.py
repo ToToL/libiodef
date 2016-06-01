@@ -14,17 +14,17 @@ except:
 	print "Cannot import rtg_cli"
 
 try:
-       import PreludeEasy
+       import LibIodefEasy
 except:
        print "Import failed"
-       print "Try 'cd ./.libs && ln -s libprelude_python.so _PreludeEasy.so'"
+       print "Try 'cd ./.libs && ln -s libiodef_python.so _LibIodefEasy.so'"
        sys.exit(1)
 
 #
 # GD Constants
 #
 
-client = PreludeEasy.Client("PreludeRTG")
+client = LibIodefEasy.Client("LibIodefRTG")
 client.Init()
 
 client.PoolInit("192.168.33.215", 1)

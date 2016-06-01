@@ -1,9 +1,9 @@
 /*****
 *
 * Copyright (C) 2004-2016 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoann.v@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann.v@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -26,8 +26,8 @@
  * is generated dynamically by gnulib-tool, it can't go there.
  */
 
-#ifndef _LIBPRELUDE_LIBMISSING_H
-#define _LIBPRELUDE_LIBMISSING_H
+#ifndef _LIBIODEF_LIBMISSING_H
+#define _LIBIODEF_LIBMISSING_H
 
 #include "config.h"
 
@@ -36,4 +36,4 @@
 #include "minmax.h"
 #include "pathmax.h"
 
-#endif /* _LIBPRELUDE_LIBMISSING_H */
+#endif /* _LIBIODEF_LIBMISSING_H */

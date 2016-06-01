@@ -1,9 +1,9 @@
 /*****
 *
 * Copyright (C) 2003-2016 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoann.v@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann.v@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -30,13 +30,13 @@
 #include <assert.h>
 
 #include "common.h"
-#include "prelude-inttypes.h"
-#include "prelude-string.h"
+#include "libiodef-inttypes.h"
+#include "libiodef-string.h"
 
-#define PRELUDE_ERROR_SOURCE_DEFAULT PRELUDE_ERROR_SOURCE_IODEF_VALUE_TYPE
-#include "prelude-error.h"
-#include "prelude-inttypes.h"
-#include "prelude-linked-object.h"
+#define LIBIODEF_ERROR_SOURCE_DEFAULT LIBIODEF_ERROR_SOURCE_IODEF_VALUE_TYPE
+#include "libiodef-error.h"
+#include "libiodef-inttypes.h"
+#include "libiodef-linked-object.h"
 #include "iodef-object-prv.h"
 
 #include "iodef-time.h"
@@ -69,14 +69,14 @@
                                                                                            \
                 (dst)->data. name ##_val = strtod(buf, &endptr);                           \
                 if ( buf == endptr || *endptr != '\0' || errno == ERANGE )                 \
-                        return prelude_error_verbose(PRELUDE_ERROR_IODEF_VALUE_TYPE_PARSE, \
+                        return libiodef_error_verbose(LIBIODEF_ERROR_IODEF_VALUE_TYPE_PARSE, \
                         "Reading " #name " value failed with '%s'", buf);                  \
                 return 1;                                                                  \
         }                                                                                  \
                                                                                            \
-        static int name ## _write(const iodef_value_type_t *src, prelude_string_t *out)    \
+        static int name ## _write(const iodef_value_type_t *src, libiodef_string_t *out)    \
         {                                                                                  \
-                return prelude_string_sprintf(out, (printfmt), src->data.name ##_val);     \
+                return libiodef_string_sprintf(out, (printfmt), src->data.name ##_val);     \
         }
 
 
@@ -88,16 +88,16 @@
                                                                                                      \
                 tmp = rfunc(buf, &endptr, 0);                                                        \
                 if ( buf == endptr || *endptr != '\0' || tmp < min || tmp > max || errno == ERANGE ) \
-                        return prelude_error_verbose(PRELUDE_ERROR_IODEF_VALUE_TYPE_PARSE,           \
+                        return libiodef_error_verbose(LIBIODEF_ERROR_IODEF_VALUE_TYPE_PARSE,           \
                         "Value out of range, required: [" # min " - " # max "], got '%s'", buf);     \
                                                                                                      \
                 dst->data.name ##_val = tmp;                                                         \
                 return 0;                                                                            \
         }                                                                                            \
                                                                                                      \
-        static int name ## _write(const iodef_value_type_t *src, prelude_string_t *out)              \
+        static int name ## _write(const iodef_value_type_t *src, libiodef_string_t *out)              \
         {                                                                                            \
-                return prelude_string_sprintf(out, (fmt_dec), src->data.name ##_val);                \
+                return libiodef_string_sprintf(out, (fmt_dec), src->data.name ##_val);                \
         }
 
 
@@ -117,7 +117,7 @@ typedef struct {
         int (*compare)(const iodef_value_type_t *t1, const iodef_value_type_t *t2, size_t size, iodef_criterion_operator_t op);
 
         int (*read)(iodef_value_type_t *dst, const char *buf);
-        int (*write)(const iodef_value_type_t *src, prelude_string_t *out);
+        int (*write)(const iodef_value_type_t *src, libiodef_string_t *out);
 
 } iodef_value_type_operation_t;
 
@@ -126,14 +126,14 @@ typedef struct {
 /*
  * We specify a type bigger than the one handled, in order to catch min/max error.
  */
-GENERIC_TWO_BASES_RW_FUNC(strtol, "%d", int8, int, PRELUDE_INT8_MIN, PRELUDE_INT8_MAX)
-GENERIC_TWO_BASES_RW_FUNC(strtol, "%d", uint8, unsigned int, 0, PRELUDE_UINT8_MAX)
-GENERIC_TWO_BASES_RW_FUNC(strtol, "%hd", int16, int, PRELUDE_INT16_MIN, PRELUDE_INT16_MAX)
-GENERIC_TWO_BASES_RW_FUNC(strtoul, "%hu", uint16, unsigned int, 0, PRELUDE_UINT16_MAX)
-GENERIC_TWO_BASES_RW_FUNC(strtol, "%d", int32, int64_t, PRELUDE_INT32_MIN, PRELUDE_INT32_MAX)
-GENERIC_TWO_BASES_RW_FUNC(strtoul, "%u", uint32, uint64_t, 0, PRELUDE_UINT32_MAX)
-GENERIC_TWO_BASES_RW_FUNC(strtoll, "%" PRELUDE_PRId64, int64, int64_t, PRELUDE_INT64_MIN, PRELUDE_INT64_MAX)
-GENERIC_TWO_BASES_RW_FUNC(strtoull, "%" PRELUDE_PRIu64, uint64, uint64_t, 0, PRELUDE_UINT64_MAX)
+GENERIC_TWO_BASES_RW_FUNC(strtol, "%d", int8, int, LIBIODEF_INT8_MIN, LIBIODEF_INT8_MAX)
+GENERIC_TWO_BASES_RW_FUNC(strtol, "%d", uint8, unsigned int, 0, LIBIODEF_UINT8_MAX)
+GENERIC_TWO_BASES_RW_FUNC(strtol, "%hd", int16, int, LIBIODEF_INT16_MIN, LIBIODEF_INT16_MAX)
+GENERIC_TWO_BASES_RW_FUNC(strtoul, "%hu", uint16, unsigned int, 0, LIBIODEF_UINT16_MAX)
+GENERIC_TWO_BASES_RW_FUNC(strtol, "%d", int32, int64_t, LIBIODEF_INT32_MIN, LIBIODEF_INT32_MAX)
+GENERIC_TWO_BASES_RW_FUNC(strtoul, "%u", uint32, uint64_t, 0, LIBIODEF_UINT32_MAX)
+GENERIC_TWO_BASES_RW_FUNC(strtoll, "%" LIBIODEF_PRId64, int64, int64_t, LIBIODEF_INT64_MIN, LIBIODEF_INT64_MAX)
+GENERIC_TWO_BASES_RW_FUNC(strtoull, "%" LIBIODEF_PRIu64, uint64, uint64_t, 0, LIBIODEF_UINT64_MAX)
 
 GENERIC_ONE_BASE_RW_FUNC("%f", "%f", float, float)
 GENERIC_ONE_BASE_RW_FUNC("%lf", "%f", double, double)
@@ -223,20 +223,20 @@ static int enum_read(iodef_value_type_t *dst, const char *buf)
 
         ret = sscanf(buf, "%d", &(dst)->data.enum_val.value);
 
-        return (ret == 1) ? 0 : prelude_error_verbose(PRELUDE_ERROR_IODEF_VALUE_TYPE_PARSE, "Reading enum value failed");
+        return (ret == 1) ? 0 : libiodef_error_verbose(LIBIODEF_ERROR_IODEF_VALUE_TYPE_PARSE, "Reading enum value failed");
 }
 
 
 
-static int enum_write(const iodef_value_type_t *src, prelude_string_t *out)
+static int enum_write(const iodef_value_type_t *src, libiodef_string_t *out)
 {
         const char *str;
 
         str = iodef_class_enum_to_string(src->data.enum_val.class_id, src->data.enum_val.value);
         if ( ! str )
-                return prelude_error_verbose(PRELUDE_ERROR_IODEF_VALUE_TYPE_PARSE, "Enumeration conversion from numeric to string failed");
+                return libiodef_error_verbose(LIBIODEF_ERROR_IODEF_VALUE_TYPE_PARSE, "Enumeration conversion from numeric to string failed");
 
-        return prelude_string_cat(out, str);
+        return libiodef_string_cat(out, str);
 }
 
 
@@ -250,9 +250,9 @@ static int enum_compare(const iodef_value_type_t *src, const iodef_value_type_t 
         if ( dst->id == IODEF_VALUE_TYPE_STRING ) {
                 s1 = iodef_class_enum_to_string(src->data.enum_val.class_id, src->data.enum_val.value);
                 if ( ! s1 )
-                        return prelude_error_verbose(PRELUDE_ERROR_IODEF_VALUE_TYPE_PARSE, "Enumeration conversion from numeric to string failed");
+                        return libiodef_error_verbose(LIBIODEF_ERROR_IODEF_VALUE_TYPE_PARSE, "Enumeration conversion from numeric to string failed");
 
-                return charstring_compare(s1, prelude_string_get_string(dst->data.string_val), op);
+                return charstring_compare(s1, libiodef_string_get_string(dst->data.string_val), op);
         }
 
         return generic_compare(src, dst, size, op);
@@ -297,13 +297,13 @@ static int time_read(iodef_value_type_t *dst, const char *buf)
         if ( ret == 0 )
                 return 0;
 
-        return prelude_error_verbose(PRELUDE_ERROR_IODEF_VALUE_TYPE_PARSE,
+        return libiodef_error_verbose(LIBIODEF_ERROR_IODEF_VALUE_TYPE_PARSE,
                                      "Invalid time format specified: '%s'", buf);
 }
 
 
 
-static int time_write(const iodef_value_type_t *src, prelude_string_t *out)
+static int time_write(const iodef_value_type_t *src, libiodef_string_t *out)
 {
         return iodef_time_to_string(src->data.time_val, out);
 }
@@ -346,10 +346,10 @@ static int string_compare(const iodef_value_type_t *t1, const iodef_value_type_t
         const char *s1 = NULL, *s2 = NULL;
 
         if ( t1 && t1->data.string_val )
-                s1 = prelude_string_get_string(t1->data.string_val);
+                s1 = libiodef_string_get_string(t1->data.string_val);
 
         if ( t2 && t2->data.string_val )
-                s2 = prelude_string_get_string(t2->data.string_val);
+                s2 = libiodef_string_get_string(t2->data.string_val);
 
         return charstring_compare(s1, s2, op);
 }
@@ -358,41 +358,41 @@ static int string_compare(const iodef_value_type_t *t1, const iodef_value_type_t
 
 static int string_read(iodef_value_type_t *dst, const char *buf)
 {
-        return prelude_string_new_dup(&dst->data.string_val, buf);
+        return libiodef_string_new_dup(&dst->data.string_val, buf);
 }
 
 
 
 static int string_copy(const iodef_value_type_t *src, void *dst, size_t size)
 {
-        return prelude_string_copy_dup(src->data.string_val, dst);
+        return libiodef_string_copy_dup(src->data.string_val, dst);
 }
 
 
 static int string_ref(const iodef_value_type_t *src)
 {
-        prelude_string_ref(src->data.string_val);
+        libiodef_string_ref(src->data.string_val);
         return 0;
 }
 
 
 static int string_clone(const iodef_value_type_t *src, iodef_value_type_t *dst, size_t size)
 {
-        return prelude_string_clone(src->data.string_val, &dst->data.string_val);
+        return libiodef_string_clone(src->data.string_val, &dst->data.string_val);
 }
 
 
 static void string_destroy(iodef_value_type_t *type)
 {
-        prelude_string_destroy(type->data.string_val);
+        libiodef_string_destroy(type->data.string_val);
 }
 
 
 
-static int string_write(const iodef_value_type_t *src, prelude_string_t *out)
+static int string_write(const iodef_value_type_t *src, libiodef_string_t *out)
 {
-        return prelude_string_sprintf(out, "%s",
-                       prelude_string_get_string_or_default(src->data.string_val, "<empty>"));
+        return libiodef_string_sprintf(out, "%s",
+                       libiodef_string_get_string_or_default(src->data.string_val, "<empty>"));
 }
 
 
@@ -445,7 +445,7 @@ static int data_read(iodef_value_type_t *dst, const char *src)
 
 
 
-static int data_write(const iodef_value_type_t *src, prelude_string_t *out)
+static int data_write(const iodef_value_type_t *src, libiodef_string_t *out)
 {
         return iodef_data_to_string(src->data.data_val, out);
 }
@@ -519,32 +519,32 @@ static void class_destroy(iodef_value_type_t *type)
 
 
 
-static int list_to_string(const char *cname, iodef_class_id_t class, prelude_list_t *head, prelude_string_t *out,
-                          int (*item_to_string_cb)(int class, void *item, prelude_string_t *out))
+static int list_to_string(const char *cname, iodef_class_id_t class, libiodef_list_t *head, libiodef_string_t *out,
+                          int (*item_to_string_cb)(int class, void *item, libiodef_string_t *out))
 {
         void *obj;
         int ret, j;
-        prelude_list_t *tmp;
+        libiodef_list_t *tmp;
 
-        if ( prelude_list_is_empty(head) )
+        if ( libiodef_list_is_empty(head) )
                 return 0;
 
         if ( cname )
-                ret = prelude_string_sprintf(out, " %s:", cname);
+                ret = libiodef_string_sprintf(out, " %s:", cname);
         else
-                ret = prelude_string_cat(out, " ");
+                ret = libiodef_string_cat(out, " ");
 
         if ( ret < 0 )
                 return ret;
 
-        ret = prelude_string_cat(out, "(");
+        ret = libiodef_string_cat(out, "(");
         if ( ret < 0 )
                 return ret;
 
         j = 0;
-        prelude_list_for_each(head, tmp) {
+        libiodef_list_for_each(head, tmp) {
                 if ( j++ > 0 ) {
-                        ret = prelude_string_cat(out, ", ");
+                        ret = libiodef_string_cat(out, ", ");
                         if ( ret < 0 )
                                 return ret;
                 }
@@ -552,25 +552,25 @@ static int list_to_string(const char *cname, iodef_class_id_t class, prelude_lis
                 if ( ! cname )
                         obj = iodef_linked_object_get_object(tmp);
                 else
-                        obj = prelude_linked_object_get_object(tmp);
+                        obj = libiodef_linked_object_get_object(tmp);
 
                 ret = item_to_string_cb(class, obj, out);
                 if ( ret < 0 )
                         return ret;
         }
 
-        return prelude_string_cat(out, ")");
+        return libiodef_string_cat(out, ")");
 }
 
 
 
-static int listed_str_to_string(iodef_class_id_t parent_class, void *parent, prelude_string_t *out)
+static int listed_str_to_string(iodef_class_id_t parent_class, void *parent, libiodef_string_t *out)
 {
-        return prelude_string_cat(out, prelude_string_get_string(parent));
+        return libiodef_string_cat(out, libiodef_string_get_string(parent));
 }
 
 
-static int class_to_string(iodef_class_id_t parent_class, void *parent, prelude_string_t *out)
+static int class_to_string(iodef_class_id_t parent_class, void *parent, libiodef_string_t *out)
 {
         int ret, i;
         void *childptr;
@@ -578,7 +578,7 @@ static int class_to_string(iodef_class_id_t parent_class, void *parent, prelude_
         iodef_value_type_id_t vtype;
         const char *pname = iodef_class_get_name(parent_class);
 
-        ret = prelude_string_sprintf(out, "<IODEF%c%s",  toupper(*pname), pname + 1);
+        ret = libiodef_string_sprintf(out, "<IODEF%c%s",  toupper(*pname), pname + 1);
         if ( ret < 0 )
                 return ret;
 
@@ -597,7 +597,7 @@ static int class_to_string(iodef_class_id_t parent_class, void *parent, prelude_
                         const char *cname = iodef_class_get_child_name(parent_class, i);
 
                         if ( ! iodef_class_is_child_list(parent_class, i) ) {
-                                ret = prelude_string_sprintf(out, " %s:", cname);
+                                ret = libiodef_string_sprintf(out, " %s:", cname);
                                 if ( ret < 0 ) {
                                         iodef_value_destroy(childptr);
                                         return ret;
@@ -619,7 +619,7 @@ static int class_to_string(iodef_class_id_t parent_class, void *parent, prelude_
                 }
 
                 if ( ! iodef_class_is_child_list(parent_class, i) ) {
-                        ret = prelude_string_cat(out, " ");
+                        ret = libiodef_string_cat(out, " ");
                         if ( ret < 0 )
                                 return ret;
 
@@ -635,11 +635,11 @@ static int class_to_string(iodef_class_id_t parent_class, void *parent, prelude_
                 }
         }
 
-        return prelude_string_cat(out, ">");
+        return libiodef_string_cat(out, ">");
 }
 
 
-static int class_write(const iodef_value_type_t *src, prelude_string_t *out)
+static int class_write(const iodef_value_type_t *src, libiodef_string_t *out)
 {
         return class_to_string(src->data.class_val.class_id, src->data.class_val.object, out);
 }
@@ -685,7 +685,7 @@ static const iodef_value_type_operation_t ops_tbl[] = {
 static int is_type_valid(iodef_value_type_id_t type)
 {
         if ( type < 0 || (size_t) type >= (sizeof(ops_tbl) / sizeof(*ops_tbl)) )
-                return prelude_error_verbose(PRELUDE_ERROR_IODEF_VALUE_TYPE_UNKNOWN, "Unknown IODEF type id: '%d'", type);
+                return libiodef_error_verbose(LIBIODEF_ERROR_IODEF_VALUE_TYPE_UNKNOWN, "Unknown IODEF type id: '%d'", type);
 
         return 0;
 }
@@ -716,7 +716,7 @@ int iodef_value_type_clone(const iodef_value_type_t *src, iodef_value_type_t *ds
                 return ret;
 
         if ( ! ops_tbl[dst->id].clone )
-                return prelude_error_verbose(PRELUDE_ERROR_IODEF_VALUE_TYPE_CLONE_UNAVAILABLE,
+                return libiodef_error_verbose(LIBIODEF_ERROR_IODEF_VALUE_TYPE_CLONE_UNAVAILABLE,
                                              "Object type '%s' does not support clone operation",
                                              iodef_value_type_to_string(dst->id));
 
@@ -735,7 +735,7 @@ int iodef_value_type_copy(const iodef_value_type_t *src, void *dst)
                 return ret;
 
         if ( ! ops_tbl[src->id].copy )
-                return prelude_error_verbose(PRELUDE_ERROR_IODEF_VALUE_TYPE_COPY_UNAVAILABLE,
+                return libiodef_error_verbose(LIBIODEF_ERROR_IODEF_VALUE_TYPE_COPY_UNAVAILABLE,
                                              "Object type '%s' does not support copy operation",
                                              iodef_value_type_to_string(src->id));
 
@@ -753,7 +753,7 @@ int iodef_value_type_ref(const iodef_value_type_t *vt)
                 return ret;
 
         if ( ! ops_tbl[vt->id].ref )
-                return prelude_error_verbose(PRELUDE_ERROR_IODEF_VALUE_TYPE_REF_UNAVAILABLE,
+                return libiodef_error_verbose(LIBIODEF_ERROR_IODEF_VALUE_TYPE_REF_UNAVAILABLE,
                                              "Object type '%s' does not support ref operation",
                                              iodef_value_type_to_string(vt->id));
 
@@ -768,7 +768,7 @@ int iodef_value_type_compare(const iodef_value_type_t *type1,
         int ret;
         iodef_value_type_id_t tid;
 
-        prelude_return_val_if_fail(type1 || type2, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(type1 || type2, libiodef_error(LIBIODEF_ERROR_ASSERTION));
         tid = (type1) ? type1->id : type2->id;
 
         ret = is_type_valid(tid);
@@ -777,16 +777,16 @@ int iodef_value_type_compare(const iodef_value_type_t *type1,
 
         if ( type1 && type2 && type1->id != type2->id ) {
                 if ( type1->id != IODEF_VALUE_TYPE_ENUM && type2->id != IODEF_VALUE_TYPE_STRING )
-                        return prelude_error(PRELUDE_ERROR_IODEF_VALUE_TYPE_COMPARE_MISMATCH);
+                        return libiodef_error(LIBIODEF_ERROR_IODEF_VALUE_TYPE_COMPARE_MISMATCH);
         }
 
         if ( ! (op & ops_tbl[tid].operator) )
-                return prelude_error_verbose(PRELUDE_ERROR_IODEF_VALUE_TYPE_COMPARE_UNAVAILABLE,
+                return libiodef_error_verbose(LIBIODEF_ERROR_IODEF_VALUE_TYPE_COMPARE_UNAVAILABLE,
                                              "Object type '%s' does not support operator '%s'",
                                              iodef_value_type_to_string(tid), iodef_criterion_operator_to_string(op));
 
         if ( ! ops_tbl[tid].compare )
-                return prelude_error_verbose(PRELUDE_ERROR_IODEF_VALUE_TYPE_COMPARE_UNAVAILABLE,
+                return libiodef_error_verbose(LIBIODEF_ERROR_IODEF_VALUE_TYPE_COMPARE_UNAVAILABLE,
                                              "Object type '%s' does not support compare operation",
                                              iodef_value_type_to_string(tid));
 
@@ -812,7 +812,7 @@ int iodef_value_type_read(iodef_value_type_t *dst, const char *buf)
                 return ret;
 
         if ( ! ops_tbl[dst->id].read )
-                return prelude_error_verbose(PRELUDE_ERROR_IODEF_VALUE_TYPE_READ_UNAVAILABLE,
+                return libiodef_error_verbose(LIBIODEF_ERROR_IODEF_VALUE_TYPE_READ_UNAVAILABLE,
                                              "Object type '%s' does not support read operation",
                                              iodef_value_type_to_string(dst->id));
 
@@ -823,7 +823,7 @@ int iodef_value_type_read(iodef_value_type_t *dst, const char *buf)
 
 
 
-int iodef_value_type_write(const iodef_value_type_t *src, prelude_string_t *out)
+int iodef_value_type_write(const iodef_value_type_t *src, libiodef_string_t *out)
 {
         int ret;
 
@@ -832,7 +832,7 @@ int iodef_value_type_write(const iodef_value_type_t *src, prelude_string_t *out)
                 return ret;
 
         if ( ! ops_tbl[src->id].write )
-                return prelude_error_verbose(PRELUDE_ERROR_IODEF_VALUE_TYPE_WRITE_UNAVAILABLE,
+                return libiodef_error_verbose(LIBIODEF_ERROR_IODEF_VALUE_TYPE_WRITE_UNAVAILABLE,
                                              "Object type '%s' does not support write operation",
                                              iodef_value_type_to_string(src->id));
 
@@ -869,7 +869,7 @@ int iodef_value_type_check_operator(iodef_value_type_id_t type, iodef_criterion_
         if ( (~ops_tbl[type].operator & op) == 0 )
                 return 0;
 
-        return prelude_error_verbose(PRELUDE_ERROR_IODEF_CRITERION_UNSUPPORTED_OPERATOR,
+        return libiodef_error_verbose(LIBIODEF_ERROR_IODEF_CRITERION_UNSUPPORTED_OPERATOR,
                                      "Object type '%s' does not support operator '%s'",
                                      iodef_value_type_to_string(type), iodef_criterion_operator_to_string(op));
 }

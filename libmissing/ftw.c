@@ -1,5 +1,5 @@
 /* Copyright (C) 2005 Free Software Foundation, Inc.
- * Written by Yoann Vandoorselaere <yoann@prelude-ids.org>
+ * Written by Yoann Vandoorselaere <yoann@libiodef-ids.org>
  *
  * The file is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public

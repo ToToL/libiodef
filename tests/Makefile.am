@@ -1,4 +1,4 @@
-TESTS = async-timer iodef iodef-criteria iodef-document-helper iodef-path iodef-value prelude-client prelude-string prelude-timer
+TESTS = async-timer iodef iodef-criteria iodef-document-helper iodef-path iodef-value libiodef-client libiodef-string libiodef-timer
 check_PROGRAMS = $(TESTS)
 LDADD = $(top_builddir)/src/libiodef.la ../libmissing/libmissing.la
 AM_CPPFLAGS = -I$(top_builddir)/src/include -I$(top_srcdir)/src/include -I$(top_builddir)/src/libiodef-error -I$(top_builddir)/libmissing -I$(top_srcdir)/libmissing

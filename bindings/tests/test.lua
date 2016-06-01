@@ -1,11 +1,11 @@
 #!/usr/bin/env lua
 
-require("prelude")
+require("libiodef")
 
 function my_cb(level, log)
 	io.write("log: " .. log)
 end
-prelude.PreludeLog_setCallback(my_cb)
+libiodef.LibIodefLog_setCallback(my_cb)
 
 
 function tprint (tbl, indent)
@@ -26,7 +26,7 @@ function tprint (tbl, indent)
 end
 
 
-iodef = prelude.IODEF()
+iodef = libiodef.IODEF()
 
 print("*** IODEF->Set() ***")
 iodef:set("alert.classification.text", "My Message")
@@ -57,7 +57,7 @@ fd:close()
 
 print("\n*** IODEF->Read() ***")
 fd2 = io.open("foo.bin","r")
-iodef2 = prelude.IODEF()
+iodef2 = libiodef.IODEF()
 while iodef2:read(fd2) do
 	print(iodef2)
 end
@@ -65,7 +65,7 @@ fd2:close()
 
 
 print("\n*** Client ***")
-c = prelude.ClientEasy("prelude-lml")
+c = libiodef.ClientEasy("libiodef-lml")
 c:start()
 
 c:sendIODEF(iodef)

@@ -1,9 +1,9 @@
 import time
-import prelude
+import libiodef
 
-sensor = prelude.Sensor("test")
+sensor = libiodef.Sensor("test")
 
-alert = prelude.IODEFAlert()
+alert = libiodef.IODEFAlert()
 
 alert["alert.classification(0).name"] = "test python"
 alert["alert.assessment.impact.severity"] = "low"

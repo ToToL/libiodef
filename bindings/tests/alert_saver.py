@@ -2,7 +2,7 @@
 
 import os
 import sys
-import PreludeEasy
+import LibIodefEasy
 
 
 ##################
@@ -22,8 +22,8 @@ if os.path.exists(dest_dir) == 0:
 	sys.exit(1)
 
 
-client = PreludeEasy.ClientEasy("PolluxTest", PreludeEasy.Client.IODEF_READ)
-client.SetFlags(client.GetFlags() & ~PreludeEasy.Client.HEARTBEAT)
+client = LibIodefEasy.ClientEasy("PolluxTest", LibIodefEasy.Client.IODEF_READ)
+client.SetFlags(client.GetFlags() & ~LibIodefEasy.Client.HEARTBEAT)
 #client.Init()
 client.Start()
 
@@ -49,7 +49,7 @@ import time
 while 1:
 	sys.stdout.write(".")
 	sys.stdout.flush()
-	iodef = PreludeEasy.IODEF()
+	iodef = LibIodefEasy.IODEF()
 	client >> iodef
 	if iodef:
 		handle_alert(iodef)

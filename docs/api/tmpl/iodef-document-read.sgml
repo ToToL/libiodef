@@ -3,14 +3,14 @@ iodef-document-read
 
 <!-- ##### SECTION Short_Description ##### -->
 
-Reading a message from a #prelude_msg_t buffer
+Reading a message from a #libiodef_msg_t buffer
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
 
-Once you read a #prelude_msg_t object, you need to decode this message.
+Once you read a #libiodef_msg_t object, you need to decode this message.
 In case this is an IODEF style message, the following API allow to read
-the relevant IODEF fields from the #prelude_msg_t object, and create the
+the relevant IODEF fields from the #libiodef_msg_t object, and create the
 IODEF object from it's content.
 
 </para>
@@ -22,10 +22,10 @@ is an example on how to use it:
 
 <programlisting>
 int ret;
-prelude_msg_t *pmsg;
+libiodef_msg_t *pmsg;
 iodef_document_t *message;
 
-pmsg = whatever_method_to_get_a_prelude_msg();
+pmsg = whatever_method_to_get_a_libiodef_msg();
 
 ret = iodef_document_new(&amp;message);
 if ( ret &lt; 0 )

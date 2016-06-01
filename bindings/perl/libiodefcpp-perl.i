@@ -1,9 +1,9 @@
 /*****
 *
 * Copyright (C) 2005-2016 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoann.v@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann.v@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@
 %ignore *::operator uint64_t() const;
 %ignore *::operator float() const;
 %ignore *::operator double() const;
-%ignore *::operator Prelude::IODEFTime() const;
+%ignore *::operator LibIodef::IODEFTime() const;
 %ignore *::operator const std::string() const;
 %ignore *::operator const char *() const;
 
@@ -49,13 +49,13 @@
 %}
 
 %fragment("IODEFValueList_to_SWIG", "header") {
-int IODEFValue_to_SWIG(TARGET_LANGUAGE_SELF self, const Prelude::IODEFValue &result, void *extra, TARGET_LANGUAGE_OUTPUT_TYPE ret);
+int IODEFValue_to_SWIG(TARGET_LANGUAGE_SELF self, const LibIodef::IODEFValue &result, void *extra, TARGET_LANGUAGE_OUTPUT_TYPE ret);
 
-SV *IODEFValueList_to_SWIG(TARGET_LANGUAGE_SELF self, const Prelude::IODEFValue &value, void *extra)
+SV *IODEFValueList_to_SWIG(TARGET_LANGUAGE_SELF self, const LibIodef::IODEFValue &value, void *extra)
 {
         int j = 0, ret;
-        std::vector<Prelude::IODEFValue> result = value;
-        std::vector<Prelude::IODEFValue>::const_iterator i;
+        std::vector<LibIodef::IODEFValue> result = value;
+        std::vector<LibIodef::IODEFValue>::const_iterator i;
 
         AV *myav;
         SV *svret, **svs = new SV*[result.size()];
@@ -87,7 +87,7 @@ SV *IODEFValueList_to_SWIG(TARGET_LANGUAGE_SELF self, const Prelude::IODEFValue 
 }
 
 %fragment("TransitionFunc", "header") {
-static SV *__prelude_log_func;
+static SV *__libiodef_log_func;
 static gl_thread_t __initial_thread;
 
 
@@ -105,49 +105,49 @@ static void _cb_perl_log(int level, const char *str)
         XPUSHs(SWIG_FromCharPtr(str));
         PUTBACK;
 
-        perl_call_sv(__prelude_log_func, G_VOID);
+        perl_call_sv(__libiodef_log_func, G_VOID);
 
         FREETMPS;
         LEAVE;
 }
 
 
-static int _cb_perl_write(prelude_msgbuf_t *fd, prelude_msg_t *msg)
+static int _cb_perl_write(libiodef_msgbuf_t *fd, libiodef_msg_t *msg)
 {
         ssize_t ret;
-        PerlIO *io = (PerlIO *) prelude_msgbuf_get_data(fd);
+        PerlIO *io = (PerlIO *) libiodef_msgbuf_get_data(fd);
 
-        ret = PerlIO_write(io, (const char *) prelude_msg_get_message_data(msg), prelude_msg_get_len(msg));
-        if ( ret != prelude_msg_get_len(msg) )
-                return prelude_error_from_errno(errno);
+        ret = PerlIO_write(io, (const char *) libiodef_msg_get_message_data(msg), libiodef_msg_get_len(msg));
+        if ( ret != libiodef_msg_get_len(msg) )
+                return libiodef_error_from_errno(errno);
 
-        prelude_msg_recycle(msg);
+        libiodef_msg_recycle(msg);
 
         return 0;
 }
 
 
-static ssize_t _cb_perl_read(prelude_io_t *fd, void *buf, size_t size)
+static ssize_t _cb_perl_read(libiodef_io_t *fd, void *buf, size_t size)
 {
         int ret;
-        PerlIO *io = (PerlIO *) prelude_io_get_fdptr(fd);
+        PerlIO *io = (PerlIO *) libiodef_io_get_fdptr(fd);
 
         ret = PerlIO_read(io, buf, size);
         if ( ret < 0 )
-                ret = prelude_error_from_errno(errno);
+                ret = libiodef_error_from_errno(errno);
 
         else if ( ret == 0 )
-                ret = prelude_error(PRELUDE_ERROR_EOF);
+                ret = libiodef_error(LIBIODEF_ERROR_EOF);
 
         return ret;
 }
 };
 
 %typemap(in, fragment="TransitionFunc") void (*log_cb)(int level, const char *log) {
-        if ( __prelude_log_func )
-                SvREFCNT_dec(__prelude_log_func);
+        if ( __libiodef_log_func )
+                SvREFCNT_dec(__libiodef_log_func);
 
-        __prelude_log_func = $input;
+        __libiodef_log_func = $input;
         SvREFCNT_inc($input);
 
         $1 = _cb_perl_log;
@@ -157,8 +157,8 @@ static ssize_t _cb_perl_read(prelude_io_t *fd, void *buf, size_t size)
 %exception read(void *nocast_p) {
         try {
                 $action
-        } catch(Prelude::PreludeError &e) {
-                if ( e.getCode() == PRELUDE_ERROR_EOF )
+        } catch(LibIodef::LibIodefError &e) {
+                if ( e.getCode() == LIBIODEF_ERROR_EOF )
                         result = 0;
                 else
                         SWIG_exception_fail(SWIG_RuntimeError, e.what());
@@ -166,7 +166,7 @@ static ssize_t _cb_perl_read(prelude_io_t *fd, void *buf, size_t size)
 }
 
 
-%extend Prelude::IODEF {
+%extend LibIodef::IODEF {
         void write(void *nocast_p) {
                 PerlIO *io = IoIFP(sv_2io((SV *) nocast_p));
                 self->_genericWrite(_cb_perl_write, io);
@@ -180,7 +180,7 @@ static ssize_t _cb_perl_read(prelude_io_t *fd, void *buf, size_t size)
 }
 
 
-%typemap(out, fragment="IODEFValue_to_SWIG") Prelude::IODEFValue {
+%typemap(out, fragment="IODEFValue_to_SWIG") LibIodef::IODEFValue {
         int ret;
 
         if ( $1.isNull() ) {
@@ -216,11 +216,11 @@ static ssize_t _cb_perl_read(prelude_io_t *fd, void *buf, size_t size)
                 argc += ret + 1;
 
         if ( argc + 1 < 0 )
-                throw PreludeError("Invalide argc length");
+                throw LibIodefError("Invalide argc length");
 
         argv = (char **) malloc((argc + 1) * sizeof(char *));
         if ( ! argv )
-                throw PreludeError("Allocation failure");
+                throw LibIodefError("Allocation failure");
 
         argv[0] = SvPV(get_sv("0", FALSE), len);
 
@@ -229,10 +229,10 @@ static ssize_t _cb_perl_read(prelude_io_t *fd, void *buf, size_t size)
 
         argv[j + 1] = NULL;
 
-        ret = prelude_init(&argc, argv);
+        ret = libiodef_init(&argc, argv);
         if ( ret < 0 ) {
                 free(argv);
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
         }
 
         free(argv);

@@ -1,9 +1,9 @@
 /*****
 *
 * Copyright (C) 2008-2016 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoann@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@
 *
 *****/
 
-#ifndef _LIBPRELUDE_IODEF_CRITERIA_HXX
-#define _LIBPRELUDE_IODEF_CRITERIA_HXX
+#ifndef _LIBIODEF_IODEF_CRITERIA_HXX
+#define _LIBIODEF_IODEF_CRITERIA_HXX
 
 #include <string>
 #include "iodef.h"

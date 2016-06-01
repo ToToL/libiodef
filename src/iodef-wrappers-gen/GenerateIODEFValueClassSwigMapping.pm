@@ -1,7 +1,7 @@
 # Copyright (C) 2003-2016 CS-SI. All Rights Reserved.
-# Author: Yoann Vandoorselaere <yoann.v@prelude-ids.com>
+# Author: Yoann Vandoorselaere <yoann.v@libiodef-ids.com>
 #
-# This file is part of the Prelude library.
+# This file is part of the LibIodef library.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,9 +34,9 @@ sub	header
 /*****
 *
 * Copyright (C) 2005-2016 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoann.v\@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann.v\@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by

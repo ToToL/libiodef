@@ -1,9 +1,9 @@
 /*****
 *
 * Copyright (C) 2008-2016 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoann@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 *
 *****/
 
-#include "prelude-error.hxx"
+#include "libiodef-error.hxx"
 #include "iodef-time.hxx"
 
 using namespace Iodef;
@@ -46,7 +46,7 @@ IODEFTime::IODEFTime()
 
         ret = iodef_time_new_from_gettimeofday(&_time);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 
 }
 
@@ -63,7 +63,7 @@ IODEFTime::IODEFTime(time_t time)
 
         ret = iodef_time_new_from_time(&_time, &time);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -73,7 +73,7 @@ IODEFTime::IODEFTime(const char *str)
 
         ret = iodef_time_new_from_string(&_time, str);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -83,7 +83,7 @@ IODEFTime::IODEFTime(const struct timeval *tv)
 
         ret = iodef_time_new_from_timeval(&_time, tv);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -100,7 +100,7 @@ void IODEFTime::set(const struct timeval *tv)
 
         ret = iodef_time_set_from_timeval(_time, tv);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -111,7 +111,7 @@ void IODEFTime::set(const char *str)
 
         ret = iodef_time_set_from_string(_time, str);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -121,7 +121,7 @@ void IODEFTime::set()
 
         ret = iodef_time_set_from_gettimeofday(_time);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -168,7 +168,7 @@ IODEFTime IODEFTime::clone() const
 
         ret = iodef_time_clone(_time, &clone);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 
         return IODEFTime(clone);
 }
@@ -178,18 +178,18 @@ const std::string IODEFTime::toString() const
 {
         int ret;
         std::string cs;
-        prelude_string_t *str = NULL;
+        libiodef_string_t *str = NULL;
 
-        ret = prelude_string_new(&str);
+        ret = libiodef_string_new(&str);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 
         ret = iodef_time_to_string(_time, str);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 
-        cs = prelude_string_get_string(str);
-        prelude_string_destroy(str);
+        cs = libiodef_string_get_string(str);
+        libiodef_string_destroy(str);
 
         return cs;
 }

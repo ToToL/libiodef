@@ -3,7 +3,7 @@
 * Copyright (C) 2009-2016 CS-SI. All Rights Reserved.
 * Author: Yoann Vandoorselaere <yoannv@gmail.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 #include <iodef-document-print.h>
 #include <iodef-object-prv.h>
 
-#include "prelude-error.hxx"
+#include "libiodef-error.hxx"
 #include "iodef-path.hxx"
 #include "iodef.hxx"
 
@@ -42,7 +42,7 @@ IODEF::IODEF() : _object(NULL)
 
         ret = iodef_document_new((iodef_document_t **) &_object);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -52,7 +52,7 @@ IODEF::IODEF(const char *json) : _object(NULL)
 
         ret = iodef_object_new_from_json(&_object, json);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -177,7 +177,7 @@ IODEF IODEF::clone()
 
         ret = iodef_object_clone(_object, &clone);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 
         return IODEF(clone);
 }
@@ -193,19 +193,19 @@ const std::string IODEF::toString() const
 {
         int ret;
         std::string str;
-        prelude_io_t *fd;
+        libiodef_io_t *fd;
 
-        ret = prelude_io_new(&fd);
+        ret = libiodef_io_new(&fd);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 
-        prelude_io_set_buffer_io(fd);
+        libiodef_io_set_buffer_io(fd);
         iodef_object_print(_object, fd);
 
-        str.assign((const char *) prelude_io_get_fdptr(fd), prelude_io_pending(fd));
+        str.assign((const char *) libiodef_io_get_fdptr(fd), libiodef_io_pending(fd));
 
-        prelude_io_close(fd);
-        prelude_io_destroy(fd);
+        libiodef_io_close(fd);
+        libiodef_io_destroy(fd);
 
         return str;
 }
@@ -215,19 +215,19 @@ const std::string IODEF::toJSON() const
 {
         int ret;
         std::string str;
-        prelude_io_t *fd;
+        libiodef_io_t *fd;
 
-        ret = prelude_io_new(&fd);
+        ret = libiodef_io_new(&fd);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 
-        prelude_io_set_buffer_io(fd);
+        libiodef_io_set_buffer_io(fd);
         iodef_object_print_json(_object, fd);
 
-        str.assign((const char *) prelude_io_get_fdptr(fd), prelude_io_pending(fd));
+        str.assign((const char *) libiodef_io_get_fdptr(fd), libiodef_io_pending(fd));
 
-        prelude_io_close(fd);
-        prelude_io_destroy(fd);
+        libiodef_io_close(fd);
+        libiodef_io_destroy(fd);
 
         return str;
 }
@@ -236,19 +236,19 @@ const std::string IODEF::toBinary() const
 {
         int ret;
         std::string str;
-        prelude_io_t *fd;
+        libiodef_io_t *fd;
 
-        ret = prelude_io_new(&fd);
+        ret = libiodef_io_new(&fd);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 
-        prelude_io_set_buffer_io(fd);
+        libiodef_io_set_buffer_io(fd);
         iodef_object_print_binary(_object, fd);
 
-        str.assign((const char *) prelude_io_get_fdptr(fd), prelude_io_pending(fd));
+        str.assign((const char *) libiodef_io_get_fdptr(fd), libiodef_io_pending(fd));
 
-        prelude_io_close(fd);
-        prelude_io_destroy(fd);
+        libiodef_io_close(fd);
+        libiodef_io_destroy(fd);
 
         return str;
 }

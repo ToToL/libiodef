@@ -1,9 +1,9 @@
 /*****
 *
 * Copyright (C) 2008-2016 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoann@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #include "iodef.hxx"
 #include "iodef-path.hxx"
 #include "iodef-class.hxx"
-#include "prelude-error.hxx"
+#include "libiodef-error.hxx"
 
 #include "iodef-object-prv.h"
 
@@ -37,7 +37,7 @@ IODEFPath::IODEFPath(const char *buffer)
 
         ret = iodef_path_new_fast(&_path, buffer);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -49,7 +49,7 @@ IODEFPath::IODEFPath(IODEF &iodef, const char *buffer)
 
         ret = iodef_path_new_from_root_fast(&_path, obj->_iodef_object_id, buffer);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -79,7 +79,7 @@ IODEFValue IODEFPath::get(const IODEF &message) const
 
         ret = iodef_path_get(_path, message, &value);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 
         else if ( ret == 0 )
                 return IODEFValue((iodef_value_t *) NULL);
@@ -109,7 +109,7 @@ iodef_criterion_operator_t IODEFPath::getApplicableOperators() const
 
         ret = iodef_path_get_applicable_operators(_path, &res);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 
         return res;
 }
@@ -123,7 +123,7 @@ void IODEFPath::set(IODEF &message, const std::vector<IODEF> &value) const
 
         ret = iodef_path_set(_path, message, v);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -137,7 +137,7 @@ void IODEFPath::set(IODEF &message, IODEF *value) const
                 ret = iodef_path_set(_path, message, IODEFValue(value));
 
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -151,7 +151,7 @@ void IODEFPath::set(IODEF &message, IODEFValue *value) const
                 ret = iodef_path_set(_path, message, *value);
 
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -162,7 +162,7 @@ void IODEFPath::set(IODEF &message, const std::vector<IODEFValue> &value) const
 
         ret = iodef_path_set(_path, message, v);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -172,7 +172,7 @@ void IODEFPath::set(IODEF &message, IODEFValue &value) const
 
         ret = iodef_path_set(_path, message, value);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -182,7 +182,7 @@ void IODEFPath::set(IODEF &message, const std::string &value) const
 
         ret = iodef_path_set(_path, message, IODEFValue(value));
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -196,7 +196,7 @@ void IODEFPath::set(IODEF &message, const char *value) const
                 ret = iodef_path_set(_path, message, (iodef_value_t *) NULL);
 
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -207,7 +207,7 @@ void IODEFPath::set(IODEF &message, int32_t value) const
 
         ret = iodef_path_set(_path, message, IODEFValue(value));
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -218,7 +218,7 @@ void IODEFPath::set(IODEF &message, int64_t value) const
 
         ret = iodef_path_set(_path, message, IODEFValue(value));
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -228,7 +228,7 @@ void IODEFPath::set(IODEF &message, uint64_t value) const
 
         ret = iodef_path_set(_path, message, IODEFValue(value));
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -238,7 +238,7 @@ void IODEFPath::set(IODEF &message, float value) const
 
         ret = iodef_path_set(_path, message, IODEFValue(value));
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -248,7 +248,7 @@ void IODEFPath::set(IODEF &message, double value) const
 
         ret = iodef_path_set(_path, message, IODEFValue(value));
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -258,7 +258,7 @@ void IODEFPath::set(IODEF &message, IODEFTime &time) const
 
         ret = iodef_path_set(_path, message, IODEFValue(time));
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -329,7 +329,7 @@ IODEFPath IODEFPath::clone() const
 
         ret = iodef_path_clone(_path, &cpath);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 
         return IODEFPath(cpath);
 }

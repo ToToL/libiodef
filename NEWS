@@ -1,7 +1,7 @@
-* 2016-05-30, libidmef-3.0.0:
+* 2016-05-30, libiodef-3.0.0:
 
 Author: Selim Menouar
 
-- Initial commit for libidmef
+- Initial commit for libiodef
 - Support C/C++ and Python bindings
 - Example of use in example folder

@@ -1,0 +1,630 @@
+<!-- ##### SECTION Title ##### -->
+libiodef-option
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### SECTION Image ##### -->
+
+
+<!-- ##### ENUM libiodef_option_type_t ##### -->
+<para>
+
+</para>
+
+@LIBIODEF_OPTION_TYPE_CLI: 
+@LIBIODEF_OPTION_TYPE_CFG: 
+@LIBIODEF_OPTION_TYPE_WIDE: 
+@LIBIODEF_OPTION_TYPE_CONTEXT: 
+@LIBIODEF_OPTION_TYPE_ROOT: 
+@LIBIODEF_OPTION_TYPE_DESTROY: 
+
+<!-- ##### ENUM libiodef_option_input_type_t ##### -->
+<para>
+
+</para>
+
+@LIBIODEF_OPTION_INPUT_TYPE_STRING: 
+@LIBIODEF_OPTION_INPUT_TYPE_INTEGER: 
+@LIBIODEF_OPTION_INPUT_TYPE_BOOLEAN: 
+
+<!-- ##### TYPEDEF libiodef_option_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### TYPEDEF libiodef_option_context_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### USER_FUNCTION libiodef_option_destroy_callback_t ##### -->
+<para>
+
+</para>
+
+@opt: 
+@out: 
+@context: 
+@Returns: 
+
+
+<!-- ##### USER_FUNCTION libiodef_option_commit_callback_t ##### -->
+<para>
+
+</para>
+
+@opt: 
+@out: 
+@context: 
+@Returns: 
+
+
+<!-- ##### USER_FUNCTION libiodef_option_get_callback_t ##### -->
+<para>
+
+</para>
+
+@opt: 
+@out: 
+@context: 
+@Returns: 
+
+
+<!-- ##### USER_FUNCTION libiodef_option_set_callback_t ##### -->
+<para>
+
+</para>
+
+@opt: 
+@optarg: 
+@err: 
+@context: 
+@Returns: 
+
+
+<!-- ##### ENUM libiodef_option_argument_t ##### -->
+<para>
+
+</para>
+
+@LIBIODEF_OPTION_ARGUMENT_REQUIRED: 
+@LIBIODEF_OPTION_ARGUMENT_OPTIONAL: 
+@LIBIODEF_OPTION_ARGUMENT_NONE: 
+
+<!-- ##### ENUM libiodef_option_priority_t ##### -->
+<para>
+
+</para>
+
+@LIBIODEF_OPTION_PRIORITY_IMMEDIATE: 
+@LIBIODEF_OPTION_PRIORITY_FIRST: 
+@LIBIODEF_OPTION_PRIORITY_NONE: 
+@LIBIODEF_OPTION_PRIORITY_LAST: 
+
+<!-- ##### ENUM libiodef_option_warning_t ##### -->
+<para>
+
+</para>
+
+@LIBIODEF_OPTION_WARNING_OPTION: 
+@LIBIODEF_OPTION_WARNING_ARG: 
+
+<!-- ##### FUNCTION libiodef_option_set_priority ##### -->
+<para>
+
+</para>
+
+@option: 
+@priority: 
+
+
+<!-- ##### FUNCTION libiodef_option_print ##### -->
+<para>
+
+</para>
+
+@opt: 
+@type: 
+@descoff: 
+@fd: 
+
+
+<!-- ##### FUNCTION libiodef_option_wide_send_msg ##### -->
+<para>
+
+</para>
+
+@msgbuf: 
+@context: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_destroy ##### -->
+<para>
+
+</para>
+
+@option: 
+
+
+<!-- ##### FUNCTION libiodef_option_read ##### -->
+<para>
+
+</para>
+
+@option: 
+@filename: 
+@argc: 
+@argv: 
+@err: 
+@context: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_add ##### -->
+<para>
+
+</para>
+
+@parent: 
+@retopt: 
+@type: 
+@shortopt: 
+@longopt: 
+@desc: 
+@has_arg: 
+@set: 
+@get: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_set_type ##### -->
+<para>
+
+</para>
+
+@opt: 
+@type: 
+
+
+<!-- ##### FUNCTION libiodef_option_get_type ##### -->
+<para>
+
+</para>
+
+@opt: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_set_warnings ##### -->
+<para>
+
+</para>
+
+@new_warnings: 
+@old_warnings: 
+
+
+<!-- ##### FUNCTION libiodef_option_get_shortname ##### -->
+<para>
+
+</para>
+
+@opt: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_get_longname ##### -->
+<para>
+
+</para>
+
+@opt: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_set_data ##### -->
+<para>
+
+</para>
+
+@opt: 
+@data: 
+
+
+<!-- ##### FUNCTION libiodef_option_get_data ##### -->
+<para>
+
+</para>
+
+@opt: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_context_get_data ##### -->
+<para>
+
+</para>
+
+@oc: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_context_set_data ##### -->
+<para>
+
+</para>
+
+@oc: 
+@data: 
+
+
+<!-- ##### FUNCTION libiodef_option_invoke_commit ##### -->
+<para>
+
+</para>
+
+@opt: 
+@ctname: 
+@value: 
+@context: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_invoke_set ##### -->
+<para>
+
+</para>
+
+@opt: 
+@ctname: 
+@value: 
+@context: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_invoke_get ##### -->
+<para>
+
+</para>
+
+@opt: 
+@ctname: 
+@value: 
+@context: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_invoke_destroy ##### -->
+<para>
+
+</para>
+
+@opt: 
+@ctname: 
+@value: 
+@context: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_new_root ##### -->
+<para>
+
+</para>
+
+@retopt: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_new ##### -->
+<para>
+
+</para>
+
+@parent: 
+@retopt: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_set_longopt ##### -->
+<para>
+
+</para>
+
+@opt: 
+@longopt: 
+
+
+<!-- ##### FUNCTION libiodef_option_get_longopt ##### -->
+<para>
+
+</para>
+
+@opt: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_set_description ##### -->
+<para>
+
+</para>
+
+@opt: 
+@description: 
+
+
+<!-- ##### FUNCTION libiodef_option_get_description ##### -->
+<para>
+
+</para>
+
+@opt: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_set_has_arg ##### -->
+<para>
+
+</para>
+
+@opt: 
+@has_arg: 
+
+
+<!-- ##### FUNCTION libiodef_option_get_has_arg ##### -->
+<para>
+
+</para>
+
+@opt: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_set_value ##### -->
+<para>
+
+</para>
+
+@opt: 
+@value: 
+
+
+<!-- ##### FUNCTION libiodef_option_get_value ##### -->
+<para>
+
+</para>
+
+@opt: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_set_help ##### -->
+<para>
+
+</para>
+
+@opt: 
+@help: 
+
+
+<!-- ##### FUNCTION libiodef_option_get_help ##### -->
+<para>
+
+</para>
+
+@opt: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_set_input_validation_regex ##### -->
+<para>
+
+</para>
+
+@opt: 
+@regex: 
+
+
+<!-- ##### FUNCTION libiodef_option_get_input_validation_regex ##### -->
+<para>
+
+</para>
+
+@opt: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_set_input_type ##### -->
+<para>
+
+</para>
+
+@opt: 
+@input_type: 
+
+
+<!-- ##### FUNCTION libiodef_option_get_input_type ##### -->
+<para>
+
+</para>
+
+@opt: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_get_optlist ##### -->
+<para>
+
+</para>
+
+@opt: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_get_next ##### -->
+<para>
+
+</para>
+
+@start: 
+@cur: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_has_optlist ##### -->
+<para>
+
+</para>
+
+@opt: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_get_parent ##### -->
+<para>
+
+</para>
+
+@opt: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_set_destroy_callback ##### -->
+<para>
+
+</para>
+
+@opt: 
+@destroy: 
+
+
+<!-- ##### FUNCTION libiodef_option_get_destroy_callback ##### -->
+<para>
+
+</para>
+
+@opt: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_set_set_callback ##### -->
+<para>
+
+</para>
+
+@opt: 
+@set: 
+
+
+<!-- ##### FUNCTION libiodef_option_get_set_callback ##### -->
+<para>
+
+</para>
+
+@opt: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_set_get_callback ##### -->
+<para>
+
+</para>
+
+@opt: 
+@get: 
+
+
+<!-- ##### FUNCTION libiodef_option_get_get_callback ##### -->
+<para>
+
+</para>
+
+@opt: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_set_commit_callback ##### -->
+<para>
+
+</para>
+
+@opt: 
+@commit: 
+
+
+<!-- ##### FUNCTION libiodef_option_get_commit_callback ##### -->
+<para>
+
+</para>
+
+@opt: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_set_default_context ##### -->
+<para>
+
+</para>
+
+@opt: 
+@context: 
+
+
+<!-- ##### FUNCTION libiodef_option_new_context ##### -->
+<para>
+
+</para>
+
+@opt: 
+@ctx: 
+@name: 
+@data: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_context_destroy ##### -->
+<para>
+
+</para>
+
+@oc: 
+
+
+<!-- ##### FUNCTION libiodef_option_search ##### -->
+<para>
+
+</para>
+
+@parent: 
+@name: 
+@type: 
+@walk_children: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_option_search_context ##### -->
+<para>
+
+</para>
+
+@opt: 
+@name: 
+@Returns: 
+
+

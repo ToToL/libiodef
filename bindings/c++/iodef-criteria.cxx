@@ -1,9 +1,9 @@
 /*****
 *
 * Copyright (C) 2008-2016 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoann@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 #include "iodef.hxx"
 #include "iodef-criteria.hxx"
-#include "prelude-error.hxx"
+#include "libiodef-error.hxx"
 
 using namespace Iodef;
 
@@ -52,7 +52,7 @@ IODEFCriteria::IODEFCriteria(const char *criteria)
 
         ret = iodef_criteria_new_from_string(&_criteria, criteria);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -62,7 +62,7 @@ IODEFCriteria::IODEFCriteria(const std::string &criteria)
 
         ret = iodef_criteria_new_from_string(&_criteria, criteria.c_str());
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -72,7 +72,7 @@ IODEFCriteria::IODEFCriteria()
 
         ret = iodef_criteria_new(&_criteria);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -83,7 +83,7 @@ IODEFCriteria IODEFCriteria::clone() const
 
         ret = iodef_criteria_clone(this->_criteria, &cl);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 
         return IODEFCriteria(cl);
 }
@@ -107,7 +107,7 @@ int IODEFCriteria::match(IODEF *message) const
 
         ret = iodef_criteria_match(this->_criteria, *message);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 
         return ret;
 }
@@ -117,20 +117,20 @@ const std::string IODEFCriteria::toString() const
 {
         int ret;
         std::string s;
-        prelude_string_t *str;
+        libiodef_string_t *str;
 
-        ret = prelude_string_new(&str);
+        ret = libiodef_string_new(&str);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 
         ret = iodef_criteria_to_string(_criteria, str);
         if ( ret < 0 ) {
-                prelude_string_destroy(str);
-                throw PreludeError(ret);
+                libiodef_string_destroy(str);
+                throw LibIodefError(ret);
         }
 
-        s = prelude_string_get_string(str);
-        prelude_string_destroy(str);
+        s = libiodef_string_get_string(str);
+        libiodef_string_destroy(str);
 
         return s;
 }

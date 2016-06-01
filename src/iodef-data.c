@@ -1,9 +1,9 @@
 /*****
 *
 * Copyright (C) 2003-2016 CS-SI. All Rights Reserved.
-* Author: Nicolas Delon <nicolas.delon@prelude-ids.com>
+* Author: Nicolas Delon <nicolas.delon@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -28,9 +28,9 @@
 #include <string.h>
 #include <sys/types.h>
 
-#include "prelude-error.h"
-#include "prelude-inttypes.h"
-#include "prelude-string.h"
+#include "libiodef-error.h"
+#include "libiodef-inttypes.h"
+#include "libiodef-string.h"
 #include "common.h"
 #include "iodef-data.h"
 
@@ -62,7 +62,7 @@ int iodef_data_new_ ## name(iodef_data_t **nd, c_type val)            \
                                                                       \
 void iodef_data_set_ ## name(iodef_data_t *ptr, c_type val)           \
 {                                                                     \
-        prelude_return_if_fail(ptr);                                  \
+        libiodef_return_if_fail(ptr);                                  \
         iodef_data_destroy_internal(ptr);                             \
         ptr->type = iodef_data_type;                                  \
         ptr->len = sizeof(val);                                       \
@@ -87,7 +87,7 @@ int iodef_data_new(iodef_data_t **data)
 {
         *data = calloc(1, sizeof(**data));
         if ( ! *data )
-                return prelude_error_from_errno(errno);
+                return libiodef_error_from_errno(errno);
 
         (*data)->refcount = 1;
         (*data)->flags |= IODEF_DATA_OWN_STRUCTURE;
@@ -123,7 +123,7 @@ void iodef_data_set_time(iodef_data_t *data, iodef_time_t *time)
 
 iodef_data_t *iodef_data_ref(iodef_data_t *data)
 {
-        prelude_return_val_if_fail(data, NULL);
+        libiodef_return_val_if_fail(data, NULL);
 
         data->refcount++;
         return data;
@@ -133,8 +133,8 @@ iodef_data_t *iodef_data_ref(iodef_data_t *data)
 
 int iodef_data_set_ptr_ref_fast(iodef_data_t *data, iodef_data_type_t type, const void *ptr, size_t len)
 {
-        prelude_return_val_if_fail(data, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(ptr, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(data, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(ptr, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         iodef_data_destroy_internal(data);
 
@@ -151,8 +151,8 @@ int iodef_data_set_ptr_dup_fast(iodef_data_t *data, iodef_data_type_t type, cons
 {
         void *new;
 
-        prelude_return_val_if_fail(data, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(ptr, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(data, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(ptr, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         iodef_data_destroy_internal(data);
 
@@ -174,8 +174,8 @@ int iodef_data_set_ptr_dup_fast(iodef_data_t *data, iodef_data_type_t type, cons
 
 int iodef_data_set_ptr_nodup_fast(iodef_data_t *data, iodef_data_type_t type, void *ptr, size_t len)
 {
-        prelude_return_val_if_fail(data, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(ptr, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(data, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(ptr, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         iodef_data_destroy_internal(data);
 
@@ -252,8 +252,8 @@ int iodef_data_new_ptr_nodup_fast(iodef_data_t **data, iodef_data_type_t type, v
  */
 int iodef_data_copy_ref(const iodef_data_t *src, iodef_data_t *dst)
 {
-        prelude_return_val_if_fail(src, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(dst, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(src, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(dst, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         iodef_data_destroy_internal(dst);
 
@@ -282,8 +282,8 @@ int iodef_data_copy_dup(const iodef_data_t *src, iodef_data_t *dst)
 {
         int ret;
 
-        prelude_return_val_if_fail(src, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(dst, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(src, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(dst, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         iodef_data_destroy_internal(dst);
 
@@ -316,7 +316,7 @@ int iodef_data_clone(const iodef_data_t *src, iodef_data_t **dst)
 {
         int ret;
 
-        prelude_return_val_if_fail(src, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(src, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         ret = iodef_data_new(dst);
         if ( ret < 0 )
@@ -333,7 +333,7 @@ int iodef_data_clone(const iodef_data_t *src, iodef_data_t **dst)
 
 const char *iodef_data_get_char_string(const iodef_data_t *data)
 {
-        prelude_return_val_if_fail(data, NULL);
+        libiodef_return_val_if_fail(data, NULL);
         return data->data.ro_data;
 }
 
@@ -341,7 +341,7 @@ const char *iodef_data_get_char_string(const iodef_data_t *data)
 
 const unsigned char *iodef_data_get_byte_string(const iodef_data_t *data)
 {
-        prelude_return_val_if_fail(data, NULL);
+        libiodef_return_val_if_fail(data, NULL);
         return data->data.ro_data;
 }
 
@@ -355,7 +355,7 @@ const unsigned char *iodef_data_get_byte_string(const iodef_data_t *data)
  */
 iodef_data_type_t iodef_data_get_type(const iodef_data_t *data)
 {
-        prelude_return_val_if_fail(data, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(data, libiodef_error(LIBIODEF_ERROR_ASSERTION));
         return data->type;
 }
 
@@ -370,7 +370,7 @@ iodef_data_type_t iodef_data_get_type(const iodef_data_t *data)
  */
 size_t iodef_data_get_len(const iodef_data_t *data)
 {
-        prelude_return_val_if_fail(data, 0);
+        libiodef_return_val_if_fail(data, 0);
         return data->len;
 }
 
@@ -385,7 +385,7 @@ size_t iodef_data_get_len(const iodef_data_t *data)
  */
 const void *iodef_data_get_data(const iodef_data_t *data)
 {
-        prelude_return_val_if_fail(data, NULL);
+        libiodef_return_val_if_fail(data, NULL);
 
         switch ( data->type ) {
         case IODEF_DATA_TYPE_UNKNOWN:
@@ -411,40 +411,40 @@ const void *iodef_data_get_data(const iodef_data_t *data)
  *
  * Returns: TRUE if empty, FALSE otherwise.
  */
-prelude_bool_t iodef_data_is_empty(const iodef_data_t *data)
+libiodef_bool_t iodef_data_is_empty(const iodef_data_t *data)
 {
-        prelude_return_val_if_fail(data, TRUE);
+        libiodef_return_val_if_fail(data, TRUE);
         return (data->len == 0) ? TRUE : FALSE;
 }
 
 
 
-static int bytes_to_string(prelude_string_t *out, const unsigned char *src, size_t size)
+static int bytes_to_string(libiodef_string_t *out, const unsigned char *src, size_t size)
 {
         char c;
         int ret;
         static const char b64tbl[64] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
         while ( size ) {
-                ret = prelude_string_ncat(out, &b64tbl[(src[0] >> 2) & 0x3f], 1);
+                ret = libiodef_string_ncat(out, &b64tbl[(src[0] >> 2) & 0x3f], 1);
                 if ( ret < 0 )
                         return ret;
 
                 c = b64tbl[((src[0] << 4) + ((--size) ? src[1] >> 4 : 0)) & 0x3f];
 
-                ret = prelude_string_ncat(out, &c, 1);
+                ret = libiodef_string_ncat(out, &c, 1);
                 if ( ret < 0 )
                         return ret;
 
                 c = (size) ? b64tbl[((src[1] << 2) + ((--size) ? src[2] >> 6 : 0)) & 0x3f] : '=';
 
-                ret = prelude_string_ncat(out, &c, 1);
+                ret = libiodef_string_ncat(out, &c, 1);
                 if ( ret < 0 )
                         return ret;
 
                 c = (size && size--) ? b64tbl[src[2] & 0x3f] : '=';
 
-                ret = prelude_string_ncat(out, &c, 1);
+                ret = libiodef_string_ncat(out, &c, 1);
                 if ( ret < 0 )
                         return ret;
 
@@ -460,46 +460,46 @@ static int bytes_to_string(prelude_string_t *out, const unsigned char *src, size
 /**
  * iodef_data_to_string:
  * @data: Pointer to an #iodef_data_t object.
- * @out: Pointer to a #prelude_string_t to store the formated data into.
+ * @out: Pointer to a #libiodef_string_t to store the formated data into.
  *
  * Formats data contained within @data to be printable,
  * and stores the result in the provided @out buffer.
  *
  * Returns: 0 on success, a negative value if an error occured.
  */
-int iodef_data_to_string(const iodef_data_t *data, prelude_string_t *out)
+int iodef_data_to_string(const iodef_data_t *data, libiodef_string_t *out)
 {
         int ret = 0;
 
-        prelude_return_val_if_fail(data, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(out, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(data, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(out, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         switch ( data->type ) {
         case IODEF_DATA_TYPE_UNKNOWN:
                 return 0;
 
         case IODEF_DATA_TYPE_CHAR:
-                ret = prelude_string_sprintf(out, "%c", data->data.char_data);
+                ret = libiodef_string_sprintf(out, "%c", data->data.char_data);
                 break;
 
         case IODEF_DATA_TYPE_BYTE:
                 /*
                  * %hh convertion specifier is not portable.
                  */
-                ret = prelude_string_sprintf(out, "%u", (unsigned int) data->data.byte_data);
+                ret = libiodef_string_sprintf(out, "%u", (unsigned int) data->data.byte_data);
                 break;
 
         case IODEF_DATA_TYPE_UINT32:
         case IODEF_DATA_TYPE_INT:
-                ret = prelude_string_sprintf(out, "%" PRELUDE_PRId64, data->data.int_data);
+                ret = libiodef_string_sprintf(out, "%" LIBIODEF_PRId64, data->data.int_data);
                 break;
 
         case IODEF_DATA_TYPE_FLOAT:
-                ret = prelude_string_sprintf(out, "%f", data->data.float_data);
+                ret = libiodef_string_sprintf(out, "%f", data->data.float_data);
                 break;
 
         case IODEF_DATA_TYPE_CHAR_STRING:
-                ret = prelude_string_sprintf(out, "%s", (const char *) data->data.ro_data);
+                ret = libiodef_string_sprintf(out, "%s", (const char *) data->data.ro_data);
                 break;
 
         case IODEF_DATA_TYPE_BYTE_STRING:
@@ -522,7 +522,7 @@ int iodef_data_to_string(const iodef_data_t *data, prelude_string_t *out)
  */
 void iodef_data_destroy_internal(iodef_data_t *ptr)
 {
-        prelude_return_if_fail(ptr);
+        libiodef_return_if_fail(ptr);
 
         if ( ptr->type == IODEF_DATA_TYPE_TIME && ptr->flags & IODEF_DATA_OWN_DATA )
                 iodef_time_destroy(ptr->data.rw_data);
@@ -550,7 +550,7 @@ void iodef_data_destroy_internal(iodef_data_t *ptr)
  */
 void iodef_data_destroy(iodef_data_t *data)
 {
-        prelude_return_if_fail(data);
+        libiodef_return_if_fail(data);
 
         if ( --data->refcount )
                 return;
@@ -595,42 +595,42 @@ int iodef_data_set_char_string_nodup_fast(iodef_data_t *data, char *ptr, size_t 
 
 int iodef_data_new_char_string_ref(iodef_data_t **data, const char *ptr)
 {
-        prelude_return_val_if_fail(ptr, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(ptr, libiodef_error(LIBIODEF_ERROR_ASSERTION));
         return iodef_data_new_char_string_ref_fast(data, ptr, strlen(ptr));
 }
 
 int iodef_data_new_char_string_dup(iodef_data_t **data, const char *ptr)
 {
-        prelude_return_val_if_fail(ptr, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(ptr, libiodef_error(LIBIODEF_ERROR_ASSERTION));
         return iodef_data_new_char_string_dup_fast(data, ptr, strlen(ptr));
 }
 
 int iodef_data_new_char_string_nodup(iodef_data_t **data, char *ptr)
 {
-        prelude_return_val_if_fail(ptr, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(ptr, libiodef_error(LIBIODEF_ERROR_ASSERTION));
         return iodef_data_new_char_string_nodup_fast(data, ptr, strlen(ptr));
 }
 
 int iodef_data_set_char_string_ref(iodef_data_t *data, const char *ptr)
 {
-        prelude_return_val_if_fail(data, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(ptr, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(data, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(ptr, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         return iodef_data_set_char_string_ref_fast(data, ptr, strlen(ptr));
 }
 
 int iodef_data_set_char_string_dup(iodef_data_t *data, const char *ptr)
 {
-        prelude_return_val_if_fail(data, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(ptr, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(data, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(ptr, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         return iodef_data_set_char_string_dup_fast(data, ptr, strlen(ptr));
 }
 
 int iodef_data_set_char_string_nodup(iodef_data_t *data, char *ptr)
 {
-        prelude_return_val_if_fail(data, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(ptr, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(data, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(ptr, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         return iodef_data_set_char_string_nodup_fast(data, ptr, strlen(ptr));
 }

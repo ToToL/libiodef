@@ -1,9 +1,9 @@
 /*****
 *
 * Copyright (C) 2003-2016 CS-SI. All Rights Reserved.
-* Author: Nicolas Delon <nicolas.delon@prelude-ids.com>
+* Author: Nicolas Delon <nicolas.delon@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -51,11 +51,11 @@
 # endif
 #endif
 
-#include "prelude-inttypes.h"
-#include "prelude-string.h"
-#include "prelude-error.h"
+#include "libiodef-inttypes.h"
+#include "libiodef-string.h"
+#include "libiodef-error.h"
 #include "ntp.h"
-#include "prelude-log.h"
+#include "libiodef-log.h"
 #include "common.h"
 #include "iodef-time.h"
 
@@ -88,7 +88,7 @@ static int digit2usec(uint32_t n, int digit_count)
         const size_t max_digit = 6; /* 999999 */
 
         if ( digit_count > max_digit )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "Invalid number of digits for time fraction");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "Invalid number of digits for time fraction");
 
         for ( i = 0; i < (max_digit - digit_count); i++ )
                 n *= 10;
@@ -125,7 +125,7 @@ static int parse_time_hmsu(struct tm *tm, uint32_t *usec, char **buf)
         return 0;
 
     fmterror:
-        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "error parsing time field, format should be: HH:MM:SS(.fraction)");
+        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "error parsing time field, format should be: HH:MM:SS(.fraction)");
 }
 
 
@@ -187,17 +187,17 @@ int iodef_time_set_from_string(iodef_time_t *time, const char *buf)
         int ret;
         char *ptr;
         struct tm tm;
-        prelude_bool_t miss_gmt = FALSE;
+        libiodef_bool_t miss_gmt = FALSE;
 
-        prelude_return_val_if_fail(time, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(buf, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(time, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(buf, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         memset(&tm, 0, sizeof(tm));
         tm.tm_isdst = -1;
 
         ptr = parse_time_ymd(&tm, buf);
         if ( ! ptr )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "error parsing date field, format should be: YY-MM-DD");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "error parsing date field, format should be: YY-MM-DD");
 
         time->usec = 0;
         time->gmt_offset = 0;
@@ -211,7 +211,7 @@ int iodef_time_set_from_string(iodef_time_t *time, const char *buf)
                 if ( *ptr ) {
                         ret = parse_time_gmt(&tm, &time->gmt_offset, ptr);
                         if ( ret < 0 )
-                                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "error parsing GMT offset field (Z)?(+|-)?HH:MM");
+                                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "error parsing GMT offset field (Z)?(+|-)?HH:MM");
 
                         miss_gmt = FALSE;
                 }
@@ -219,11 +219,11 @@ int iodef_time_set_from_string(iodef_time_t *time, const char *buf)
 
         if ( miss_gmt ) {
                 long gmtoff;
-                prelude_get_gmt_offset_from_tm(&tm, &gmtoff);
+                libiodef_get_gmt_offset_from_tm(&tm, &gmtoff);
                 time->gmt_offset = (int32_t) gmtoff;
         }
 
-        time->sec = miss_gmt ? mktime(&tm) : prelude_timegm(&tm);
+        time->sec = miss_gmt ? mktime(&tm) : libiodef_timegm(&tm);
         return 0;
 }
 
@@ -250,7 +250,7 @@ int iodef_time_new_from_string(iodef_time_t **time, const char *buf)
 {
         int ret;
 
-        prelude_return_val_if_fail(buf, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(buf, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         ret = iodef_time_new(time);
         if ( ret < 0 )
@@ -283,8 +283,8 @@ int iodef_time_set_from_ntpstamp(iodef_time_t *time, const char *buf)
         unsigned ts_mask = TS_MASK;
         unsigned ts_roundbit = TS_ROUNDBIT;
 
-        prelude_return_val_if_fail(time, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(buf, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(time, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(buf, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         if ( sscanf(buf, "%x.%x", &ts.l_ui, &ts.l_uf) < 2 )
                 return -1;
@@ -310,14 +310,14 @@ int iodef_time_set_from_ntpstamp(iodef_time_t *time, const char *buf)
 /**
  * iodef_time_to_ntpstamp:
  * @time: Pointer to an IODEF time structure.
- * @out: Pointer to a #prelude_string_t output buffer.
+ * @out: Pointer to a #libiodef_string_t output buffer.
  *
  * Translates @time to an user readable NTP timestamp string,
  * conforming to the IODEF defined time format.
  *
  * Returns: number of bytes written on success, a negative value if an error occured.
  */
-int iodef_time_to_ntpstamp(const iodef_time_t *time, prelude_string_t *out)
+int iodef_time_to_ntpstamp(const iodef_time_t *time, libiodef_string_t *out)
 {
         l_fp ts;
         struct timeval tv;
@@ -325,8 +325,8 @@ int iodef_time_to_ntpstamp(const iodef_time_t *time, prelude_string_t *out)
         unsigned ts_roundbit = TS_ROUNDBIT;     /* defaults to 20 bits (us) */
         int ret;
 
-        prelude_return_val_if_fail(time, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(out, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(time, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(out, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         tv.tv_sec = iodef_time_get_sec(time);
         tv.tv_usec = iodef_time_get_usec(time);
@@ -337,7 +337,7 @@ int iodef_time_to_ntpstamp(const iodef_time_t *time, prelude_string_t *out)
         ts.l_uf += ts_roundbit;
         ts.l_uf &= ts_mask;
 
-        ret = prelude_string_sprintf(out, "0x%08lx.0x%08lx", (unsigned long) ts.l_ui, (unsigned long) ts.l_uf);
+        ret = libiodef_string_sprintf(out, "0x%08lx.0x%08lx", (unsigned long) ts.l_ui, (unsigned long) ts.l_uf);
 
         return ret;
 }
@@ -347,31 +347,31 @@ int iodef_time_to_ntpstamp(const iodef_time_t *time, prelude_string_t *out)
 /**
  * iodef_time_to_string:
  * @time: Pointer to an IODEF time structure.
- * @out: Pointer to a #prelude_string_t output buffer.
+ * @out: Pointer to a #libiodef_string_t output buffer.
  *
  * Translates @time to an user readable string conforming to the IODEF
  * defined time format.
  *
  * Returns: number of bytes written on success, a negative value if an error occured.
  */
-int iodef_time_to_string(const iodef_time_t *time, prelude_string_t *out)
+int iodef_time_to_string(const iodef_time_t *time, libiodef_string_t *out)
 {
         time_t t;
         struct tm utc;
         uint32_t hour_off, min_off;
 
-        prelude_return_val_if_fail(time, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(out, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(time, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(out, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         t = time->sec + time->gmt_offset;
 
         if ( ! gmtime_r((const time_t *) &t, &utc) )
-                return prelude_error_from_errno(errno);
+                return libiodef_error_from_errno(errno);
 
         hour_off = time->gmt_offset / 3600;
         min_off = time->gmt_offset % 3600 / 60;
 
-        return prelude_string_sprintf(out, "%d-%.2d-%.2dT%.2d:%.2d:%.2d.%02u%+.2d:%.2d",
+        return libiodef_string_sprintf(out, "%d-%.2d-%.2dT%.2d:%.2d:%.2d.%02u%+.2d:%.2d",
                                       utc.tm_year + 1900, utc.tm_mon + 1, utc.tm_mday,
                                       utc.tm_hour, utc.tm_min, utc.tm_sec, iodef_time_get_usec(time),
                                       hour_off, min_off);
@@ -394,7 +394,7 @@ int iodef_time_new_from_ntpstamp(iodef_time_t **time, const char *buf)
 {
         int ret;
 
-        prelude_return_val_if_fail(buf, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(buf, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         ret = iodef_time_new(time);
         if ( ret < 0 )
@@ -425,10 +425,10 @@ int iodef_time_set_from_timeval(iodef_time_t *time, const struct timeval *tv)
         int ret;
         long gmtoff;
 
-        prelude_return_val_if_fail(time, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(tv, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(time, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(tv, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
-        ret = prelude_get_gmt_offset_from_time((const time_t *) &tv->tv_sec, &gmtoff);
+        ret = libiodef_get_gmt_offset_from_time((const time_t *) &tv->tv_sec, &gmtoff);
         if ( ret < 0 )
                 return ret;
 
@@ -455,7 +455,7 @@ int iodef_time_new_from_timeval(iodef_time_t **time, const struct timeval *tv)
 {
         int ret;
 
-        prelude_return_val_if_fail(tv, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(tv, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         ret = iodef_time_new(time);
         if ( ret < 0 )
@@ -479,11 +479,11 @@ int iodef_time_set_from_gettimeofday(iodef_time_t *time)
         int ret;
         struct timeval tv;
 
-        prelude_return_val_if_fail(time, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(time, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         ret = gettimeofday(&tv, NULL);
         if ( ret < 0 )
-                return prelude_error_from_errno(errno);
+                return libiodef_error_from_errno(errno);
 
         return iodef_time_set_from_timeval(time, &tv);
 }
@@ -506,7 +506,7 @@ int iodef_time_new_from_gettimeofday(iodef_time_t **time)
 
         ret = gettimeofday(&tv, NULL);
         if ( ret < 0 )
-                return prelude_error_from_errno(errno);
+                return libiodef_error_from_errno(errno);
 
         return iodef_time_new_from_timeval(time, &tv);
 }
@@ -525,7 +525,7 @@ int iodef_time_new_from_gettimeofday(iodef_time_t **time)
  */
 iodef_time_t *iodef_time_ref(iodef_time_t *time)
 {
-        prelude_return_val_if_fail(time, NULL);
+        libiodef_return_val_if_fail(time, NULL);
 
         time->refcount++;
         return time;
@@ -545,7 +545,7 @@ int iodef_time_new(iodef_time_t **time)
 {
         *time = calloc(1, sizeof(**time));
         if ( ! *time )
-                return prelude_error_from_errno(errno);
+                return libiodef_error_from_errno(errno);
 
         (*time)->refcount = 1;
 
@@ -567,7 +567,7 @@ int iodef_time_clone(const iodef_time_t *src, iodef_time_t **dst)
 {
         int ret;
 
-        prelude_return_val_if_fail(src, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(src, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         ret = iodef_time_new(dst);
         if ( ret < 0 )
@@ -591,10 +591,10 @@ void iodef_time_set_from_time(iodef_time_t *time, const time_t *t)
 {
         long gmtoff;
 
-        prelude_return_if_fail(time);
-        prelude_return_if_fail(t);
+        libiodef_return_if_fail(time);
+        libiodef_return_if_fail(t);
 
-        prelude_get_gmt_offset_from_time(t, &gmtoff);
+        libiodef_get_gmt_offset_from_time(t, &gmtoff);
 
         time->gmt_offset = (int32_t) gmtoff;
         time->sec = *t;
@@ -618,7 +618,7 @@ int iodef_time_new_from_time(iodef_time_t **time, const time_t *t)
 {
         int ret;
 
-        prelude_return_val_if_fail(t, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(t, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         ret = iodef_time_new(time);
         if ( ret < 0 )
@@ -644,7 +644,7 @@ int iodef_time_new_from_time(iodef_time_t **time, const time_t *t)
  */
 void iodef_time_set_gmt_offset(iodef_time_t *time, int32_t gmtoff)
 {
-        prelude_return_if_fail(time);
+        libiodef_return_if_fail(time);
         time->gmt_offset = gmtoff;
 }
 
@@ -663,7 +663,7 @@ void iodef_time_set_gmt_offset(iodef_time_t *time, int32_t gmtoff)
  */
 void iodef_time_set_sec(iodef_time_t *time, uint32_t sec)
 {
-        prelude_return_if_fail(time);
+        libiodef_return_if_fail(time);
         time->sec = sec;
 }
 
@@ -682,7 +682,7 @@ void iodef_time_set_sec(iodef_time_t *time, uint32_t sec)
  */
 void iodef_time_set_usec(iodef_time_t *time, uint32_t usec)
 {
-        prelude_return_if_fail(time);
+        libiodef_return_if_fail(time);
         time->usec = usec;
 }
 
@@ -697,7 +697,7 @@ void iodef_time_set_usec(iodef_time_t *time, uint32_t usec)
  */
 int32_t iodef_time_get_gmt_offset(const iodef_time_t *time)
 {
-        prelude_return_val_if_fail(time, 0);
+        libiodef_return_val_if_fail(time, 0);
         return time->gmt_offset;
 }
 
@@ -715,7 +715,7 @@ int32_t iodef_time_get_gmt_offset(const iodef_time_t *time)
  */
 uint32_t iodef_time_get_sec(const iodef_time_t *time)
 {
-        prelude_return_val_if_fail(time, 0);
+        libiodef_return_val_if_fail(time, 0);
         return time->sec;
 }
 
@@ -731,7 +731,7 @@ uint32_t iodef_time_get_sec(const iodef_time_t *time)
  */
 uint32_t iodef_time_get_usec(const iodef_time_t *time)
 {
-        prelude_return_val_if_fail(time, 0);
+        libiodef_return_val_if_fail(time, 0);
         return time->usec;
 }
 
@@ -748,8 +748,8 @@ uint32_t iodef_time_get_usec(const iodef_time_t *time)
  */
 int iodef_time_copy(const iodef_time_t *src, iodef_time_t *dst)
 {
-        prelude_return_val_if_fail(src, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(dst, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(src, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(dst, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         dst->sec = src->sec;
         dst->usec = src->usec;
@@ -776,7 +776,7 @@ void iodef_time_destroy_internal(iodef_time_t *time)
  */
 void iodef_time_destroy(iodef_time_t *time)
 {
-        prelude_return_if_fail(time);
+        libiodef_return_if_fail(time);
 
         if ( --time->refcount )
                 return;

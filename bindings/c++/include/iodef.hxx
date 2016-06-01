@@ -3,7 +3,7 @@
 * Copyright (C) 2009-2016 CS-SI. All Rights Reserved.
 * Author: Yoann Vandoorselaere <yoannv@gmail.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@
 *
 *****/
 
-#ifndef _LIBPRELUDE_IODEF_HXX
-#define _LIBPRELUDE_IODEF_HXX
+#ifndef _LIBIODEF_IODEF_HXX
+#define _LIBIODEF_IODEF_HXX
 
 #include <string>
 #include <iostream>
@@ -75,4 +75,4 @@ namespace Iodef {
         };
 };
 
-#endif /* __LIBPRELUDE_IODEF_HXX */
+#endif /* __LIBIODEF_IODEF_HXX */

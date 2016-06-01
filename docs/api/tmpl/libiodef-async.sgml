@@ -1,0 +1,101 @@
+<!-- ##### SECTION Title ##### -->
+libiodef-async
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### SECTION Image ##### -->
+
+
+<!-- ##### ENUM libiodef_async_flags_t ##### -->
+<para>
+
+</para>
+
+@LIBIODEF_ASYNC_FLAGS_TIMER: 
+
+<!-- ##### USER_FUNCTION libiodef_async_callback_t ##### -->
+<para>
+
+</para>
+
+@object: 
+@data: 
+
+
+<!-- ##### MACRO LIBIODEF_ASYNC_OBJECT ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### STRUCT libiodef_async_object_t ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION libiodef_async_init ##### -->
+<para>
+
+</para>
+
+@void: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_async_get_flags ##### -->
+<para>
+
+</para>
+
+@void: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_async_set_flags ##### -->
+<para>
+
+</para>
+
+@flags: 
+
+
+<!-- ##### FUNCTION libiodef_async_add ##### -->
+<para>
+
+</para>
+
+@obj: 
+
+
+<!-- ##### FUNCTION libiodef_async_del ##### -->
+<para>
+
+</para>
+
+@obj: 
+
+
+<!-- ##### FUNCTION libiodef_async_exit ##### -->
+<para>
+
+</para>
+
+@void: 
+
+

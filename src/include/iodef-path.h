@@ -2,10 +2,10 @@
 *
 *
 * Copyright (C) 2002-2016 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoann.v@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann.v@libiodef-ids.com>
 * Author: Krzysztof Zaraska <kzaraska@student.uci.agh.edu.pl>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -23,8 +23,8 @@
 *
 *****/
 
-#ifndef _LIBPRELUDE_IODEF_PATH_H
-#define _LIBPRELUDE_IODEF_PATH_H
+#ifndef _LIBIODEF_IODEF_PATH_H
+#define _LIBIODEF_IODEF_PATH_H
 
 #ifdef __cplusplus
  extern "C" {
@@ -37,7 +37,7 @@
 typedef struct iodef_path iodef_path_t;
 
 #include <stdarg.h>
-#include "prelude-macros.h"
+#include "libiodef-macros.h"
 #include "iodef-value.h"
 #include "iodef-tree-wrap.h"
 
@@ -45,9 +45,9 @@ int iodef_path_get(const iodef_path_t *path, void *object, iodef_value_t **ret);
 
 int iodef_path_set(const iodef_path_t *path, void *object, iodef_value_t *value);
 
-int iodef_path_new(iodef_path_t **path, const char *format, ...) PRELUDE_FMT_PRINTF(2, 3);
+int iodef_path_new(iodef_path_t **path, const char *format, ...) LIBIODEF_FMT_PRINTF(2, 3);
 
-int iodef_path_new_v(iodef_path_t **path, const char *format, va_list args) PRELUDE_FMT_PRINTF(2, 0);
+int iodef_path_new_v(iodef_path_t **path, const char *format, va_list args) LIBIODEF_FMT_PRINTF(2, 0);
 
 int iodef_path_new_from_root_fast(iodef_path_t **path, iodef_class_id_t rootclass, const char *buffer);
 
@@ -81,11 +81,11 @@ iodef_path_t *iodef_path_ref(iodef_path_t *path);
 
 const char *iodef_path_get_name(const iodef_path_t *path, int depth);
 
-prelude_bool_t iodef_path_is_ambiguous(const iodef_path_t *path);
+libiodef_bool_t iodef_path_is_ambiguous(const iodef_path_t *path);
 
 int iodef_path_has_lists(const iodef_path_t *path);
 
-prelude_bool_t iodef_path_is_list(const iodef_path_t *path, int depth);
+libiodef_bool_t iodef_path_is_list(const iodef_path_t *path, int depth);
 
 unsigned int iodef_path_get_depth(const iodef_path_t *path);
 
@@ -107,4 +107,4 @@ void _iodef_path_cache_destroy(void);
  }
 #endif
 
-#endif /* _LIBPRELUDE_IODEF_PATH_H */
+#endif /* _LIBIODEF_IODEF_PATH_H */

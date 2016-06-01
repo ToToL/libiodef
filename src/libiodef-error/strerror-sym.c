@@ -32,13 +32,13 @@
 /* Return a pointer to a string containing the name of the symbol of
    the error code in the error value ERR.  Returns NULL if the error
    code is not known.  */
-const char *prelude_strerror_sym(prelude_error_t err)
+const char *libiodef_strerror_sym(libiodef_error_t err)
 {
 	int idx;
-  	prelude_error_code_t code = prelude_error_get_code(err);
+  	libiodef_error_code_t code = libiodef_error_get_code(err);
 
-  	if ( code & PRELUDE_ERROR_SYSTEM_ERROR ) {
-      		code &= ~PRELUDE_ERROR_SYSTEM_ERROR;
+  	if ( code & LIBIODEF_ERROR_SYSTEM_ERROR ) {
+      		code &= ~LIBIODEF_ERROR_SYSTEM_ERROR;
       
       		idx = errnos_msgidxof (code);
       		if ( idx >= 0 )
@@ -47,7 +47,7 @@ const char *prelude_strerror_sym(prelude_error_t err)
 			return NULL;
     	}
 
-  	if ( msgidxof(code) == msgidxof(PRELUDE_ERROR_CODE_DIM) )
+  	if ( msgidxof(code) == msgidxof(LIBIODEF_ERROR_CODE_DIM) )
     		return NULL;
 
 	return msgstr + msgidx[msgidxof(code)];

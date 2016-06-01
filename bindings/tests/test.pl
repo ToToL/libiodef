@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-use Prelude;
+use LibIodef;
 
 sub log_func {
 	($level, $str) = @_;
@@ -25,9 +25,9 @@ sub print_array($)
 }
 
 
-Prelude::PreludeLog::setCallback(\&log_func);
+LibIodef::LibIodefLog::setCallback(\&log_func);
 
-$iodef = new Prelude::IODEF;
+$iodef = new LibIodef::IODEF;
 
 print "*** IODEF->Set() ***\n";
 $iodef->set("alert.classification.text", "My Message");
@@ -62,7 +62,7 @@ close FILE;
 
 print "\n\n*** IODEF->Read() ***\n";
 open FILE2, "<foo.bin" or die "arg2";
-my $iodef2 = new Prelude::IODEF;
+my $iodef2 = new LibIodef::IODEF;
 while ( $iodef2->read(FILE2) ) {
 	print $iodef2->toString();
 }
@@ -70,7 +70,7 @@ while ( $iodef2->read(FILE2) ) {
 close FILE2;
 
 print "\n*** Client ***";
-$client = new Prelude::ClientEasy("prelude-lml");
+$client = new LibIodef::ClientEasy("libiodef-lml");
 $client->start();
 
 $client->sendIODEF($iodef);

@@ -1,9 +1,9 @@
 /*****
 *
 * Copyright (C) 2001-2016 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoann.v@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann.v@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -28,31 +28,31 @@
 #include <string.h>
 
 #include "libmissing.h"
-#include "prelude-list.h"
-#include "prelude-error.h"
+#include "libiodef-list.h"
+#include "libiodef-error.h"
 #include "variable.h"
 
 
 typedef struct {
-        prelude_list_t list;
+        libiodef_list_t list;
         char *variable;
         char *value;
 } variable_t;
 
 
 
-static PRELUDE_LIST(variable_list);
+static LIBIODEF_LIST(variable_list);
 
 
 
 static variable_t *search_entry(const char *variable)
 {
         int ret;
-        prelude_list_t *tmp;
+        libiodef_list_t *tmp;
         variable_t *item = NULL;
 
-        prelude_list_for_each(&variable_list, tmp) {
-                item = prelude_list_entry(tmp, variable_t, list);
+        libiodef_list_for_each(&variable_list, tmp) {
+                item = libiodef_list_entry(tmp, variable_t, list);
 
                 ret = strcasecmp(item->variable, variable);
 
@@ -72,12 +72,12 @@ static int create_entry(const char *variable, const char *value)
 
         item = malloc(sizeof(*item));
         if ( ! item )
-                return prelude_error_from_errno(errno);
+                return libiodef_error_from_errno(errno);
 
         item->variable = strdup(variable);
         if ( ! item->variable ) {
                 free(item);
-                return prelude_error_from_errno(errno);
+                return libiodef_error_from_errno(errno);
         }
 
         if ( ! value )
@@ -87,11 +87,11 @@ static int create_entry(const char *variable, const char *value)
                 if ( ! item->value ) {
                         free(item->variable);
                         free(item);
-                        return prelude_error_from_errno(errno);
+                        return libiodef_error_from_errno(errno);
                 }
         }
 
-        prelude_list_add_tail(&variable_list, &item->list);
+        libiodef_list_add_tail(&variable_list, &item->list);
 
         return 0;
 }
@@ -99,7 +99,7 @@ static int create_entry(const char *variable, const char *value)
 
 static void destroy_variable(variable_t *item)
 {
-        prelude_list_del(&item->list);
+        libiodef_list_del(&item->list);
 
         free(item->variable);
 
@@ -187,10 +187,10 @@ int variable_unset(const char *variable)
 void variable_unset_all(void)
 {
         variable_t *item;
-        prelude_list_t *tmp, *bkp;
+        libiodef_list_t *tmp, *bkp;
 
-        prelude_list_for_each_safe(&variable_list, tmp, bkp) {
-                item = prelude_list_entry(tmp, variable_t, list);
+        libiodef_list_for_each_safe(&variable_list, tmp, bkp) {
+                item = libiodef_list_entry(tmp, variable_t, list);
                 destroy_variable(item);
         }
 }

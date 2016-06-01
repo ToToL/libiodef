@@ -1,7 +1,7 @@
 # Copyright (C) 2003-2016 CS-SI. All Rights Reserved.
-# Author: Nicolas Delon <nicolas.delon@prelude-ids.com>
+# Author: Nicolas Delon <nicolas.delon@libiodef-ids.com>
 #
-# This file is part of the Prelude library.
+# This file is part of the LibIodef library.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,10 +33,10 @@ sub        header
 /*****
 *
 * Copyright (C) 2004-2016 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoann.v\@prelude-ids.com>
-* Author: Nicolas Delon <nicolas.delon\@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann.v\@libiodef-ids.com>
+* Author: Nicolas Delon <nicolas.delon\@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -68,27 +68,27 @@ sub        header
 
 static int indent = 0;
 
-static void print_indent(prelude_io_t *fd)
+static void print_indent(libiodef_io_t *fd)
 \{
         int cnt;
 
         for ( cnt = 0; cnt < indent; cnt++ )
-                prelude_io_write(fd, \" \", 1);
+                libiodef_io_write(fd, \" \", 1);
 \}
 
 
 
-static void print_string(prelude_string_t *string, prelude_io_t *fd)
+static void print_string(libiodef_string_t *string, libiodef_io_t *fd)
 \{
-        if ( prelude_string_is_empty(string) )
-                prelude_io_write(fd, \"<empty>\", 7);
+        if ( libiodef_string_is_empty(string) )
+                libiodef_io_write(fd, \"<empty>\", 7);
         else
-                prelude_io_write(fd, prelude_string_get_string(string), prelude_string_get_len(string));
+                libiodef_io_write(fd, libiodef_string_get_string(string), libiodef_string_get_len(string));
 \}
 
 
 
-static void print_uint8(uint8_t i, prelude_io_t *fd)
+static void print_uint8(uint8_t i, libiodef_io_t *fd)
 \{
         int len;
         char buf[sizeof(\"255\")];
@@ -97,65 +97,65 @@ static void print_uint8(uint8_t i, prelude_io_t *fd)
          * %hh convertion specifier is not portable.
          */
         len = snprintf(buf, sizeof(buf), \"\%u\", (unsigned int) i);
-        prelude_io_write(fd, buf, len);
+        libiodef_io_write(fd, buf, len);
 \}
 
 
-static void print_uint16(uint16_t i, prelude_io_t *fd)
+static void print_uint16(uint16_t i, libiodef_io_t *fd)
 \{
         int len;
         char buf[sizeof(\"65535\")];
 
         len = snprintf(buf, sizeof(buf), \"\%hu\", i);
-        prelude_io_write(fd, buf, len);
+        libiodef_io_write(fd, buf, len);
 \}
 
 
-static void print_int32(int32_t i, prelude_io_t *fd)
+static void print_int32(int32_t i, libiodef_io_t *fd)
 \{
         int len;
         char buf[sizeof(\"4294967296\")];
 
         len = snprintf(buf, sizeof(buf), \"\%d\", i);
-        prelude_io_write(fd, buf, len);
+        libiodef_io_write(fd, buf, len);
 \}
 
 
-static void print_uint32(uint32_t i, prelude_io_t *fd)
+static void print_uint32(uint32_t i, libiodef_io_t *fd)
 \{
         int len;
         char buf[sizeof(\"4294967296\")];
 
         len = snprintf(buf, sizeof(buf), \"\%u\", i);
-        prelude_io_write(fd, buf, len);
+        libiodef_io_write(fd, buf, len);
 \}
 
 
 
-static void print_uint64(uint64_t i, prelude_io_t *fd)
+static void print_uint64(uint64_t i, libiodef_io_t *fd)
 \{
         int len;
         char buf[sizeof(\"18446744073709551616\")];
 
-        len = snprintf(buf, sizeof(buf), \"%\" PRELUDE_PRIu64, i);
-        prelude_io_write(fd, buf, len);
+        len = snprintf(buf, sizeof(buf), \"%\" LIBIODEF_PRIu64, i);
+        libiodef_io_write(fd, buf, len);
 \}
 
 
 
-static void print_float(float f, prelude_io_t *fd)
+static void print_float(float f, libiodef_io_t *fd)
 \{
         int len;
         char buf[32];
 
         len = snprintf(buf, sizeof(buf), \"\%f\", f);
-        prelude_io_write(fd, buf, len);
+        libiodef_io_write(fd, buf, len);
 \}
 
 
 
 
-static void print_time(iodef_time_t *t, prelude_io_t *fd)
+static void print_time(iodef_time_t *t, libiodef_io_t *fd)
 \{
         int len;
         time_t _time;
@@ -175,37 +175,37 @@ static void print_time(iodef_time_t *t, prelude_io_t *fd)
                        tmp, iodef_time_get_usec(t), iodef_time_get_gmt_offset(t) / 3600,
                        iodef_time_get_gmt_offset(t) % 3600 / 60);
 
-        prelude_io_write(fd, buf, len);
+        libiodef_io_write(fd, buf, len);
 \}
 
 
 
 /* print data as a string */
 
-static int print_data(iodef_data_t *data, prelude_io_t *fd)
+static int print_data(iodef_data_t *data, libiodef_io_t *fd)
 \{
         int ret;
-        prelude_string_t *out;
+        libiodef_string_t *out;
 
-        ret = prelude_string_new(&out);
+        ret = libiodef_string_new(&out);
         if ( ret < 0 )
                 return ret;
 
         ret = iodef_data_to_string(data, out);
         if ( ret < 0 ) {
-                prelude_string_destroy(out);
+                libiodef_string_destroy(out);
                 return ret;
         }
 
-        prelude_io_write(fd, prelude_string_get_string(out), prelude_string_get_len(out));
-        prelude_string_destroy(out);
+        libiodef_io_write(fd, libiodef_string_get_string(out), libiodef_string_get_len(out));
+        libiodef_string_destroy(out);
 
         return 0;
 \}
 
 
 
-static void print_enum(const char *s, int i, prelude_io_t *fd)
+static void print_enum(const char *s, int i, libiodef_io_t *fd)
 \{
         int len;
         char buf[512];
@@ -214,7 +214,7 @@ static void print_enum(const char *s, int i, prelude_io_t *fd)
                 s = \"<invalid enum value>\";
 
         len = snprintf(buf, sizeof(buf), \"\%s (\%d)\", s, i);
-        prelude_io_write(fd, buf, len);
+        libiodef_io_write(fd, buf, len);
 \}
 
 ");
@@ -247,9 +247,9 @@ sub        struct_field_normal
 
                 \{
                         print_indent(fd);
-                        prelude_io_write(fd, \"$field->{name}: \", sizeof(\"$field->{name}: \") - 1);
+                        libiodef_io_write(fd, \"$field->{name}: \", sizeof(\"$field->{name}: \") - 1);
                         print_enum(iodef_$field->{short_typename}_to_string(${refer}i), ${refer}i, fd);
-                        prelude_io_write(fd, \"\\n\", sizeof(\"\\n\") - 1);
+                        libiodef_io_write(fd, \"\\n\", sizeof(\"\\n\") - 1);
                 \}
         \}
 ");
@@ -266,7 +266,7 @@ sub        struct_field_normal
 
                 if ( field ) \{
                         print_indent(fd);
-                        prelude_io_write(fd, tmp, sizeof(tmp) - 1);
+                        libiodef_io_write(fd, tmp, sizeof(tmp) - 1);
 ");
 
             if ( $struct->{short_typename} eq "additional_data" and $field->{typename} eq "iodef_data_t" ) {
@@ -276,21 +276,21 @@ sub        struct_field_normal
                         else {
                                 int ret;
                                 uint64_t i;
-                                prelude_string_t *out;
+                                libiodef_string_t *out;
 
-                                ret = prelude_string_new(&out);
+                                ret = libiodef_string_new(&out);
                                 if ( ret < 0 )
                                         return;
 
                                 i = iodef_data_get_int(field);
-                                ret = prelude_string_sprintf(out, \"0x%\" PRELUDE_PRIx32 \".0x%\" PRELUDE_PRIx32 \"\", (uint32_t) (i >> 32), (uint32_t) i);
+                                ret = libiodef_string_sprintf(out, \"0x%\" LIBIODEF_PRIx32 \".0x%\" LIBIODEF_PRIx32 \"\", (uint32_t) (i >> 32), (uint32_t) i);
                                 if ( ret < 0 ) {
-                                        prelude_string_destroy(out);
+                                        libiodef_string_destroy(out);
                                         return;
                                 }
 
-                                prelude_io_write(fd, prelude_string_get_string(out), prelude_string_get_len(out));
-                                prelude_string_destroy(out);
+                                libiodef_io_write(fd, libiodef_string_get_string(out), libiodef_string_get_len(out));
+                                libiodef_string_destroy(out);
                         }
 ");
             }
@@ -298,7 +298,7 @@ sub        struct_field_normal
                 $self->output("                        print_$field->{value_type}(${refer}field, fd);\n");
             }
 
-            $self->output("                        prelude_io_write(fd, \"\\n\", sizeof(\"\\n\") - 1);
+            $self->output("                        libiodef_io_write(fd, \"\\n\", sizeof(\"\\n\") - 1);
                 \}
         \}
 ");
@@ -306,9 +306,9 @@ sub        struct_field_normal
         } else {
             $self->output("
         print_indent(fd);
-        prelude_io_write(fd, \"$field->{name}: \", sizeof(\"$field->{name}: \") - 1);
+        libiodef_io_write(fd, \"$field->{name}: \", sizeof(\"$field->{name}: \") - 1);
         print_$field->{value_type}(iodef_$struct->{short_typename}_get_$field->{name}(ptr), fd);
-        prelude_io_write(fd, \"\\n\", sizeof(\"\\n\") - 1);
+        libiodef_io_write(fd, \"\\n\", sizeof(\"\\n\") - 1);
 ");
         }
 
@@ -321,7 +321,7 @@ sub        struct_field_normal
 
                 if ( field ) \{
                         print_indent(fd);
-                        prelude_io_write(fd, \"$field->{name}:\\n\", sizeof(\"$field->{name}:\\n\") - 1);
+                        libiodef_io_write(fd, \"$field->{name}:\\n\", sizeof(\"$field->{name}:\\n\") - 1);
                         iodef_$field->{short_typename}_print(field, fd);
                 \}
         \}
@@ -343,7 +343,7 @@ sub        struct_field_union
         $self->output("
         case $member->{value}:
                 print_indent(fd);
-                prelude_io_write(fd, \"$member->{name}:\\n\", sizeof(\"$member->{name}:\\n\") - 1);
+                libiodef_io_write(fd, \"$member->{name}:\\n\", sizeof(\"$member->{name}:\\n\") - 1);
                 iodef_$member->{short_typename}_print(iodef_$struct->{short_typename}_get_$member->{name}(ptr), fd);
                 break;
  ");
@@ -377,15 +377,15 @@ sub        struct_field_list
     if ( $field->{metatype} & &METATYPE_PRIMITIVE ) {
         $self->output("
                         len = snprintf(buf, sizeof(buf), \"$field->{short_name}(%d): \", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         print_$field->{value_type}(elem, fd);
-                        prelude_io_write(fd, \"\\n\", sizeof(\"\\n\") - 1);
+                        libiodef_io_write(fd, \"\\n\", sizeof(\"\\n\") - 1);
 ");
 
     } else {
         $self->output("
                         len = snprintf(buf, sizeof(buf), \"$field->{short_name}(%d): \\n\", cnt);
-                        prelude_io_write(fd, buf, len);
+                        libiodef_io_write(fd, buf, len);
                         iodef_$field->{short_typename}_print(elem, fd);
 ");
     }
@@ -407,12 +407,12 @@ sub        struct
 /**
  * iodef_$struct->{short_typename}_print:
  * \@ptr: Pointer to an $struct->{typename} object.
- * \@fd: Pointer to a #prelude_io_t object where to print \@ptr to.
+ * \@fd: Pointer to a #libiodef_io_t object where to print \@ptr to.
  *
  * This function will convert \@ptr to a string suitable for writing,
  * and write it to the provided \@fd descriptor.
  */
-void iodef_$struct->{short_typename}_print($struct->{typename} *ptr, prelude_io_t *fd)
+void iodef_$struct->{short_typename}_print($struct->{typename} *ptr, libiodef_io_t *fd)
 \{
         if ( ! ptr )
                 return;

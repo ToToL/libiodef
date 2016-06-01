@@ -1,6 +1,6 @@
 # Author: Sebastien Tricaud <stricaud@inl.fr>
 #
-# This file is part of the Prelude library.
+# This file is part of the LibIodef library.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ sub     header
 * Based on GenerateIODEFTreeWrapC.pm
 * Author: Sebastien Tricaud <stricaud\@inl.fr>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -61,20 +61,20 @@ sub     header
 #include \"common.h\"
 
 
-static std::string *to_string(prelude_string_t *str)
+static std::string *to_string(libiodef_string_t *str)
 \{
-        return new std::string(prelude_string_get_string(str));
+        return new std::string(libiodef_string_get_string(str));
 \}
 
 
-static prelude_string_t *from_string(std::string *str)
+static libiodef_string_t *from_string(std::string *str)
 \{
         int ret;
-        prelude_string_t *pstr;
+        libiodef_string_t *pstr;
 
-        ret = prelude_string_new_dup_fast(&pstr, str->c_str(), str->length());
+        ret = libiodef_string_new_dup_fast(&pstr, str->c_str(), str->length());
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 
         return pstr;
 \}
@@ -154,7 +154,7 @@ IODEF$struct->{short_typename} *IODEF$struct->{short_typename}::clone()
 
         ret = iodef_$struct->{short_typename}_clone(_priv, &dst);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 
         ptr = new IODEF$struct->{short_typename}();
         iodef_$struct->{short_typename}_destroy(ptr->_priv);
@@ -255,7 +255,7 @@ sub     struct_field_normal
     my $fromcast;
     my $tocast;
 
-    if ( $field->{typename} eq "prelude_string_t" ) {
+    if ( $field->{typename} eq "libiodef_string_t" ) {
         $type = "std::string";
         $fromcast = "from_string";
         $tocast = "to_string";
@@ -287,7 +287,7 @@ $type ${ptr} IODEF$struct->{short_typename}::get_${name}()
         $self->output("
 void IODEF$struct->{short_typename}::set_$field->{name}($field->{typename} $field_name)
 \{
-        prelude_return_if_fail(ptr);
+        libiodef_return_if_fail(ptr);
         ptr->$field->{name} = $field_name;
         ptr->$field->{name}_is_set = 1;
 \}
@@ -415,7 +415,7 @@ IODEF$member->{short_typename} *IODEF$struct->{short_typename}::new_$member->{na
 
         ret = iodef_$struct->{short_typename}_new_$member->{name}(_priv, &ptr);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 
         obj = new IODEF$member->{short_typename};
         iodef_$member->{short_typename}_destroy(obj->_priv);
@@ -567,13 +567,13 @@ sub footer
     my $self = shift;
 
     $self->output("
-void IODEFMessage::set_pmsg(prelude_msg_t *msg)
+void IODEFMessage::set_pmsg(libiodef_msg_t *msg)
 \{
         iodef_document_set_pmsg(_priv, msg);
 \}
 
 
-prelude_msg_t *IODEFMessage::get_pmsg()
+libiodef_msg_t *IODEFMessage::get_pmsg()
 \{
         return iodef_document_get_pmsg(_priv);
 \}

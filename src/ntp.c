@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 
-#include "prelude-inttypes.h"
+#include "libiodef-inttypes.h"
 #include "ntp.h"
 
 

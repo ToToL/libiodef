@@ -1,9 +1,9 @@
 /*****
 *
 * Copyright (C) 2003-2016 CS-SI. All Rights Reserved.
-* Author: Nicolas Delon <nicolas.delon@prelude-ids.com>
+* Author: Nicolas Delon <nicolas.delon@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -21,10 +21,10 @@
 *
 *****/
 
-#ifndef _LIBPRELUDE_IODEF_DATA_H
-#define _LIBPRELUDE_IODEF_DATA_H
+#ifndef _LIBIODEF_IODEF_DATA_H
+#define _LIBIODEF_IODEF_DATA_H
 
-#include "prelude-list.h"
+#include "libiodef-list.h"
 
 #ifdef __cplusplus
  extern "C" {
@@ -60,7 +60,7 @@ typedef struct {
                 const void *ro_data;
         } data;
 
-        prelude_list_t list;
+        libiodef_list_t list;
 } iodef_data_t;
 
 
@@ -72,16 +72,16 @@ iodef_data_t *iodef_data_ref(iodef_data_t *data);
 
 int iodef_data_new_char(iodef_data_t **data, char c);
 int iodef_data_new_byte(iodef_data_t **data, uint8_t i);
-int iodef_data_new_uint32(iodef_data_t **data, uint32_t i) PRELUDE_DEPRECATED;
-int iodef_data_new_uint64(iodef_data_t **data, uint64_t i) PRELUDE_DEPRECATED;
+int iodef_data_new_uint32(iodef_data_t **data, uint32_t i) LIBIODEF_DEPRECATED;
+int iodef_data_new_uint64(iodef_data_t **data, uint64_t i) LIBIODEF_DEPRECATED;
 int iodef_data_new_int(iodef_data_t **data, int64_t i);
 int iodef_data_new_float(iodef_data_t **data, float f);
 int iodef_data_new_time(iodef_data_t **data, iodef_time_t *time);
 
 void iodef_data_set_char(iodef_data_t *data, char c);
 void iodef_data_set_byte(iodef_data_t *data, uint8_t i);
-void iodef_data_set_uint32(iodef_data_t *data, uint32_t i) PRELUDE_DEPRECATED;
-void iodef_data_set_uint64(iodef_data_t *data, uint64_t i) PRELUDE_DEPRECATED;
+void iodef_data_set_uint32(iodef_data_t *data, uint32_t i) LIBIODEF_DEPRECATED;
+void iodef_data_set_uint64(iodef_data_t *data, uint64_t i) LIBIODEF_DEPRECATED;
 void iodef_data_set_int(iodef_data_t *data, int64_t i);
 void iodef_data_set_float(iodef_data_t *data, float f);
 void iodef_data_set_time(iodef_data_t *data, iodef_time_t *time);
@@ -149,9 +149,9 @@ char iodef_data_get_char(const iodef_data_t *data);
 
 uint8_t iodef_data_get_byte(const iodef_data_t *data);
 
-uint32_t iodef_data_get_uint32(const iodef_data_t *data) PRELUDE_DEPRECATED;
+uint32_t iodef_data_get_uint32(const iodef_data_t *data) LIBIODEF_DEPRECATED;
 
-uint64_t iodef_data_get_uint64(const iodef_data_t *data) PRELUDE_DEPRECATED;
+uint64_t iodef_data_get_uint64(const iodef_data_t *data) LIBIODEF_DEPRECATED;
 
 int64_t iodef_data_get_int(const iodef_data_t *data);
 
@@ -161,9 +161,9 @@ const char *iodef_data_get_char_string(const iodef_data_t *data);
 
 const unsigned char *iodef_data_get_byte_string(const iodef_data_t *data);
 
-prelude_bool_t iodef_data_is_empty(const iodef_data_t *data);
+libiodef_bool_t iodef_data_is_empty(const iodef_data_t *data);
 
-int iodef_data_to_string(const iodef_data_t *data, prelude_string_t *out);
+int iodef_data_to_string(const iodef_data_t *data, libiodef_string_t *out);
 
 void iodef_data_destroy_internal(iodef_data_t *data);
 
@@ -173,4 +173,4 @@ int iodef_data_compare(const iodef_data_t *data1, const iodef_data_t *data2);
  }
 #endif
 
-#endif /* _LIBPRELUDE_IODEF_DATA_H */
+#endif /* _LIBIODEF_IODEF_DATA_H */

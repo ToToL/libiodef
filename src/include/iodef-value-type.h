@@ -1,9 +1,9 @@
 /*****
 *
 * Copyright (C) 2003-2016 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoann.v@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann.v@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 
 #include "iodef-time.h"
 #include "iodef-data.h"
-#include "prelude-string.h"
+#include "libiodef-string.h"
 
 #ifdef __cplusplus
  extern "C" {
@@ -76,10 +76,10 @@ typedef union {
         uint64_t uint64_val;
         float float_val;
         double double_val;
-        prelude_string_t *string_val;
+        libiodef_string_t *string_val;
         iodef_time_t *time_val;
         iodef_data_t *data_val;
-        prelude_list_t list_val;
+        libiodef_list_t list_val;
         iodef_value_type_enum_t enum_val;
         iodef_value_type_class_t class_val;
 } iodef_value_type_data_t;
@@ -99,7 +99,7 @@ int iodef_value_type_copy(const iodef_value_type_t *src, void *dst);
 
 int iodef_value_type_read(iodef_value_type_t *dst, const char *buf);
 
-int iodef_value_type_write(const iodef_value_type_t *src, prelude_string_t *out);
+int iodef_value_type_write(const iodef_value_type_t *src, libiodef_string_t *out);
 
 void iodef_value_type_destroy(iodef_value_type_t *type);
 

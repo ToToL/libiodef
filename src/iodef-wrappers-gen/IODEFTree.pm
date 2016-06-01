@@ -1,7 +1,7 @@
 # Copyright (C) 2003-2016 CS-SI. All Rights Reserved.
-# Author: Nicolas Delon <nicolas.delon@prelude-ids.com>
+# Author: Nicolas Delon <nicolas.delon@libiodef-ids.com>
 #
-# This file is part of the Prelude library.
+# This file is part of the LibIodef library.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -354,7 +354,7 @@ sub	parse_struct
 	elsif ( ($name) = $line =~ /\s*IS_KEY_LISTED\(\s*(\w+)\s*\)/ ) {
 	    $struct->{is_listed} = 1;
 	    $struct->{is_key_listed} = 1;
-            my $typename = "prelude_string_t";
+            my $typename = "libiodef_string_t";
             my $metatype;
             my $short_typename;
             my $value_type;

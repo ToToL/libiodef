@@ -35,7 +35,7 @@ IODEF provide differents time field to be used for this:
 
 </itemizedlist>
 
-You don't need to take care of the AnalyzerTime field, since in Prelude, once an events
+You don't need to take care of the AnalyzerTime field, since in LibIodef, once an events
 is handed to the library, and if the sending of the message fail, there will be a fallback
 to backuping the event for later retransmission. 
 

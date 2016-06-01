@@ -1,0 +1,103 @@
+<!-- ##### SECTION Title ##### -->
+libiodef
+
+<!-- ##### SECTION Short_Description ##### -->
+
+Initializing the library
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+Before any operation are done using the libiodef library, the user first need 
+to initialize it using the libiodef_init() function.
+
+<programlisting>
+int ret;
+
+ret = libiodef_init(&amp;argc, argv);
+if ( ret &lt; 0 ) {
+        libiodef_perror(ret, "unable to initialize the libiodef library");
+        return -1;
+}
+</programlisting>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### SECTION Image ##### -->
+
+
+<!-- ##### MACRO LIBIODEF_VERSION ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### FUNCTION libiodef_init ##### -->
+<para>
+
+</para>
+
+@argc: 
+@argv: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_deinit ##### -->
+<para>
+
+</para>
+
+@void: 
+
+
+<!-- ##### FUNCTION libiodef_check_version ##### -->
+<para>
+
+</para>
+
+@req_version: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_thread_init ##### -->
+<para>
+
+</para>
+
+@nil: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_fork_child ##### -->
+<para>
+
+</para>
+
+@void: 
+
+
+<!-- ##### FUNCTION libiodef_fork_parent ##### -->
+<para>
+
+</para>
+
+@void: 
+
+
+<!-- ##### FUNCTION libiodef_fork_prepare ##### -->
+<para>
+
+</para>
+
+@void: 
+
+

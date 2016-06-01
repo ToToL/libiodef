@@ -1,7 +1,7 @@
 #!/bin/sh
 
 prefix=@prefix@
-prelude_conf_prefix=@PRELUDE_CONFIG_DIR@
+libiodef_conf_prefix=@LIBIODEF_CONFIG_DIR@
 exec_prefix=@exec_prefix@
 exec_prefix_set=no
 cpp_set=no
@@ -45,7 +45,7 @@ while test $# -gt 0; do
       ;;
 
     --config-prefix)
-      echo $prelude_conf_prefix
+      echo $libiodef_conf_prefix
       ;;
 
     --version)

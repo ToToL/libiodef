@@ -41,7 +41,7 @@ endif
 
 _iodef.cxx iodef.py: $(top_srcdir)/bindings/c++/include/*.hxx $(top_srcdir)/bindings/libiodefcpp.i libiodefcpp-python.i 
 if HAVE_SWIG
-	$(SWIG) -c++ -DSWIG_COMPILE_LIBPRELUDE -I$(top_srcdir)/bindings -I$(top_srcdir)/bindings/c++/include -I$(top_srcdir)/src/include -I$(top_srcdir)/src/libiodef-error -python -threads -builtin -O -o $@ $(top_srcdir)/bindings/libiodefcpp.i
+	$(SWIG) -c++ -DSWIG_COMPILE_LIBIODEF -I$(top_srcdir)/bindings -I$(top_srcdir)/bindings/c++/include -I$(top_srcdir)/src/include -I$(top_srcdir)/src/libiodef-error -python -threads -builtin -O -o $@ $(top_srcdir)/bindings/libiodefcpp.i
 endif
 
 endif

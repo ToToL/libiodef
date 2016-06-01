@@ -1,4 +1,4 @@
-dnl Autoconf macros for libprelude
+dnl Autoconf macros for libiodef
 dnl $id$
 
 # Modified for LIBIODEF -- Yoann Vandoorselaere
@@ -8,20 +8,20 @@ dnl $id$
 # Werner Koch   99-12-09
 
 dnl AM_PATH_LIBIODEF([MINIMUM-VERSION, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND ]]], THREAD_SUPPORT)
-dnl Test for libprelude, and define LIBIODEF_PREFIX, LIBIODEF_CFLAGS, LIBIODEF_PTHREAD_CFLAGS,
+dnl Test for libiodef, and define LIBIODEF_PREFIX, LIBIODEF_CFLAGS, LIBIODEF_PTHREAD_CFLAGS,
 dnl LIBIODEF_LDFLAGS, and LIBIODEF_LIBS
 dnl
 AC_DEFUN([AM_PATH_LIBIODEF],
 [dnl
 dnl Get the cflags and libraries from the libiodef-config script
 dnl
-AC_ARG_WITH(libprelude-prefix, AC_HELP_STRING(--with-libprelude-prefix=PFX,
-            Prefix where libprelude is installed (optional)),
-            libprelude_config_prefix="$withval", libprelude_config_prefix="")
+AC_ARG_WITH(libiodef-prefix, AC_HELP_STRING(--with-libiodef-prefix=PFX,
+            Prefix where libiodef is installed (optional)),
+            libiodef_config_prefix="$withval", libiodef_config_prefix="")
 
-  if test x$libprelude_config_prefix != x ; then
+  if test x$libiodef_config_prefix != x ; then
      if test x${LIBIODEF_CONFIG+set} != xset ; then
-        LIBIODEF_CONFIG=$libprelude_config_prefix/bin/libiodef-config
+        LIBIODEF_CONFIG=$libiodef_config_prefix/bin/libiodef-config
      fi
   fi
 
@@ -31,27 +31,27 @@ AC_ARG_WITH(libprelude-prefix, AC_HELP_STRING(--with-libprelude-prefix=PFX,
         	LIBIODEF_PTHREAD_CFLAGS=`$LIBIODEF_CONFIG --thread --cflags`
 
         	if test x$4 = xtrue || test x$4 = xyes; then
-                	libprelude_config_args="--thread"
+                	libiodef_config_args="--thread"
         	else
-                	libprelude_config_args="--no-thread"
+                	libiodef_config_args="--no-thread"
         	fi
   	else
         	LIBIODEF_PTHREAD_CFLAGS=`$LIBIODEF_CONFIG --pthread-cflags`
   	fi
   fi
 
-  min_libprelude_version=ifelse([$1], ,0.1.0,$1)
-  AC_MSG_CHECKING(for libprelude - version >= $min_libprelude_version)
-  no_libprelude=""
+  min_libiodef_version=ifelse([$1], ,0.1.0,$1)
+  AC_MSG_CHECKING(for libiodef - version >= $min_libiodef_version)
+  no_libiodef=""
   if test "$LIBIODEF_CONFIG" = "no" ; then
-    no_libprelude=yes
+    no_libiodef=yes
   else
-    LIBIODEF_CFLAGS=`$LIBIODEF_CONFIG $libprelude_config_args --cflags`
-    LIBIODEF_LDFLAGS=`$LIBIODEF_CONFIG $libprelude_config_args --ldflags`
-    LIBIODEF_LIBS=`$LIBIODEF_CONFIG $libprelude_config_args --libs`
-    LIBIODEF_PREFIX=`$LIBIODEF_CONFIG $libprelude_config_args --prefix`
-    LIBIODEF_CONFIG_PREFIX=`$LIBIODEF_CONFIG $libprelude_config_args --config-prefix`
-    libprelude_config_version=`$LIBIODEF_CONFIG $libprelude_config_args --version`
+    LIBIODEF_CFLAGS=`$LIBIODEF_CONFIG $libiodef_config_args --cflags`
+    LIBIODEF_LDFLAGS=`$LIBIODEF_CONFIG $libiodef_config_args --ldflags`
+    LIBIODEF_LIBS=`$LIBIODEF_CONFIG $libiodef_config_args --libs`
+    LIBIODEF_PREFIX=`$LIBIODEF_CONFIG $libiodef_config_args --prefix`
+    LIBIODEF_CONFIG_PREFIX=`$LIBIODEF_CONFIG $libiodef_config_args --config-prefix`
+    libiodef_config_version=`$LIBIODEF_CONFIG $libiodef_config_args --version`
 
 
       ac_save_CFLAGS="$CFLAGS"
@@ -61,25 +61,25 @@ AC_ARG_WITH(libprelude-prefix, AC_HELP_STRING(--with-libprelude-prefix=PFX,
       LDFLAGS="$LDFLAGS $LIBIODEF_LDFLAGS"
       LIBS="$LIBS $LIBIODEF_LIBS"
 dnl
-dnl Now check if the installed libprelude is sufficiently new. Also sanity
+dnl Now check if the installed libiodef is sufficiently new. Also sanity
 dnl checks the results of libiodef-config to some extent
 dnl
-      rm -f conf.libpreludetest
+      rm -f conf.libiodeftest
       AC_TRY_RUN([
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <libprelude/prelude.h>
+#include <libiodef/libiodef.h>
 
 int
 main ()
 {
-    system ("touch conf.libpreludetest");
+    system ("touch conf.libiodeftest");
 
-    if( strcmp( prelude_check_version(NULL), "$libprelude_config_version" ) )
+    if( strcmp( libiodef_check_version(NULL), "$libiodef_config_version" ) )
     {
       printf("\n*** 'libiodef-config --version' returned %s, but LIBIODEF (%s)\n",
-             "$libprelude_config_version", prelude_check_version(NULL) );
+             "$libiodef_config_version", libiodef_check_version(NULL) );
       printf("*** was found! If libiodef-config was correct, then it is best\n");
       printf("*** to remove the old version of LIBIODEF. You may also be able to fix the error\n");
       printf("*** by modifying your LD_LIBRARY_PATH enviroment variable, or by editing\n");
@@ -89,19 +89,19 @@ main ()
       printf("*** to point to the correct copy of libiodef-config, and remove the file config.cache\n");
       printf("*** before re-running configure\n");
     }
-    else if ( strcmp(prelude_check_version(NULL), LIBIODEF_VERSION ) ) {
+    else if ( strcmp(libiodef_check_version(NULL), LIBIODEF_VERSION ) ) {
         printf("\n*** LIBIODEF header file (version %s) does not match\n", LIBIODEF_VERSION);
-        printf("*** library (version %s)\n", prelude_check_version(NULL) );
+        printf("*** library (version %s)\n", libiodef_check_version(NULL) );
     }
     else {
-      if ( prelude_check_version( "$min_libprelude_version" ) )
+      if ( libiodef_check_version( "$min_libiodef_version" ) )
         return 0;
       else {
         printf("no\n*** An old version of LIBIODEF (%s) was found.\n",
-                prelude_check_version(NULL) );
+                libiodef_check_version(NULL) );
         printf("*** You need a version of LIBIODEF newer than %s. The latest version of\n",
-               "$min_libprelude_version" );
-        printf("*** LIBIODEF is always available from https://www.prelude-siem.org/project/prelude/files\n");
+               "$min_libiodef_version" );
+        printf("*** LIBIODEF is always available from https://www.libiodef-siem.org/project/libiodef/files\n");
         printf("*** \n");
         printf("*** If you have already installed a sufficiently new version, this error\n");
         printf("*** probably means that the wrong copy of the libiodef-config shell script is\n");
@@ -114,17 +114,17 @@ main ()
     }
     return 1;
 }
-],, no_libprelude=yes,[echo $ac_n "cross compiling; assumed OK... $ac_c"])
+],, no_libiodef=yes,[echo $ac_n "cross compiling; assumed OK... $ac_c"])
        CFLAGS="$ac_save_CFLAGS"
        LIBS="$ac_save_LIBS"
        LDFLAGS="$ac_save_LDFLAGS"
   fi
 
-  if test "x$no_libprelude" = x ; then
+  if test "x$no_libiodef" = x ; then
      AC_MSG_RESULT(yes)
      ifelse([$2], , :, [$2])
   else
-     if test -f conf.libpreludetest ; then
+     if test -f conf.libiodeftest ; then
         :
      else
         AC_MSG_RESULT(no)
@@ -135,10 +135,10 @@ main ()
        echo "*** your path, or set the LIBIODEF_CONFIG environment variable to the"
        echo "*** full path to libiodef-config."
      else
-       if test -f conf.libpreludetest ; then
+       if test -f conf.libiodeftest ; then
         :
        else
-          echo "*** Could not run libprelude test program, checking why..."
+          echo "*** Could not run libiodef test program, checking why..."
           CFLAGS="$CFLAGS $LIBIODEF_CFLAGS"
           LDFLAGS="$LDFLAGS $LIBIODEF_LDFLAGS"
           LIBS="$LIBS $LIBIODEF_LIBS"
@@ -146,8 +146,8 @@ main ()
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <libprelude/prelude.h>
-],      [ return !!prelude_check_version(NULL); ],
+#include <libiodef/libiodef.h>
+],      [ return !!libiodef_check_version(NULL); ],
         [ echo "*** The test program compiled, but did not run. This usually means"
           echo "*** that the run-time linker is not finding LIBIODEF or finding the wrong"
           echo "*** version of LIBIODEF. If it is not finding LIBIODEF, you'll need to set your"
@@ -172,7 +172,7 @@ main ()
      LIBIODEF_LIBS=""
      ifelse([$3], , :, [$3])
   fi
-  rm -f conf.libpreludetest
+  rm -f conf.libiodeftest
   AC_SUBST(LIBIODEF_CFLAGS)
   AC_SUBST(LIBIODEF_PTHREAD_CFLAGS)
   AC_SUBST(LIBIODEF_LDFLAGS)
@@ -181,7 +181,7 @@ main ()
   AC_SUBST(LIBIODEF_CONFIG_PREFIX)
 
   m4_ifdef([LT_INIT],
-           [AC_DEFINE([PRELUDE_APPLICATION_USE_LIBTOOL2], [], [Define whether application use libtool >= 2.0])],
+           [AC_DEFINE([LIBIODEF_APPLICATION_USE_LIBTOOL2], [], [Define whether application use libtool >= 2.0])],
            [])
 
 ])

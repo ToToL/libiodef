@@ -1,7 +1,7 @@
 # Copyright (C) 2003-2012 CS-SI. All Rights Reserved.
-# Author: Nicolas Delon <nicolas.delon@prelude-ids.com>
+# Author: Nicolas Delon <nicolas.delon@libiodef-ids.com>
 #
-# This file is part of the Prelude library.
+# This file is part of the LibIodef library.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,10 +33,10 @@ sub     header
 /*****
 *
 * Copyright (C) 2001-2012 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoann.v\@prelude-ids.com>
-* Author: Nicolas Delon <nicolas.delon\@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann.v\@libiodef-ids.com>
+* Author: Nicolas Delon <nicolas.delon\@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -62,11 +62,11 @@ sub     header
 #include <string.h>
 #include <unistd.h>
 
-#include \"prelude-error.h\"
-#include \"prelude-inttypes.h\"
-#include \"prelude-list.h\"
-#include \"prelude-extract.h\"
-#include \"prelude-io.h\"
+#include \"libiodef-error.h\"
+#include \"libiodef-inttypes.h\"
+#include \"libiodef-list.h\"
+#include \"libiodef-extract.h\"
+#include \"libiodef-io.h\"
 #include \"iodef-document-id.h\"
 #include \"iodef.h\"
 #include \"iodef-tree-wrap.h\"
@@ -92,18 +92,18 @@ typedef struct {
 
 
 // code from http://stackoverflow.com/a/4609989/697313
-static int unicode_to_utf8(unsigned int codepoint, prelude_string_t *out)
+static int unicode_to_utf8(unsigned int codepoint, libiodef_string_t *out)
 {
           char val;
 
           if ( codepoint < 0x80 )
-                prelude_string_ncat(out, (char *) &codepoint, 1);
+                libiodef_string_ncat(out, (char *) &codepoint, 1);
 
           else if ( codepoint < 0x800 ) {
                 val = 192 + codepoint / 64;
-                prelude_string_ncat(out, &val, 1);
+                libiodef_string_ncat(out, &val, 1);
                 val = 128 + codepoint % 64;
-                prelude_string_ncat(out, &val, 1);
+                libiodef_string_ncat(out, &val, 1);
           }
 
           else if ( codepoint - 0xd800u < 0x800 )
@@ -111,22 +111,22 @@ static int unicode_to_utf8(unsigned int codepoint, prelude_string_t *out)
 
           else if ( codepoint < 0x10000 ) {
                 val = 224 + codepoint / 4096;
-                prelude_string_ncat(out, &val, 1);
+                libiodef_string_ncat(out, &val, 1);
                 val = 128 + codepoint /64 % 64;
-                prelude_string_ncat(out, &val, 1);
+                libiodef_string_ncat(out, &val, 1);
                 val = 128 + codepoint % 64;
-                prelude_string_ncat(out, &val, 1);
+                libiodef_string_ncat(out, &val, 1);
           }
 
           else if ( codepoint < 0x110000 ) {
                 val = 240 + codepoint / 262144;
-                prelude_string_ncat(out, &val, 1);
+                libiodef_string_ncat(out, &val, 1);
                 val = 128 + codepoint / 4096 % 64;
-                prelude_string_ncat(out, &val, 1);
+                libiodef_string_ncat(out, &val, 1);
                 val = 128 + codepoint / 64 % 64;
-                prelude_string_ncat(out, &val, 1);
+                libiodef_string_ncat(out, &val, 1);
                 val = 128 + codepoint % 64;
-                prelude_string_ncat(out, &val, 1);
+                libiodef_string_ncat(out, &val, 1);
           }
 
           else
@@ -156,23 +156,23 @@ static int unescape_unicode(const char *in, const char *end)
         int h1, h2, h3, h4;
 
         if ( in + 4 > end )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, \"unicode sequence must be at least 4 characters long\");;
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, \"unicode sequence must be at least 4 characters long\");;
 
         if ( (h1 = hexval(in[0])) < 0 || (h2 = hexval(in[1])) < 0 || (h3 = hexval(in[2])) < 0 || (h4 = hexval(in[3])) < 0 )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, \"invalid unicode escape: '%.6s'\", in - 2);
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, \"invalid unicode escape: '%.6s'\", in - 2);
 
         return h1 << 12 | h2 << 8 | h3 << 4 | h4;
 }
 
 
-static int unescape_string(prelude_string_t *out, const char *in, size_t size)
+static int unescape_string(libiodef_string_t *out, const char *in, size_t size)
 {
         int ret;
         const char *end = in + size;
 
         for ( ; in < end; in++ ) {
                 if ( *in != '\\\\' ) {
-                        ret = prelude_string_ncat(out, in, 1);
+                        ret = libiodef_string_ncat(out, in, 1);
                         continue;
                 }
 
@@ -181,23 +181,23 @@ static int unescape_string(prelude_string_t *out, const char *in, size_t size)
                         case '\"':
                         case '/':
                         case '\\\\':
-                                ret = prelude_string_ncat(out, in, 1);
+                                ret = libiodef_string_ncat(out, in, 1);
                                 break;
 
                         case 'b':
-                                ret = prelude_string_ncat(out, \"\\b\", 1);
+                                ret = libiodef_string_ncat(out, \"\\b\", 1);
                                 break;
                         case 't':
-                                ret = prelude_string_ncat(out, \"\\t\", 1);
+                                ret = libiodef_string_ncat(out, \"\\t\", 1);
                                 break;
                         case 'n':
-                                ret = prelude_string_ncat(out, \"\\n\", 1);
+                                ret = libiodef_string_ncat(out, \"\\n\", 1);
                                 break;
                         case 'f':
-                                ret = prelude_string_ncat(out, \"\\f\", 1);
+                                ret = libiodef_string_ncat(out, \"\\f\", 1);
                                 break;
                         case 'r':
-                                ret = prelude_string_ncat(out, \"\\r\", 1);
+                                ret = libiodef_string_ncat(out, \"\\r\", 1);
                                 break;
 
                         case 'u': {
@@ -229,7 +229,7 @@ static int unescape_string(prelude_string_t *out, const char *in, size_t size)
                         }
 
                         default:
-                                ret = prelude_string_ncat(out, in, 1);
+                                ret = libiodef_string_ncat(out, in, 1);
                                 break;
                 }
 
@@ -250,7 +250,7 @@ static int __get_float(json_data_t *ctrl, float *value)
 
         *value = strtof(ctrl->input + j->start, &end);
         if ( end != (str + len) )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, \"error decoding to real\");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, \"error decoding to real\");
 
         return 0;
 \}
@@ -266,11 +266,11 @@ static int64_t __get_integer(json_data_t *ctrl)
         const char *str = ctrl->input + j->start;
 
         if ( j->type != JSMN_PRIMITIVE )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, \"JSON value is not a primitive\");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, \"JSON value is not a primitive\");
 
         ret = strtoll(ctrl->input + j->start, &end, 10);
         if ( end != (str + len) )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, \"error decoding to integer\");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, \"error decoding to integer\");
 
         return ret;
 \}
@@ -290,7 +290,7 @@ static int __get_string_copy(json_data_t *ctrl, unsigned int idx, char *out, siz
         }
 
         else if ( insize >= size )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, \"buffer is too small\");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, \"buffer is too small\");
 
         strncpy(out, input, MIN(size, j->end - j->start));
         out[j->end - j->start] = 0;
@@ -298,13 +298,13 @@ static int __get_string_copy(json_data_t *ctrl, unsigned int idx, char *out, siz
         return 0;
 }
 
-static int __get_string(json_data_t *ctrl, prelude_string_t *out)
+static int __get_string(json_data_t *ctrl, libiodef_string_t *out)
 {
         jsmntok_t *j = &ctrl->jtok[ctrl->idx];
         const char *input = ctrl->input + j->start;
 
         if ( j->type != JSMN_STRING )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, \"JSON value is not string\");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, \"JSON value is not string\");
 
         if ( j->end - j->start == 0 )
                 return 0;
@@ -376,7 +376,7 @@ sub     struct_field_normal
         } else {
                 $self->output("
                                         int ret;
-                                        prelude_string_t *str;
+                                        libiodef_string_t *str;
 
                                         ret = iodef_$struct->{short_typename}_new_$field->{short_name}($struct->{short_typename}, &str, IODEF_LIST_APPEND);
                                         if ( ret < 0 )
@@ -441,24 +441,24 @@ sub     struct_field_normal
                 $self->output("
                         int ret;
                         iodef_data_t *data;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_$struct->{short_typename}_new_$field->{short_name}($struct->{short_typename}, &data);
                         if ( ret < 0 )
                                 return ret;
 
-                        ret = prelude_string_new(&str);
+                        ret = libiodef_string_new(&str);
                         if ( ret < 0 )
                                 return ret;
 
                         ret = __get_string(ctrl, str);
                         if ( ret < 0 ) {
-                                prelude_string_destroy(str);
+                                libiodef_string_destroy(str);
                                 return ret;
                         }
 
-                        ret = iodef_data_set_byte_string_dup(data, (const unsigned char *) prelude_string_get_string(str), prelude_string_get_len(str));
-                        prelude_string_destroy(str);
+                        ret = iodef_data_set_byte_string_dup(data, (const unsigned char *) libiodef_string_get_string(str), libiodef_string_get_len(str));
+                        libiodef_string_destroy(str);
 ");
             } else {
                 $self->output("
@@ -469,7 +469,7 @@ sub     struct_field_normal
 
                         ret = __get_json_key(ctrl, \"type\", obj_idx);
                         if ( ret < 0 )
-                                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, \"type argument required for additional data object\");
+                                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, \"type argument required for additional data object\");
 
                         ret = __get_string_copy(ctrl, obj_idx + ret + 1, buf, sizeof(buf));
                         if ( ret < 0 )
@@ -530,24 +530,24 @@ sub     struct_field_normal
                                 case IODEF_ADDITIONAL_DATA_TYPE_NTPSTAMP:
                                 case IODEF_ADDITIONAL_DATA_TYPE_PORTLIST:
                                 case IODEF_ADDITIONAL_DATA_TYPE_XML: {
-                                        prelude_string_t *str;
+                                        libiodef_string_t *str;
 
-                                        ret = prelude_string_new(&str);
+                                        ret = libiodef_string_new(&str);
                                         if ( ret < 0 )
                                                 return ret;
 
                                         ret = __get_string(ctrl, str);
                                         if ( ret < 0 ) {
-                                                prelude_string_destroy(str);
+                                                libiodef_string_destroy(str);
                                                 return ret;
                                         }
 
                                         if ( type == IODEF_ADDITIONAL_DATA_TYPE_BYTE_STRING )
-                                                ret = iodef_data_set_byte_string_dup(data, (const unsigned char *) prelude_string_get_string(str), prelude_string_get_len(str));
+                                                ret = iodef_data_set_byte_string_dup(data, (const unsigned char *) libiodef_string_get_string(str), libiodef_string_get_len(str));
                                         else
-                                                ret = iodef_data_set_char_string_dup_fast(data, prelude_string_get_string(str), prelude_string_get_len(str));
+                                                ret = iodef_data_set_char_string_dup_fast(data, libiodef_string_get_string(str), libiodef_string_get_len(str));
 
-                                        prelude_string_destroy(str);
+                                        libiodef_string_destroy(str);
                                         break;
                                 }
 
@@ -572,7 +572,7 @@ sub     struct_field_normal
         } else {
                 $self->output("
                         int ret;
-                        prelude_string_t *str;
+                        libiodef_string_t *str;
 
                         ret = iodef_$struct->{short_typename}_new_$field->{short_name}($struct->{short_typename}, &str);
                         if ( ret < 0 )
@@ -693,7 +693,7 @@ $self->output("
         //printf(\"READ $struct->{short_typename} idx=%u rsize=%lu type=%d\\n\", ctrl->idx, size, ctrl->jtok[ctrl->idx].type);
 
         if ( ctrl->jtok[ctrl->idx].type != JSMN_OBJECT )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, \"unexpected JSON object type\");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, \"unexpected JSON object type\");
 
         for ( ctrl->idx += 1; i < size && ctrl->idx < ctrl->jtoksize; ctrl->idx++, i++ ) {
                 //printf(\"MESSAGE READ %.*s type=%d idx=%d i=%u size=%lu\\n\", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start, ctrl->jtok[ctrl->idx+1].type, ctrl->idx, i, size);
@@ -765,7 +765,7 @@ $self->output("
 
     $self->output("
                 else {
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, \"unexpected field '%.*s' while reading $struct->{short_typename}\", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, \"unexpected field '%.*s' while reading $struct->{short_typename}\", ctrl->jtok[ctrl->idx].end - ctrl->jtok[ctrl->idx].start, ctrl->input + ctrl->jtok[ctrl->idx].start);
                 }
         }
 
@@ -793,11 +793,11 @@ int iodef_object_new_from_json(iodef_object_t **object, const char *json_message
 
         ret = ctrl.jtoksize = jsmn_parse(&parser, json_message, strlen(json_message), ctrl.jtok, sizeof(ctrl.jtok) / sizeof(*ctrl.jtok));
         if ( ret < 0 )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, \"error parsing json message\");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, \"error parsing json message\");
 
         selfkey = __get_json_key(&ctrl, \"_self\", 0);
         if ( selfkey < 0 )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, \"json message miss '_self' attribute\");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, \"json message miss '_self' attribute\");
 ");
 
 
@@ -824,7 +824,7 @@ foreach my $obj ( sort { $a->{id} <=> $b->{id} } map { ($_->{obj_type} != &OBJ_P
 
 $self->output("
         else {
-                ret = prelude_error_verbose(PRELUDE_ERROR_GENERIC, \"unknown object type '%s'\", \"\");
+                ret = libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, \"unknown object type '%s'\", \"\");
         }
 
         return ret;

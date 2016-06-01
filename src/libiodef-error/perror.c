@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#include "prelude-log.h"
-#include "prelude-error.h"
+#include "libiodef-log.h"
+#include "libiodef-error.h"
 
 
-void prelude_perror(prelude_error_t error, const char *fmt, ...)
+void libiodef_perror(libiodef_error_t error, const char *fmt, ...)
 {
 	va_list ap;
 	char buf[1024];
@@ -14,8 +14,8 @@ void prelude_perror(prelude_error_t error, const char *fmt, ...)
 	vsnprintf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
 
-        if ( prelude_error_get_source(error) )
-                prelude_log(PRELUDE_LOG_WARN, "%s: %s: %s.\n", prelude_strsource(error), buf, prelude_strerror(error));
+        if ( libiodef_error_get_source(error) )
+                libiodef_log(LIBIODEF_LOG_WARN, "%s: %s: %s.\n", libiodef_strsource(error), buf, libiodef_strerror(error));
         else
-                prelude_log(PRELUDE_LOG_WARN, "%s: %s.\n", buf, prelude_strerror(error));
+                libiodef_log(LIBIODEF_LOG_WARN, "%s: %s.\n", buf, libiodef_strerror(error));
 }

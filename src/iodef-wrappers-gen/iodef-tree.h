@@ -1,9 +1,9 @@
 /*****
 *
 * Copyright (C) 2001-2016 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoann.v@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann.v@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -46,21 +46,21 @@
  */
 
 
-#ifndef _LIBPRELUDE_IODEF_TREE_H
-#define _LIBPRELUDE_IODEF_TREE_H
+#ifndef _LIBIODEF_IODEF_TREE_H
+#define _LIBIODEF_IODEF_TREE_H
 
 #ifndef _GENERATE
 
-#include "prelude-inttypes.h"
+#include "libiodef-inttypes.h"
 
-#include "prelude-hash.h"
+#include "libiodef-hash.h"
 
-#include "prelude-io.h"
-#include "prelude-message.h"
+#include "libiodef-io.h"
+#include "libiodef-message.h"
 
-#define LISTED_OBJECT(name, type) prelude_list_t name
+#define LISTED_OBJECT(name, type) libiodef_list_t name
 
-#define IS_KEY_LISTED(keyfield) IODEF_LINKED_OBJECT; prelude_string_t *keyfield
+#define IS_KEY_LISTED(keyfield) IODEF_LINKED_OBJECT; libiodef_string_t *keyfield
 
 #define UNION(type, var) type var; union
 
@@ -95,7 +95,7 @@
 #define IODEF_VERSION "0.6"
 
 #ifndef _GENERATE
-#include "prelude-string.h"
+#include "libiodef-string.h"
 #include "iodef-time.h"
 #include "iodef-data.h"
 #endif
@@ -110,7 +110,7 @@ PRIMITIVE_TYPE(uint64_t)
 PRIMITIVE_TYPE(uchar_t)
 PRIMITIVE_TYPE(float)
 
-PRIMITIVE_TYPE_STRUCT(prelude_string_t)
+PRIMITIVE_TYPE_STRUCT(libiodef_string_t)
 PRIMITIVE_TYPE_STRUCT(iodef_time_t)
 PRIMITIVE_TYPE_STRUCT(iodef_data_t)
 
@@ -144,13 +144,13 @@ ENUM() {
 struct {
         IODEF_LINKED_OBJECT;
         REFCOUNT;
-        IGNORED(prelude_bool_t, _type_is_set);
+        IGNORED(libiodef_bool_t, _type_is_set);
 
         iodef_additional_data_restriction_t restriction;
         iodef_additional_data_type_t type;
-        prelude_string_t *formatid;
-        prelude_string_t *meaning;
-        prelude_string_t *ext_dtype;
+        libiodef_string_t *formatid;
+        libiodef_string_t *meaning;
+        libiodef_string_t *ext_dtype;
         REQUIRED(iodef_data_t, *data);
 } TYPE_ID(iodef_additional_data_t, 1);
 
@@ -168,7 +168,7 @@ struct {
         REFCOUNT;
 
         iodef_email_meaning_t meaning;
-        REQUIRED(prelude_string_t, *email);
+        REQUIRED(libiodef_string_t, *email);
 } TYPE_ID(iodef_email_t, 2);
 
 /*
@@ -193,7 +193,7 @@ struct {
         REFCOUNT;
 
         iodef_registry_handle_registry_t registry;
-        prelude_string_t *ext_registry;
+        libiodef_string_t *ext_registry;
 } TYPE_ID(iodef_registry_handle_t, 3);
 
 /*
@@ -251,19 +251,19 @@ struct {
         REFCOUNT;
 
         LISTED_OBJECT(additional_data_list, iodef_additional_data_t);
-        prelude_string_t *fax;
-        LISTED_OBJECT(description_list, prelude_string_t);
-        LISTED_OBJECT(telephone_list, prelude_string_t);
+        libiodef_string_t *fax;
+        LISTED_OBJECT(description_list, libiodef_string_t);
+        LISTED_OBJECT(telephone_list, libiodef_string_t);
         LISTED_OBJECT(registry_handle_list, iodef_registry_handle_t);
         LISTED_OBJECT(contact_list, iodef_contact_t);
-        prelude_string_t *contact_name;
-        prelude_string_t *timezone;
+        libiodef_string_t *contact_name;
+        libiodef_string_t *timezone;
         iodef_postal_address_t *postal_address;
         LISTED_OBJECT(email_list, iodef_email_t);
         iodef_contact_type_t type;
         iodef_contact_role_t role;
-        prelude_string_t *ext_type;
-        prelude_string_t *ext_role;
+        libiodef_string_t *ext_type;
+        libiodef_string_t *ext_role;
         iodef_contact_restriction_t restriction;
 } TYPE_ID(iodef_contact_t, 5);
 
@@ -280,8 +280,8 @@ struct {
         IODEF_LINKED_OBJECT;
         REFCOUNT;
 
-        prelude_string_t *instance;
-        REQUIRED(prelude_string_t, *name);
+        libiodef_string_t *instance;
+        REQUIRED(libiodef_string_t, *name);
         iodef_incident_id_restriction_t restriction;
 } TYPE_ID(iodef_incident_id_t, 6);
 
@@ -315,7 +315,7 @@ struct {
         IODEF_OBJECT;
         REFCOUNT;
 
-        LISTED_OBJECT(url_list, prelude_string_t);
+        LISTED_OBJECT(url_list, libiodef_string_t);
         LISTED_OBJECT(incident_id_list, iodef_incident_id_t);
         iodef_related_activity_restriction_t restriction;
 } TYPE_ID(iodef_related_activity_t, 8);
@@ -340,12 +340,12 @@ struct {
 
         LISTED_OBJECT(additional_data_list, iodef_additional_data_t);
         iodef_incident_id_t *incident_id;
-        LISTED_OBJECT(description_list, prelude_string_t);
+        LISTED_OBJECT(description_list, libiodef_string_t);
         iodef_contact_t *contact;
         REQUIRED(iodef_time_t, *date_time);
         iodef_history_item_action_t action;
         iodef_history_item_restriction_t restriction;
-        prelude_string_t *ext_action;
+        libiodef_string_t *ext_action;
 } TYPE_ID(iodef_history_item_t, 9);
 
 /*
@@ -408,12 +408,12 @@ struct {
         REFCOUNT;
 
         iodef_time_t *end_time;
-        LISTED_OBJECT(description_list, prelude_string_t);
+        LISTED_OBJECT(description_list, libiodef_string_t);
         iodef_time_t *start_time;
         iodef_contact_t *contact;
         iodef_expectation_action_t action;
         iodef_expectation_restriction_t restriction;
-        prelude_string_t *ext_action;
+        libiodef_string_t *ext_action;
         iodef_expectation_severity_t severity;
 } TYPE_ID(iodef_expectation_t, 11);
 
@@ -444,9 +444,9 @@ struct {
 
         iodef_record_pattern_offsetunit_t offsetunit;
         OPTIONAL_INT(uint32_t, instance);
-        prelude_string_t *ext_type;
+        libiodef_string_t *ext_type;
         OPTIONAL_INT(uint32_t, offset);
-        prelude_string_t *ext_offsetunit;
+        libiodef_string_t *ext_offsetunit;
         iodef_record_pattern_type_t type;
 } TYPE_ID(iodef_record_pattern_t, 12);
 
@@ -489,9 +489,9 @@ struct {
 
         iodef_record_item_restriction_t restriction;
         iodef_record_item_dtype_t dtype;
-        prelude_string_t *formatid;
-        prelude_string_t *meaning;
-        prelude_string_t *ext_dtype;
+        libiodef_string_t *formatid;
+        libiodef_string_t *meaning;
+        libiodef_string_t *ext_dtype;
         iodef_data_t *data;
 } TYPE_ID(iodef_record_item_t, 13);
 
@@ -503,14 +503,14 @@ struct {
         IODEF_LINKED_OBJECT;
         REFCOUNT;
 
-        prelude_string_t *url;
-        prelude_string_t *vendor;
-        prelude_string_t *name;
-        prelude_string_t *family;
-        prelude_string_t *swid;
-        prelude_string_t *patch;
-        prelude_string_t *version;
-        prelude_string_t *configid;
+        libiodef_string_t *url;
+        libiodef_string_t *vendor;
+        libiodef_string_t *name;
+        libiodef_string_t *family;
+        libiodef_string_t *swid;
+        libiodef_string_t *patch;
+        libiodef_string_t *version;
+        libiodef_string_t *configid;
 } TYPE_ID(iodef_application_t, 14);
 
 /*
@@ -527,7 +527,7 @@ struct {
         REFCOUNT;
 
         iodef_additional_data_t *additional_data;
-        LISTED_OBJECT(description_list, prelude_string_t);
+        LISTED_OBJECT(description_list, libiodef_string_t);
         LISTED_OBJECT(record_pattern_list, iodef_record_pattern_t);
         iodef_time_t *date_time;
         iodef_application_t *application;
@@ -560,9 +560,9 @@ struct {
         IODEF_LINKED_OBJECT;
         REFCOUNT;
 
-        LISTED_OBJECT(url_list, prelude_string_t);
-        LISTED_OBJECT(description_list, prelude_string_t);
-        REQUIRED(prelude_string_t, *reference_name);
+        LISTED_OBJECT(url_list, libiodef_string_t);
+        LISTED_OBJECT(description_list, libiodef_string_t);
+        REQUIRED(libiodef_string_t, *reference_name);
 } TYPE_ID(iodef_reference_t, 17);
 
 /*
@@ -579,7 +579,7 @@ struct {
         REFCOUNT;
 
         LISTED_OBJECT(additional_data_list, iodef_additional_data_t);
-        LISTED_OBJECT(description_list, prelude_string_t);
+        LISTED_OBJECT(description_list, libiodef_string_t);
         LISTED_OBJECT(reference_list, iodef_reference_t);
         iodef_method_restriction_t restriction;
 } TYPE_ID(iodef_method_t, 18);
@@ -622,11 +622,11 @@ struct {
         IODEF_LINKED_OBJECT;
         REFCOUNT;
 
-        prelude_string_t *ext_metric;
+        libiodef_string_t *ext_metric;
         iodef_time_impact_duration_t duration;
         iodef_time_impact_metric_t metric;
         iodef_time_impact_severity_t severity;
-        prelude_string_t *ext_duration;
+        libiodef_string_t *ext_duration;
 } TYPE_ID(iodef_time_impact_t, 19);
 
 /*
@@ -677,7 +677,7 @@ struct {
         iodef_impact_completion_t completion;
         iodef_impact_type_t type;
         iodef_impact_severity_t severity;
-        prelude_string_t *ext_type;
+        libiodef_string_t *ext_type;
 } TYPE_ID(iodef_impact_t, 20);
 
 /*
@@ -716,7 +716,7 @@ struct {
         IODEF_LINKED_OBJECT;
         REFCOUNT;
 
-        REQUIRED(prelude_string_t, *currency);
+        REQUIRED(libiodef_string_t, *currency);
         iodef_monetary_impact_severity_t severity;
 } TYPE_ID(iodef_monetary_impact_t, 22);
 
@@ -751,8 +751,8 @@ struct {
 
         iodef_counter_duration_t duration;
         iodef_counter_type_t type;
-        prelude_string_t *ext_duration;
-        prelude_string_t *ext_type;
+        libiodef_string_t *ext_duration;
+        libiodef_string_t *ext_type;
 } TYPE_ID(iodef_counter_t, 23);
 
 /*
@@ -795,7 +795,7 @@ struct {
 
         OPTIONAL_INT(uint32_t, proto_code);
         OPTIONAL_INT(uint32_t, proto_flags);
-        prelude_string_t *portlist;
+        libiodef_string_t *portlist;
         LISTED_OBJECT(application_list, iodef_application_t);
         OPTIONAL_INT(uint32_t, proto_type);
         OPTIONAL_INT(uint32_t, port);
@@ -827,9 +827,9 @@ struct {
         REFCOUNT;
 
         iodef_address_category_t category;
-        prelude_string_t *vlan_name;
-        prelude_string_t *ext_category;
-        prelude_string_t *vlan_num;
+        libiodef_string_t *vlan_name;
+        libiodef_string_t *ext_category;
+        libiodef_string_t *vlan_num;
 } TYPE_ID(iodef_address_t, 27);
 
 /*
@@ -872,7 +872,7 @@ struct {
 
         iodef_node_role_category_t category;
         iodef_node_role_lang_t lang;
-        prelude_string_t *ext_category;
+        libiodef_string_t *ext_category;
 } TYPE_ID(iodef_node_role_t, 28);
 
 /*
@@ -883,11 +883,11 @@ struct {
         IODEF_OBJECT;
         REFCOUNT;
 
-        LISTED_OBJECT(node_name_list, prelude_string_t);
+        LISTED_OBJECT(node_name_list, libiodef_string_t);
         LISTED_OBJECT(counter_list, iodef_counter_t);
         iodef_time_t *date_time;
         LISTED_OBJECT(node_role_list, iodef_node_role_t);
-        prelude_string_t *location;
+        libiodef_string_t *location;
         LISTED_OBJECT(address_list, iodef_address_t);
 } TYPE_ID(iodef_node_t, 29);
 
@@ -899,14 +899,14 @@ struct {
         IODEF_OBJECT;
         REFCOUNT;
 
-        prelude_string_t *url;
-        prelude_string_t *vendor;
-        prelude_string_t *name;
-        prelude_string_t *family;
-        prelude_string_t *swid;
-        prelude_string_t *patch;
-        prelude_string_t *version;
-        prelude_string_t *configid;
+        libiodef_string_t *url;
+        libiodef_string_t *vendor;
+        libiodef_string_t *name;
+        libiodef_string_t *family;
+        libiodef_string_t *swid;
+        libiodef_string_t *patch;
+        libiodef_string_t *version;
+        libiodef_string_t *configid;
 } TYPE_ID(iodef_operating_system_t, 30);
 
 /*
@@ -943,15 +943,15 @@ struct {
 
         REQUIRED(iodef_node_t, *node);
         LISTED_OBJECT(additional_data_list, iodef_additional_data_t);
-        LISTED_OBJECT(description_list, prelude_string_t);
+        LISTED_OBJECT(description_list, libiodef_string_t);
         LISTED_OBJECT(service_list, iodef_service_t);
         LISTED_OBJECT(counter_list, iodef_counter_t);
         iodef_operating_system_t *operating_system;
         iodef_system_category_t category;
         iodef_system_restriction_t restriction;
-        prelude_string_t *ext_category;
+        libiodef_string_t *ext_category;
         iodef_system_spoofed_t spoofed;
-        prelude_string_t *interface;
+        libiodef_string_t *interface;
 } TYPE_ID(iodef_system_t, 31);
 
 /*
@@ -980,7 +980,7 @@ struct {
 
         iodef_time_t *detect_time;
         LISTED_OBJECT(additional_data_list, iodef_additional_data_t);
-        LISTED_OBJECT(description_list, prelude_string_t);
+        LISTED_OBJECT(description_list, libiodef_string_t);
         LISTED_OBJECT(flow_list, iodef_flow_t);
         LISTED_OBJECT(expectation_list, iodef_expectation_t);
         iodef_record_t *record;
@@ -1028,7 +1028,7 @@ struct {
         iodef_time_t *detect_time;
         LISTED_OBJECT(additional_data_list, iodef_additional_data_t);
         iodef_time_t *end_time;
-        LISTED_OBJECT(description_list, prelude_string_t);
+        LISTED_OBJECT(description_list, libiodef_string_t);
         LISTED_OBJECT(contact_list, iodef_contact_t);
         iodef_alternative_id_t *alternative_id;
         REQUIRED(iodef_time_t, *report_time);
@@ -1041,7 +1041,7 @@ struct {
         iodef_history_t *history;
         iodef_incident_lang_t lang;
         iodef_incident_restriction_t restriction;
-        prelude_string_t *ext_purpose;
+        libiodef_string_t *ext_purpose;
         iodef_incident_purpose_t purpose;
 } TYPE_ID(iodef_incident_t, 34);
 
@@ -1060,9 +1060,9 @@ struct {
 
         LISTED_OBJECT(incident_list, iodef_incident_t);
         iodef_document_lang_t lang;
-        prelude_string_t *formatid;
-        REQUIRED(prelude_string_t, *version);
+        libiodef_string_t *formatid;
+        REQUIRED(libiodef_string_t, *version);
 } TYPE_ID(iodef_document_t, 35);
 
 
-#endif /* _LIBPRELUDE_IODEF_TREE_H */
+#endif /* _LIBIODEF_IODEF_TREE_H */

@@ -66,7 +66,7 @@ BEGIN {
   codes_body = 0;
   between_codes_and_errnos = 0;
   errnos_body = 0;
-  prelude_error_h = 0;
+  libiodef_error_h = 0;
 
   print "/* Output of mkheader.awk.  DO NOT EDIT.  */";
   print "";
@@ -148,19 +148,19 @@ errnos_body {
 
   if ($1 !~ /^[0-9]/)
     {
-# Note that this assumes that prelude-error.h.in doesn't start with a digit.
+# Note that this assumes that libiodef-error.h.in doesn't start with a digit.
       errnos_body = 0;
-      prelude_error_h = 1;
+      libiodef_error_h = 1;
     }
   else
     {
-      errnos_idx[errnos_nr] = "PRELUDE_ERROR_SYSTEM_ERROR | " $1;
-      errnos_sym[errnos_nr] = "PRELUDE_ERROR_" $2;
+      errnos_idx[errnos_nr] = "LIBIODEF_ERROR_SYSTEM_ERROR | " $1;
+      errnos_sym[errnos_nr] = "LIBIODEF_ERROR_" $2;
       errnos_nr++;
     }
 }
 
-prelude_error_h {
+libiodef_error_h {
   if ($0 ~ /^@include err-sources/)
     {
       for (i = 0; i < sources_nr; i++)

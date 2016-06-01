@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 #include <assert.h>
-#include "prelude.h"
+#include "libiodef.h"
 
 static void test_criteria(iodef_document_t *iodef, const char *criteria_str, int expect_create, int expect_match)
 {
@@ -25,9 +25,9 @@ int main(void)
         iodef_alert_t *alert;
         iodef_document_t *iodef;
         iodef_classification_t *classification;
-        prelude_string_t *str;
+        libiodef_string_t *str;
 
-        assert(prelude_string_new_ref(&str, "A") == 0);
+        assert(libiodef_string_new_ref(&str, "A") == 0);
 
         assert(iodef_document_new(&iodef) == 0);
         assert(iodef_document_new_alert(iodef, &alert) == 0);
@@ -47,7 +47,7 @@ int main(void)
         test_criteria(iodef, "alert.classification.text = (A || B || C || D) || heartbeat", 0, 1);
         test_criteria(iodef, "(alert.classification.text == A || heartbeat", -1, -1);
 
-        prelude_string_set_ref(str, "My String");
+        libiodef_string_set_ref(str, "My String");
 
         test_criteria(iodef, "alert.classification.text != 'My String'", 0, 0);
         test_criteria(iodef, "alert.classification.text != 'random'", 0, 1);

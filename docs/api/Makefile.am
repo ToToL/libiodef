@@ -29,7 +29,7 @@ SCANGOBJ_OPTIONS=
 
 # Extra options to supply to gtkdoc-scan.
 # e.g. SCAN_OPTIONS=--deprecated-guards="GTK_DISABLE_DEPRECATED" 
-SCAN_OPTIONS=--deprecated-guards="PRELUDE_DISABLE_DEPRECATED"
+SCAN_OPTIONS=--deprecated-guards="LIBIODEF_DISABLE_DEPRECATED"
 
 # Extra options to supply to gtkdoc-mkdb.
 # e.g. MKDB_OPTIONS=--xml-mode --output-format=xml
@@ -58,7 +58,7 @@ EXTRA_HFILES=
 
 # Header files or dirs to ignore when scanning. Use base file/dir names
 # e.g. IGNORE_HFILES=gtkdebug.h gtkintl.h private_code
-IGNORE_HFILES=config-engine.h libmissing.h iodef-tree-data.h ntp.h tls-auth.h tls-util.h code-from-errno.h code-to-errno.h err-codes-sym.h err-codes.h err-sources-sym.h err-sources.h errnos-sym.h gettext.h mkerrcodes.h iodef-criteria-string.yac.h iodef-tree.h prelude-extract.h prelude-message-id.h iodef-document-id.h iodef-class.h iodef-value-type.h daemonize.h common.h variable.h
+IGNORE_HFILES=config-engine.h libmissing.h iodef-tree-data.h ntp.h tls-auth.h tls-util.h code-from-errno.h code-to-errno.h err-codes-sym.h err-codes.h err-sources-sym.h err-sources.h errnos-sym.h gettext.h mkerrcodes.h iodef-criteria-string.yac.h iodef-tree.h libiodef-extract.h libiodef-document-id.h iodef-document-id.h iodef-class.h iodef-value-type.h daemonize.h common.h variable.h
 
 # Images to copy into HTML directory.
 # e.g. HTML_IMAGES=$(top_srcdir)/gtk/stock-icons/stock_about_24.png

@@ -2,9 +2,9 @@
 *
 * Copyright (C) 2002-2016 CS-SI. All Rights Reserved.
 * Author: Krzysztof Zaraska
-*         Yoann Vandoorselaere <yoann@prelude-ids.com>
+*         Yoann Vandoorselaere <yoann@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -34,12 +34,12 @@
 
 #include "glthread/lock.h"
 
-#include "prelude-hash.h"
-#include "prelude-inttypes.h"
-#include "prelude-string.h"
+#include "libiodef-hash.h"
+#include "libiodef-inttypes.h"
+#include "libiodef-string.h"
 
-#define PRELUDE_ERROR_SOURCE_DEFAULT PRELUDE_ERROR_SOURCE_IODEF_PATH
-#include "prelude-error.h"
+#define LIBIODEF_ERROR_SOURCE_DEFAULT LIBIODEF_ERROR_SOURCE_IODEF_PATH
+#include "libiodef-error.h"
 
 #include "iodef-time.h"
 #include "iodef-data.h"
@@ -49,8 +49,8 @@
 #include "iodef-object-prv.h"
 #include "iodef-tree-wrap.h"
 #include "iodef-path.h"
-#include "prelude-string.h"
-#include "prelude-linked-object.h"
+#include "libiodef-string.h"
+#include "libiodef-linked-object.h"
 #include "common.h"
 
 
@@ -65,8 +65,8 @@
 
 typedef struct iodef_key_listed_object {
         IODEF_OBJECT;
-        prelude_list_t list;
-        prelude_string_t *objkey;
+        libiodef_list_t list;
+        libiodef_string_t *objkey;
 } iodef_key_listed_object_t;
 
 
@@ -99,8 +99,8 @@ static int _iodef_path_set(const iodef_path_t *path, iodef_class_id_t class, siz
                            int index_override, void *ptr, iodef_value_t *value);
 
 
-static prelude_bool_t flush_cache = FALSE;
-static prelude_hash_t *cached_path = NULL;
+static libiodef_bool_t flush_cache = FALSE;
+static libiodef_hash_t *cached_path = NULL;
 static gl_lock_t cached_path_mutex = gl_lock_initializer;
 
 
@@ -167,7 +167,7 @@ static int initialize_path_cache_if_needed(void)
         if ( cached_path )
                 return 0;
 
-        return prelude_hash_new2(&cached_path, HASH_DEFAULT_SIZE, path_hash_func, path_key_cmp_func, NULL, flush_cache_if_wanted);
+        return libiodef_hash_new2(&cached_path, HASH_DEFAULT_SIZE, path_hash_func, path_key_cmp_func, NULL, flush_cache_if_wanted);
 }
 
 
@@ -192,7 +192,7 @@ static int build_name(iodef_path_t *path)
 
                 name = iodef_path_get_name(path, i);
                 if ( ! name )
-                        return prelude_error(PRELUDE_ERROR_IODEF_PATH_INTEGRITY);
+                        return libiodef_error(LIBIODEF_ERROR_IODEF_PATH_INTEGRITY);
 
                 strncat(path->name, name, sizeof(path->name) - strlen(path->name));
 
@@ -210,7 +210,7 @@ static int build_name(iodef_path_t *path)
 
                 class = iodef_class_get_child_class(class, path->elem[i].position);
                 if ( class < 0 && i < path->depth - 1 )
-                        return prelude_error(PRELUDE_ERROR_IODEF_PATH_INTEGRITY);
+                        return libiodef_error(LIBIODEF_ERROR_IODEF_PATH_INTEGRITY);
         }
 
         return 0;
@@ -223,10 +223,10 @@ static int iodef_path_get_internal(iodef_value_t **ret, const iodef_path_t *path
                                    unsigned int depth, void *parent, iodef_class_id_t parent_class);
 
 
-static inline prelude_bool_t has_index_key(prelude_list_t *elem, const char *index_key)
+static inline libiodef_bool_t has_index_key(libiodef_list_t *elem, const char *index_key)
 {
-        iodef_key_listed_object_t *obj = prelude_list_entry(elem, iodef_key_listed_object_t, list);
-        return (obj->objkey && strcmp(prelude_string_get_string_or_default(obj->objkey, ""), index_key) == 0) ? TRUE : FALSE;
+        iodef_key_listed_object_t *obj = libiodef_list_entry(elem, iodef_key_listed_object_t, list);
+        return (obj->objkey && strcmp(libiodef_string_get_string_or_default(obj->objkey, ""), index_key) == 0) ? TRUE : FALSE;
 }
 
 
@@ -238,19 +238,19 @@ static int set_index_key(const iodef_path_element_t *elem, void *ptr)
                 return 0;
 
         if ( obj->objkey )
-                prelude_string_destroy(obj->objkey);
+                libiodef_string_destroy(obj->objkey);
 
-        return prelude_string_new_dup(&obj->objkey, elem->index_key);
+        return libiodef_string_new_dup(&obj->objkey, elem->index_key);
 }
 
 
 
 static int iodef_path_get_list_internal(iodef_value_t **value_list,
                                         const iodef_path_t *path, int depth,
-                                        prelude_list_t *list, iodef_class_id_t parent_class)
+                                        libiodef_list_t *list, iodef_class_id_t parent_class)
 {
         int ret;
-        prelude_list_t *tmp;
+        libiodef_list_t *tmp;
         iodef_value_t *value;
         unsigned int cnt = 0;
 
@@ -258,7 +258,7 @@ static int iodef_path_get_list_internal(iodef_value_t **value_list,
         if ( ret < 0 )
                 return ret;
 
-        prelude_list_for_each(list, tmp) {
+        libiodef_list_for_each(list, tmp) {
                 value = NULL;
 
                 if ( path->elem[depth - 1].index_key && ! has_index_key(tmp, path->elem[depth - 1].index_key) )
@@ -306,14 +306,14 @@ static int iodef_path_get_list_internal(iodef_value_t **value_list,
 
 
 static int iodef_path_get_nth_internal(iodef_value_t **value, const iodef_path_t *path,
-                                       unsigned int depth, prelude_list_t *list,
+                                       unsigned int depth, libiodef_list_t *list,
                                        iodef_class_id_t parent_class, int which, const char *index_key)
 {
         int cnt = 0;
-        prelude_list_t *tmp = NULL;
+        libiodef_list_t *tmp = NULL;
 
         if ( which >= 0 ) {
-                prelude_list_for_each(list, tmp) {
+                libiodef_list_for_each(list, tmp) {
                         if ( cnt++ == which )
                                 return iodef_path_get_internal(value, path, depth, iodef_linked_object_get_object(tmp), parent_class);
                 }
@@ -321,7 +321,7 @@ static int iodef_path_get_nth_internal(iodef_value_t **value, const iodef_path_t
                 which = -which;
                 which--; /* With negative value, -1 is the base, translate to 0 */
 
-                prelude_list_for_each_reversed(list, tmp) {
+                libiodef_list_for_each_reversed(list, tmp) {
                         if ( cnt++ == which )
                                 return iodef_path_get_internal(value, path, depth, iodef_linked_object_get_object(tmp), parent_class);
                 }
@@ -382,13 +382,13 @@ static void delete_listed_child(void *parent, iodef_class_id_t class, const iode
 {
         int ret;
         void *obj;
-        prelude_list_t *head, *tmp, *bkp;
+        libiodef_list_t *head, *tmp, *bkp;
 
         ret = iodef_class_get_child(parent, class, elem->position, (void *) &head);
         if ( ret < 0 )
                 return;
 
-        prelude_list_for_each_safe(head, tmp, bkp) {
+        libiodef_list_for_each_safe(head, tmp, bkp) {
                 obj = iodef_linked_object_get_object(tmp);
 
                 if ( elem->index_key && ! has_index_key(obj, elem->index_key) )
@@ -399,10 +399,10 @@ static void delete_listed_child(void *parent, iodef_class_id_t class, const iode
                  * this message, in which case iodef_class_destroy()
                  * will only decrease it's reference count.
                  *
-                 * We manually call prelude_list_del_init() in order to
+                 * We manually call libiodef_list_del_init() in order to
                  * disassociate the object from the message.
                  */
-                prelude_list_del_init(tmp);
+                libiodef_list_del_init(tmp);
                 iodef_class_destroy(iodef_class_get_child_class(class, elem->position), obj);
         }
 }
@@ -414,7 +414,7 @@ static int _iodef_path_set_undefined_not_last(const iodef_path_t *path, const io
 {
         int j = 0, ret;
         iodef_value_t *val;
-        prelude_list_t *head, *tmp, *bkp;
+        libiodef_list_t *head, *tmp, *bkp;
 
         assert(iodef_class_is_child_list(class, elem->position));
 
@@ -422,7 +422,7 @@ static int _iodef_path_set_undefined_not_last(const iodef_path_t *path, const io
         if ( ret < 0 )
                 return ret;
 
-        prelude_list_for_each_safe(head, tmp, bkp) {
+        libiodef_list_for_each_safe(head, tmp, bkp) {
                 if ( elem->index_key && ! has_index_key(tmp, elem->index_key) )
                         continue;
 
@@ -493,7 +493,7 @@ static int _iodef_path_set(const iodef_path_t *path, iodef_class_id_t class, siz
 {
         void *prevptr = NULL;
         int ret, index, j;
-        prelude_bool_t is_last_element;
+        libiodef_bool_t is_last_element;
         iodef_value_type_id_t tid;
         const iodef_path_element_t *elem;
         iodef_class_id_t parent_class;
@@ -519,7 +519,7 @@ static int _iodef_path_set(const iodef_path_t *path, iodef_class_id_t class, siz
                                                 return ret;
 
                                         if ( index == INDEX_KEY ) {
-                                                prelude_list_t *head;
+                                                libiodef_list_t *head;
 
                                                 ret = iodef_class_get_child(ptr, class, elem->position, (void *) &head);
                                                 if ( ret < 0 )
@@ -578,7 +578,7 @@ int iodef_path_get(const iodef_path_t *path, void *obj, iodef_value_t **ret)
         iodef_object_t *object = obj;
 
         if ( object->_iodef_object_id != path->top_class )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "path for object '%s' used with '%s' object root",
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "path for object '%s' used with '%s' object root",
                                              iodef_class_get_name(path->top_class), iodef_class_get_name(object->_iodef_object_id));
 
         return iodef_path_get_internal(ret, path, 0, object, object->_iodef_object_id);
@@ -601,10 +601,10 @@ int iodef_path_set(const iodef_path_t *path, void *obj, iodef_value_t *value)
         iodef_object_t *object = obj;
 
         if ( path->depth < 1 )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "Path with depth of 0 are not allowed");
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "Path with depth of 0 are not allowed");
 
         if ( object->_iodef_object_id != path->top_class )
-                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "path for object '%s' used with '%s' object root",
+                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "path for object '%s' used with '%s' object root",
                                              iodef_class_get_name(path->top_class), iodef_class_get_name(object->_iodef_object_id));
 
 
@@ -619,7 +619,7 @@ static int copy_path_name(iodef_path_t *path, const char *buffer)
 
         len = strlen(buffer) + 1;
         if ( len >= sizeof(path->name) )
-                return prelude_error(PRELUDE_ERROR_IODEF_PATH_LENGTH);
+                return libiodef_error(LIBIODEF_ERROR_IODEF_PATH_LENGTH);
 
         memcpy(path->name, buffer, len);
 
@@ -653,7 +653,7 @@ static int iodef_path_create(iodef_path_t **path, iodef_class_id_t rootclass, co
                 return ret;
         }
 
-        *path = prelude_hash_get(cached_path, &tmp);
+        *path = libiodef_hash_get(cached_path, &tmp);
         gl_lock_unlock(cached_path_mutex);
 
         if ( *path )
@@ -661,7 +661,7 @@ static int iodef_path_create(iodef_path_t **path, iodef_class_id_t rootclass, co
 
         *path = calloc(1, sizeof(**path));
         if ( ! *path )
-                return prelude_error_from_errno(errno);
+                return libiodef_error_from_errno(errno);
 
         (*path)->refcount = 1;
         gl_lock_init((*path)->mutex);
@@ -725,7 +725,7 @@ static int iodef_path_parse_new(iodef_path_t *path, iodef_class_id_t rootclass, 
 
                         end = strchr(ptr2, ')');
                         if ( ! end )
-                                return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "Malformed IODEFPath index : missing ')' character");
+                                return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "Malformed IODEFPath index : missing ')' character");
 
                         *end = *ptr2 = '\0';
                         if ( strcmp(tok, "<<") == 0 )
@@ -742,7 +742,7 @@ static int iodef_path_parse_new(iodef_path_t *path, iodef_class_id_t rootclass, 
                         else if ( strcmp(ptr2 + 1, "*") != 0 ) {
                                 index = strtol(ptr2 + 1, &errptr, 0);
                                 if ( index == 0 && errptr == tok )
-                                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC, "Invalid index specified : `%s`", tok);
+                                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC, "Invalid index specified : `%s`", tok);
                         }
                         *end = ')';
                 }
@@ -760,11 +760,11 @@ static int iodef_path_parse_new(iodef_path_t *path, iodef_class_id_t rootclass, 
                         path->elem[depth].index = iodef_class_is_child_list(class, child) ? INDEX_UNDEFINED : INDEX_FORBIDDEN;
                 else {
                         if ( ! iodef_class_is_child_list(class, child) )
-                                return prelude_error_verbose(PRELUDE_ERROR_IODEF_PATH_INDEX_FORBIDDEN,
+                                return libiodef_error_verbose(LIBIODEF_ERROR_IODEF_PATH_INDEX_FORBIDDEN,
                                                              "Invalid IODEF path element '%s': indexing not supported", ptr);
 
                         if ( index == INDEX_KEY && ! iodef_class_is_child_keyed_list(class, child) )
-                                return prelude_error_verbose(PRELUDE_ERROR_IODEF_PATH_INDEX_FORBIDDEN,
+                                return libiodef_error_verbose(LIBIODEF_ERROR_IODEF_PATH_INDEX_FORBIDDEN,
                                                              "Invalid IODEF path element '%s': key not supported as index", ptr);
 
                         path->elem[depth].index = index;
@@ -773,13 +773,13 @@ static int iodef_path_parse_new(iodef_path_t *path, iodef_class_id_t rootclass, 
                 /* The last object may not be a structure */
                 vtype = path->elem[depth].value_type = iodef_class_get_child_value_type(class, child);
                 if ( vtype != IODEF_VALUE_TYPE_CLASS && ! is_last )
-                        return prelude_error_verbose(PRELUDE_ERROR_GENERIC,
+                        return libiodef_error_verbose(LIBIODEF_ERROR_GENERIC,
                                                      "IODEF element '%s' is a leaf and thus has no child '%s'",
                                                      ptr, endptr + 1);
 
                 class = path->elem[depth].class = iodef_class_get_child_class(class, child);
                 if ( ++depth == MAX_DEPTH )
-                        return prelude_error(PRELUDE_ERROR_IODEF_PATH_DEPTH);
+                        return libiodef_error(LIBIODEF_ERROR_IODEF_PATH_DEPTH);
 
         } while ( ! is_last );
 
@@ -806,7 +806,7 @@ int iodef_path_new_from_root_fast(iodef_path_t **path, iodef_class_id_t rootclas
 {
         int ret;
 
-        prelude_return_val_if_fail(buffer, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(buffer, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         ret = iodef_path_create(path, rootclass, buffer);
         if ( ret < 0 )
@@ -830,7 +830,7 @@ int iodef_path_new_from_root_fast(iodef_path_t **path, iodef_class_id_t rootclas
 
         gl_lock_lock(cached_path_mutex);
 
-        if ( prelude_hash_add(cached_path, *path, *path) < 0 ) {
+        if ( libiodef_hash_add(cached_path, *path, *path) < 0 ) {
 
                 gl_lock_destroy((*path)->mutex);
                 free(*path);
@@ -880,11 +880,11 @@ int iodef_path_new_v(iodef_path_t **path, const char *format, va_list args)
         int ret;
         char buffer[MAX_NAME_LEN];
 
-        prelude_return_val_if_fail(format, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(format, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         ret = vsnprintf(buffer, sizeof(buffer), format, args);
         if ( ret < 0 || (size_t) ret > sizeof(buffer) - 1 )
-                return prelude_error(PRELUDE_ERROR_IODEF_PATH_LENGTH);
+                return libiodef_error(LIBIODEF_ERROR_IODEF_PATH_LENGTH);
 
         return iodef_path_new_fast(path, buffer);
 }
@@ -907,7 +907,7 @@ int iodef_path_new(iodef_path_t **path, const char *format, ...)
         int ret;
         va_list args;
 
-        prelude_return_val_if_fail(format, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(format, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         va_start(args, format);
         ret = iodef_path_new_v(path, format, args);
@@ -930,7 +930,7 @@ int iodef_path_new(iodef_path_t **path, const char *format, ...)
  */
 iodef_class_id_t iodef_path_get_class(const iodef_path_t *path, int depth)
 {
-        prelude_return_val_if_fail(path, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(path, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         if ( depth < 0 )
                 depth = path->depth - 1;
@@ -956,7 +956,7 @@ iodef_class_id_t iodef_path_get_class(const iodef_path_t *path, int depth)
  */
 iodef_value_type_id_t iodef_path_get_value_type(const iodef_path_t *path, int depth)
 {
-        prelude_return_val_if_fail(path, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(path, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         if ( depth < 0 )
                 depth = path->depth - 1;
@@ -1003,7 +1003,7 @@ static inline int invalidate(iodef_path_t *path)
 
         if ( path->refcount == 2 ) {
                 gl_lock_lock(cached_path_mutex);
-                ret = prelude_hash_elem_destroy(cached_path, path);
+                ret = libiodef_hash_elem_destroy(cached_path, path);
                 gl_lock_unlock(cached_path_mutex);
 
                 if ( ret == 0 )
@@ -1036,14 +1036,14 @@ int iodef_path_set_index(iodef_path_t *path, unsigned int depth, int index)
 {
         int ret;
 
-        prelude_return_val_if_fail(path, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(depth < path->depth, prelude_error(PRELUDE_ERROR_IODEF_PATH_DEPTH));
+        libiodef_return_val_if_fail(path, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(depth < path->depth, libiodef_error(LIBIODEF_ERROR_IODEF_PATH_DEPTH));
 
         if ( index == INDEX_FORBIDDEN || index == INDEX_KEY )
-                return prelude_error(PRELUDE_ERROR_IODEF_PATH_INDEX_RESERVED);
+                return libiodef_error(LIBIODEF_ERROR_IODEF_PATH_INDEX_RESERVED);
 
         if ( path->elem[depth].index == INDEX_FORBIDDEN )
-                return prelude_error(PRELUDE_ERROR_IODEF_PATH_INDEX_FORBIDDEN);
+                return libiodef_error(LIBIODEF_ERROR_IODEF_PATH_INDEX_FORBIDDEN);
 
         ret = invalidate(path);
         if ( ret < 0 )
@@ -1077,7 +1077,7 @@ int iodef_path_set_index(iodef_path_t *path, unsigned int depth, int index)
  */
 int iodef_path_undefine_index(iodef_path_t *path, unsigned int depth)
 {
-        prelude_return_val_if_fail(path, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(path, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         return iodef_path_set_index(path, depth, INDEX_UNDEFINED);
 }
@@ -1096,14 +1096,14 @@ int iodef_path_undefine_index(iodef_path_t *path, unsigned int depth)
  */
 int iodef_path_get_index(const iodef_path_t *path, unsigned int depth)
 {
-        prelude_return_val_if_fail(path, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(depth < path->depth, prelude_error(PRELUDE_ERROR_IODEF_PATH_DEPTH));
+        libiodef_return_val_if_fail(path, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(depth < path->depth, libiodef_error(LIBIODEF_ERROR_IODEF_PATH_DEPTH));
 
         if ( path->elem[depth].index == INDEX_UNDEFINED )
-                return prelude_error(PRELUDE_ERROR_IODEF_PATH_INDEX_UNDEFINED);
+                return libiodef_error(LIBIODEF_ERROR_IODEF_PATH_INDEX_UNDEFINED);
 
         if ( path->elem[depth].index == INDEX_FORBIDDEN )
-                return prelude_error(PRELUDE_ERROR_IODEF_PATH_INDEX_FORBIDDEN);
+                return libiodef_error(LIBIODEF_ERROR_IODEF_PATH_INDEX_FORBIDDEN);
 
         return path->elem[depth].index;
 }
@@ -1112,17 +1112,17 @@ int iodef_path_get_index(const iodef_path_t *path, unsigned int depth)
 
 int iodef_path_get_key(const iodef_path_t *path, unsigned int depth, const char **key)
 {
-        prelude_return_val_if_fail(path, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(depth < path->depth, prelude_error(PRELUDE_ERROR_IODEF_PATH_DEPTH));
+        libiodef_return_val_if_fail(path, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(depth < path->depth, libiodef_error(LIBIODEF_ERROR_IODEF_PATH_DEPTH));
 
         if ( path->elem[depth].index == INDEX_UNDEFINED )
-                return prelude_error(PRELUDE_ERROR_IODEF_PATH_INDEX_UNDEFINED);
+                return libiodef_error(LIBIODEF_ERROR_IODEF_PATH_INDEX_UNDEFINED);
 
         if ( path->elem[depth].index == INDEX_FORBIDDEN )
-                return prelude_error(PRELUDE_ERROR_IODEF_PATH_INDEX_FORBIDDEN);
+                return libiodef_error(LIBIODEF_ERROR_IODEF_PATH_INDEX_FORBIDDEN);
 
         if ( path->elem[depth].index != INDEX_KEY )
-                return prelude_error(PRELUDE_ERROR_IODEF_PATH_INDEX_FORBIDDEN);
+                return libiodef_error(LIBIODEF_ERROR_IODEF_PATH_INDEX_FORBIDDEN);
 
         *key = path->elem[depth].index_key;
         return 0;
@@ -1150,11 +1150,11 @@ int iodef_path_make_child(iodef_path_t *path, const char *child_name, int index)
         iodef_class_id_t class;
         iodef_class_child_id_t child;
 
-        prelude_return_val_if_fail(path, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(child_name, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(path, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(child_name, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         if ( path->depth > MAX_DEPTH - 1 )
-                return prelude_error(PRELUDE_ERROR_IODEF_PATH_DEPTH);
+                return libiodef_error(LIBIODEF_ERROR_IODEF_PATH_DEPTH);
 
         class = iodef_path_get_class(path, -1);
 
@@ -1201,10 +1201,10 @@ int iodef_path_make_parent(iodef_path_t *path)
         int ret;
         char *ptr;
 
-        prelude_return_val_if_fail(path, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(path, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         if ( path->depth == 0 )
-                return prelude_error(PRELUDE_ERROR_IODEF_PATH_PARENT_ROOT);
+                return libiodef_error(LIBIODEF_ERROR_IODEF_PATH_PARENT_ROOT);
 
         ret = invalidate(path);
         if ( ret < 0 )
@@ -1233,7 +1233,7 @@ int iodef_path_make_parent(iodef_path_t *path)
  */
 void iodef_path_destroy(iodef_path_t *path)
 {
-        prelude_return_if_fail(path);
+        libiodef_return_if_fail(path);
 
         gl_lock_lock(path->mutex);
 
@@ -1263,8 +1263,8 @@ int iodef_path_ncompare(const iodef_path_t *p1, const iodef_path_t *p2, unsigned
 {
         unsigned int i;
 
-        prelude_return_val_if_fail(p1, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(p2, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(p1, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(p2, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         for ( i = 0; i < depth; i++ ) {
 
@@ -1294,8 +1294,8 @@ int iodef_path_ncompare(const iodef_path_t *p1, const iodef_path_t *p2, unsigned
  */
 int iodef_path_compare(const iodef_path_t *p1, const iodef_path_t *p2)
 {
-        prelude_return_val_if_fail(p1, prelude_error(PRELUDE_ERROR_ASSERTION));
-        prelude_return_val_if_fail(p2, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(p1, libiodef_error(LIBIODEF_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(p2, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         if ( p1->depth != p2->depth )
                 return -1;
@@ -1319,11 +1319,11 @@ int iodef_path_clone(const iodef_path_t *src, iodef_path_t **dst)
 {
         unsigned int i;
 
-        prelude_return_val_if_fail(src, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(src, libiodef_error(LIBIODEF_ERROR_ASSERTION));
 
         *dst = calloc(1, sizeof(**dst));
         if ( ! *dst )
-                return prelude_error_from_errno(errno);
+                return libiodef_error_from_errno(errno);
 
         memcpy(*dst, src, sizeof(**dst));
 
@@ -1339,7 +1339,7 @@ int iodef_path_clone(const iodef_path_t *src, iodef_path_t **dst)
                         }
 
                         free(*dst);
-                        return prelude_error_from_errno(errno);
+                        return libiodef_error_from_errno(errno);
                 }
         }
 
@@ -1362,7 +1362,7 @@ int iodef_path_clone(const iodef_path_t *src, iodef_path_t **dst)
  */
 int iodef_path_check_operator(const iodef_path_t *path, iodef_criterion_operator_t op)
 {
-        prelude_return_val_if_fail(path, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(path, libiodef_error(LIBIODEF_ERROR_ASSERTION));
         return iodef_value_type_check_operator(iodef_path_get_value_type(path, -1), op);
 }
 
@@ -1380,7 +1380,7 @@ int iodef_path_check_operator(const iodef_path_t *path, iodef_criterion_operator
  */
 int iodef_path_get_applicable_operators(const iodef_path_t *path, iodef_criterion_operator_t *result)
 {
-        prelude_return_val_if_fail(path && result, prelude_error(PRELUDE_ERROR_ASSERTION));
+        libiodef_return_val_if_fail(path && result, libiodef_error(LIBIODEF_ERROR_ASSERTION));
         return iodef_value_type_get_applicable_operators(iodef_path_get_value_type(path, -1), result);
 }
 
@@ -1399,7 +1399,7 @@ int iodef_path_get_applicable_operators(const iodef_path_t *path, iodef_criterio
  */
 iodef_path_t *iodef_path_ref(iodef_path_t *path)
 {
-        prelude_return_val_if_fail(path, NULL);
+        libiodef_return_val_if_fail(path, NULL);
 
         gl_lock_lock(path->mutex);
         path->refcount++;
@@ -1419,11 +1419,11 @@ iodef_path_t *iodef_path_ref(iodef_path_t *path)
  *
  * Returns: TRUE if the object is ambiguous, FALSE otherwise.
  */
-prelude_bool_t iodef_path_is_ambiguous(const iodef_path_t *path)
+libiodef_bool_t iodef_path_is_ambiguous(const iodef_path_t *path)
 {
         size_t i;
 
-        prelude_return_val_if_fail(path, FALSE);
+        libiodef_return_val_if_fail(path, FALSE);
 
         for ( i = 0; i < path->depth; i++ ) {
                 if ( path->elem[i].index == INDEX_UNDEFINED )
@@ -1446,7 +1446,7 @@ int iodef_path_has_lists(const iodef_path_t *path)
         size_t i;
         int ret = 0;
 
-        prelude_return_val_if_fail(path, 0);
+        libiodef_return_val_if_fail(path, 0);
 
         for ( i = 0; i < path->depth; i++ ) {
                 if ( path->elem[i].index != INDEX_FORBIDDEN )
@@ -1458,9 +1458,9 @@ int iodef_path_has_lists(const iodef_path_t *path)
 
 
 
-prelude_bool_t iodef_path_is_list(const iodef_path_t *path, int depth)
+libiodef_bool_t iodef_path_is_list(const iodef_path_t *path, int depth)
 {
-        prelude_return_val_if_fail(path, FALSE);
+        libiodef_return_val_if_fail(path, FALSE);
 
         if ( depth < 0 )
                 depth = path->depth - 1;
@@ -1479,7 +1479,7 @@ prelude_bool_t iodef_path_is_list(const iodef_path_t *path, int depth)
  */
 unsigned int iodef_path_get_depth(const iodef_path_t *path)
 {
-        prelude_return_val_if_fail(path, 0);
+        libiodef_return_val_if_fail(path, 0);
         return path->depth;
 }
 
@@ -1503,8 +1503,8 @@ const char *iodef_path_get_name(const iodef_path_t *path, int depth)
         const char *ret;
         const iodef_path_element_t *elem;
 
-        prelude_return_val_if_fail(path, NULL);
-        prelude_return_val_if_fail(depth < 0 || (size_t) depth < path->depth, NULL);
+        libiodef_return_val_if_fail(path, NULL);
+        libiodef_return_val_if_fail(depth < 0 || (size_t) depth < path->depth, NULL);
 
         if ( depth < 0 )
                 return path->name;
@@ -1526,7 +1526,7 @@ void _iodef_path_cache_lock(void)
         gl_lock_lock(cached_path_mutex);
 
         if ( cached_path )
-                prelude_hash_iterate(cached_path, path_lock_cb);
+                libiodef_hash_iterate(cached_path, path_lock_cb);
 }
 
 
@@ -1536,7 +1536,7 @@ void _iodef_path_cache_reinit(void)
         gl_lock_init(cached_path_mutex);
 
         if ( cached_path )
-                prelude_hash_iterate(cached_path, path_reinit_cb);
+                libiodef_hash_iterate(cached_path, path_reinit_cb);
 }
 
 
@@ -1545,7 +1545,7 @@ void _iodef_path_cache_reinit(void)
 void _iodef_path_cache_unlock(void)
 {
         if ( cached_path )
-                prelude_hash_iterate(cached_path, path_unlock_cb);
+                libiodef_hash_iterate(cached_path, path_unlock_cb);
 
         gl_lock_unlock(cached_path_mutex);
 }
@@ -1558,6 +1558,6 @@ void _iodef_path_cache_destroy(void)
                 return;
 
         flush_cache = TRUE;
-        prelude_hash_destroy(cached_path);
+        libiodef_hash_destroy(cached_path);
         flush_cache = FALSE;
 }

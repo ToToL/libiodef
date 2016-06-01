@@ -3,13 +3,13 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <assert.h>
-#include "prelude.h"
+#include "libiodef.h"
 
 #include "glthread/lock.h"
 
 
 struct asyncobj {
-        PRELUDE_ASYNC_OBJECT;
+        LIBIODEF_ASYNC_OBJECT;
         int myval;
 };
 
@@ -23,7 +23,7 @@ static void timer_cb(void *data)
 {
         gl_lock_lock(lock);
         timer_count++;
-        prelude_timer_reset(data);
+        libiodef_timer_reset(data);
         gl_lock_unlock(lock);
 }
 
@@ -41,17 +41,17 @@ static void async_func(void *obj, void *data)
 
 int main(void)
 {
-        prelude_timer_t timer;
+        libiodef_timer_t timer;
         struct asyncobj myobj;
 
-        assert(prelude_init(NULL, NULL) == 0);
-        assert(prelude_async_init() == 0);
-        prelude_async_set_flags(PRELUDE_ASYNC_FLAGS_TIMER);
+        assert(libiodef_init(NULL, NULL) == 0);
+        assert(libiodef_async_init() == 0);
+        libiodef_async_set_flags(LIBIODEF_ASYNC_FLAGS_TIMER);
 
-        prelude_timer_set_expire(&timer, 1);
-        prelude_timer_set_data(&timer, &timer);
-        prelude_timer_set_callback(&timer, timer_cb);
-        prelude_timer_init(&timer);
+        libiodef_timer_set_expire(&timer, 1);
+        libiodef_timer_set_data(&timer, &timer);
+        libiodef_timer_set_callback(&timer, timer_cb);
+        libiodef_timer_init(&timer);
 
         sleep(3);
 
@@ -60,12 +60,12 @@ int main(void)
         gl_lock_unlock(lock);
 
         myobj.myval = 10;
-        prelude_async_set_callback((prelude_async_object_t *) &myobj, async_func);
-        prelude_async_add((prelude_async_object_t *) &myobj);
+        libiodef_async_set_callback((libiodef_async_object_t *) &myobj, async_func);
+        libiodef_async_add((libiodef_async_object_t *) &myobj);
 
-        prelude_async_exit();
+        libiodef_async_exit();
         assert(async_done);
 
-        prelude_deinit();
+        libiodef_deinit();
         exit(0);
 }

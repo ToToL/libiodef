@@ -1,9 +1,9 @@
 /*****
 *
 * Copyright (C) 2004-2016 CS-SI. All Rights Reserved.
-* Author: Nicolas Delon <nicolas.delon@prelude-ids.com>
+* Author: Nicolas Delon <nicolas.delon@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@
 *
 *****/
 
-#ifndef _LIBPRELUDE_IODEF_CRITERION_VALUE_H
-#define _LIBPRELUDE_IODEF_CRITERION_VALUE_H
+#ifndef _LIBIODEF_IODEF_CRITERION_VALUE_H
+#define _LIBIODEF_IODEF_CRITERION_VALUE_H
 
 #ifdef __cplusplus
  extern "C" {
@@ -58,9 +58,9 @@ int iodef_criterion_value_clone(const iodef_criterion_value_t *src, iodef_criter
 
 void iodef_criterion_value_destroy(iodef_criterion_value_t *value);
 
-int iodef_criterion_value_print(iodef_criterion_value_t *value, prelude_io_t *fd);
+int iodef_criterion_value_print(iodef_criterion_value_t *value, libiodef_io_t *fd);
 
-int iodef_criterion_value_to_string(iodef_criterion_value_t *value, prelude_string_t *out);
+int iodef_criterion_value_to_string(iodef_criterion_value_t *value, libiodef_string_t *out);
 
 int iodef_criterion_value_match(iodef_criterion_value_t *cv, iodef_value_t *value, iodef_criterion_operator_t op);
 
@@ -77,4 +77,4 @@ iodef_criterion_value_type_t iodef_criterion_value_get_type(iodef_criterion_valu
 #endif
 
          
-#endif /* _LIBPRELUDE_IODEF_CRITERION_VALUE_H */
+#endif /* _LIBIODEF_IODEF_CRITERION_VALUE_H */

@@ -45,7 +45,7 @@
 # for each error value symbol in the input file (example for EINVAL):
 #
 # #ifdef EINVAL
-# EINVAL PRELUDE_ERROR_EINVAL
+# EINVAL LIBIODEF_ERROR_EINVAL
 # #endif
 #
 # The input file is a list of possible system errors in the column errnoidx
@@ -85,6 +85,6 @@ header {
     next;
 
     print "#ifdef " $errnoidx;
-    print $errnoidx "\tPRELUDE_ERROR_" $errnoidx;
+    print $errnoidx "\tLIBIODEF_ERROR_" $errnoidx;
     print "#endif";
 }

@@ -1,9 +1,9 @@
 /*****
 *
 * Copyright (C) 2008-2016 CS-SI. All Rights Reserved.
-* Author: Yoann Vandoorselaere <yoann@prelude-ids.com>
+* Author: Yoann Vandoorselaere <yoann@libiodef-ids.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #include <string.h>
 #include <sstream>
 
-#include "prelude-error.hxx"
+#include "libiodef-error.hxx"
 #include "iodef.hxx"
 #include "iodef-value.hxx"
 #include "iodef-criteria.hxx"
@@ -71,16 +71,16 @@ IODEFValue::IODEFValue(const IODEFValue &value)
 void IODEFValue::_InitFromString(const char *value, size_t len)
 {
         int ret;
-        prelude_string_t *str;
+        libiodef_string_t *str;
 
-        ret = prelude_string_new_dup_fast(&str, value, len);
+        ret = libiodef_string_new_dup_fast(&str, value, len);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 
         ret = iodef_value_new_string(&_value, str);
         if ( ret < 0 ) {
-                prelude_string_destroy(str);
-                throw PreludeError(ret);
+                libiodef_string_destroy(str);
+                throw LibIodefError(ret);
         }
 }
 
@@ -101,7 +101,7 @@ IODEFValue::IODEFValue(int32_t value)
 {
         int ret = iodef_value_new_int32(&_value, value);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -109,7 +109,7 @@ IODEFValue::IODEFValue(int64_t value)
 {
         int ret = iodef_value_new_int64(&_value, value);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -117,7 +117,7 @@ IODEFValue::IODEFValue(uint64_t value)
 {
         int ret = iodef_value_new_uint64(&_value, value);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -125,7 +125,7 @@ IODEFValue::IODEFValue(float value)
 {
         int ret = iodef_value_new_float(&_value, value);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -133,7 +133,7 @@ IODEFValue::IODEFValue(double value)
 {
         int ret = iodef_value_new_double(&_value, value);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -141,7 +141,7 @@ IODEFValue::IODEFValue(IODEFTime &time)
 {
         int ret = iodef_value_new_time(&_value, iodef_time_ref(time));
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 }
 
 
@@ -153,7 +153,7 @@ IODEFValue::IODEFValue(IODEF *iodef)
         if (  iodef ) {
                 ret = iodef_value_new_class(&v, iodef->getId(), iodef_object_ref((iodef_object_t *) *iodef));
                 if ( ret < 0 )
-                       throw PreludeError(ret);
+                       throw LibIodefError(ret);
         }
 
         _value = v;
@@ -168,12 +168,12 @@ IODEFValue::IODEFValue(const std::vector<IODEF> &value)
 
         ret = iodef_value_new_list(&_value);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 
         for ( i = value.begin(); i != value.end(); i++ ) {
                 ret = iodef_value_new_class(&vitem, i->getId(), iodef_object_ref((iodef_object_t *) *i));
                 if ( ret < 0 )
-                        throw PreludeError(ret);
+                        throw LibIodefError(ret);
 
                 iodef_value_list_add(_value, vitem);
         }
@@ -187,7 +187,7 @@ IODEFValue::IODEFValue(const std::vector<IODEFValue> &value)
 
         ret = iodef_value_new_list(&_value);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 
         for ( i = value.begin(); i != value.end(); i++ )
                 iodef_value_list_add(_value, iodef_value_ref(*i));
@@ -205,7 +205,7 @@ int IODEFValue::match(const IODEFValue &value, int op) const
 
         ret = iodef_value_match(this->_value, value._value, (iodef_criterion_operator_t) op);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 
         return ret;
 }
@@ -218,7 +218,7 @@ IODEFValue IODEFValue::clone() const
 
         ret = iodef_value_clone(_value, &clone);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 
         return IODEFValue(clone);
 }
@@ -228,20 +228,20 @@ const std::string IODEFValue::toString() const
 {
         int ret;
         std::string s;
-        prelude_string_t *str;
+        libiodef_string_t *str;
 
-        ret = prelude_string_new(&str);
+        ret = libiodef_string_new(&str);
         if ( ret < 0 )
-                throw PreludeError(ret);
+                throw LibIodefError(ret);
 
         ret = iodef_value_to_string(_value, str);
         if ( ret < 0 ) {
-                prelude_string_destroy(str);
-                throw PreludeError(ret);
+                libiodef_string_destroy(str);
+                throw LibIodefError(ret);
         }
 
-        s = prelude_string_get_string(str);
-        prelude_string_destroy(str);
+        s = libiodef_string_get_string(str);
+        libiodef_string_destroy(str);
 
         return s;
 }
@@ -270,7 +270,7 @@ IODEFValue::operator std::vector<IODEFValue> () const
         if ( getType() != TYPE_LIST ) {
                 std::stringstream s;
                 s << "Left value doesn't fit '" << iodef_value_type_to_string((iodef_value_type_id_t) getType()) << "' requirement";
-                throw PreludeError(s.str());
+                throw LibIodefError(s.str());
         }
 
         iodef_value_iterate(_value, iterate_cb, &vlist);
@@ -281,12 +281,12 @@ IODEFValue::operator std::vector<IODEFValue> () const
 
 IODEFValue::operator IODEFTime () const
 {
-        prelude_except_if_fail(_value);
+        libiodef_except_if_fail(_value);
 
         if ( getType() != TYPE_TIME ) {
                 std::stringstream s;
                 s << "Left value doesn't fit '" << iodef_value_type_to_string((iodef_value_type_id_t) getType()) << "' requirement";
-                throw PreludeError(s.str());
+                throw LibIodefError(s.str());
         }
 
         return IODEFTime(iodef_time_ref(iodef_value_get_time(_value)));
@@ -298,7 +298,7 @@ IODEFValue::operator int32_t () const
 {
         IODEFValueTypeEnum vtype;
 
-        prelude_except_if_fail(_value);
+        libiodef_except_if_fail(_value);
         vtype = getType();
 
         if ( vtype == TYPE_INT8 )
@@ -321,13 +321,13 @@ IODEFValue::operator int32_t () const
 
         std::stringstream s;
         s << "Left value doesn't fit '" << iodef_value_type_to_string((iodef_value_type_id_t) vtype) << "' requirement";
-        throw PreludeError(s.str());
+        throw LibIodefError(s.str());
 }
 
 
 IODEFValue::operator uint32_t () const
 {
-        prelude_except_if_fail(_value);
+        libiodef_except_if_fail(_value);
 
         if ( getType() == TYPE_UINT32 )
                 return iodef_value_get_uint32(_value);
@@ -338,7 +338,7 @@ IODEFValue::operator uint32_t () const
 
 IODEFValue::operator int64_t () const
 {
-        prelude_except_if_fail(_value);
+        libiodef_except_if_fail(_value);
 
         if ( getType() == TYPE_INT64 )
                 return iodef_value_get_int64(_value);
@@ -349,7 +349,7 @@ IODEFValue::operator int64_t () const
 
 IODEFValue::operator uint64_t () const
 {
-        prelude_except_if_fail(_value);
+        libiodef_except_if_fail(_value);
 
         if ( getType() == TYPE_UINT64 )
                 return iodef_value_get_uint64(_value);
@@ -362,7 +362,7 @@ IODEFValue::operator float () const
 {
         IODEFValueTypeEnum vtype;
 
-        prelude_except_if_fail(_value);
+        libiodef_except_if_fail(_value);
         vtype = getType();
 
         if ( vtype == TYPE_FLOAT )
@@ -377,13 +377,13 @@ IODEFValue::operator float () const
 
         std::stringstream s;
         s << "Left value doesn't fit '" << iodef_value_type_to_string((iodef_value_type_id_t) vtype) << "' requirement";
-        throw PreludeError(s.str());
+        throw LibIodefError(s.str());
 }
 
 
 IODEFValue::operator double () const
 {
-        prelude_except_if_fail(_value);
+        libiodef_except_if_fail(_value);
 
         if ( getType() == TYPE_DOUBLE )
                 return iodef_value_get_double(_value);
@@ -395,10 +395,10 @@ IODEFValue::operator double () const
 std::string IODEFValue::convert_string() const
 {
         std::stringstream s;
-        prelude_except_if_fail(_value);
+        libiodef_except_if_fail(_value);
 
         if ( getType() == TYPE_STRING )
-                return prelude_string_get_string(iodef_value_get_string(_value));
+                return libiodef_string_get_string(iodef_value_get_string(_value));
 
         else if ( getType() == TYPE_TIME )
                 return IODEFTime(iodef_time_ref(iodef_value_get_time(_value)));
@@ -430,12 +430,12 @@ std::string IODEFValue::convert_string() const
 
                 else {
                         s << "Left value doesn't fit 'data' type '" << t << "' requirement";
-                        throw PreludeError(s.str());
+                        throw LibIodefError(s.str());
                 }
         }
 
         s << "Left value doesn't fit '" << iodef_value_type_to_string((iodef_value_type_id_t) getType()) << "' requirement";
-        throw PreludeError(s.str());
+        throw LibIodefError(s.str());
 }
 
 

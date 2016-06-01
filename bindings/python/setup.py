@@ -1,8 +1,8 @@
 #
 # Copyright (C) 2005-2016 CS-SI. All Rights Reserved.
-# Author: Yoann Vandoorselaere <yoann.v@prelude-ids.com>
+# Author: Yoann Vandoorselaere <yoann.v@libiodef-ids.com>
 #
-# This file is part of the Prelude library.
+# This file is part of the LibIodef library.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -98,9 +98,9 @@ if len(sys.argv) > 1 and sys.argv[1] in commands:
 
 setup(name="iodef",
       version="3.0.0",
-      description="Python bindings for the Prelude Library",
+      description="Python bindings for the LibIodef Library",
       author="CS-SI",
-      url="https://www.prelude-siem.org",
+      url="https://www.libiodef-siem.org",
       license="GPL V2.1",
       package_dir={'iodef': '../../bindings/python'},
       py_modules=["iodef"],

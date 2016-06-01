@@ -1,11 +1,11 @@
 #!/usr/bin/python
 
 import sys
-import PreludeEasy
+import LibIodefEasy
 
-iodef = PreludeEasy.IODEF()
+iodef = LibIodefEasy.IODEF()
 iodef.Set("alert.classification.text", "Bar")
 
-client = PreludeEasy.ClientEasy("MyTest")
+client = LibIodefEasy.ClientEasy("MyTest")
 client << iodef
 

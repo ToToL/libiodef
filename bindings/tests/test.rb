@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby 
 
-require("Prelude")
+require("LibIodef")
 
-Prelude::PreludeLog::setCallback(lambda{|level,str|print "log: " + str})
-iodef = Prelude::IODEF.new()
+LibIodef::LibIodefLog::setCallback(lambda{|level,str|print "log: " + str})
+iodef = LibIodef::IODEF.new()
 
 print "*** IODEF->Set() ***\n"
 iodef.set("alert.classification.text", "My Message")
@@ -35,7 +35,7 @@ fd.close()
 
 print "\n*** IODEF->Read() ***\n"
 fd2 = File.new("foo.bin", "r")
-iodef2 = Prelude::IODEF.new()
+iodef2 = LibIodef::IODEF.new()
 while true do
 	begin
 		iodef2 << fd2
@@ -48,14 +48,14 @@ end
 fd2.close()
 
 fd2 = File.new("foo.bin", "r")
-iodef2 = Prelude::IODEF.new()
+iodef2 = LibIodef::IODEF.new()
 while iodef2.read(fd2) > 0 do
 	print iodef2
 end
 fd2.close()
 
 print "\n*** Client ***\n"
-c = Prelude::ClientEasy.new("prelude-lml")
+c = LibIodef::ClientEasy.new("libiodef-lml")
 c.start()
 
 c << iodef

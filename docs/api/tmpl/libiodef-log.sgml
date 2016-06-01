@@ -1,0 +1,145 @@
+<!-- ##### SECTION Title ##### -->
+libiodef-log
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### SECTION Image ##### -->
+
+
+<!-- ##### ENUM libiodef_log_t ##### -->
+<para>
+
+</para>
+
+@LIBIODEF_LOG_CRIT: 
+@LIBIODEF_LOG_ERR: 
+@LIBIODEF_LOG_WARN: 
+@LIBIODEF_LOG_INFO: 
+@LIBIODEF_LOG_DEBUG: 
+
+<!-- ##### ENUM libiodef_log_flags_t ##### -->
+<para>
+
+</para>
+
+@LIBIODEF_LOG_FLAGS_QUIET: 
+@LIBIODEF_LOG_FLAGS_SYSLOG: 
+
+<!-- ##### MACRO libiodef_log ##### -->
+<para>
+
+</para>
+
+@level: 
+@...: 
+
+
+<!-- ##### MACRO libiodef_log_debug ##### -->
+<para>
+
+</para>
+
+@level: 
+@...: 
+
+
+<!-- ##### MACRO libiodef_log_v ##### -->
+<para>
+
+</para>
+
+@level: 
+@fmt: 
+@ap: 
+
+
+<!-- ##### MACRO libiodef_log_debug_v ##### -->
+<para>
+
+</para>
+
+@level: 
+@fmt: 
+@ap: 
+
+
+<!-- ##### FUNCTION libiodef_log_set_level ##### -->
+<para>
+
+</para>
+
+@level: 
+
+
+<!-- ##### FUNCTION libiodef_log_set_debug_level ##### -->
+<para>
+
+</para>
+
+@level: 
+
+
+<!-- ##### FUNCTION libiodef_log_get_flags ##### -->
+<para>
+
+</para>
+
+@void: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_log_set_flags ##### -->
+<para>
+
+</para>
+
+@flags: 
+
+
+<!-- ##### FUNCTION libiodef_log_get_prefix ##### -->
+<para>
+
+</para>
+
+@void: 
+@Returns: 
+
+
+<!-- ##### FUNCTION libiodef_log_set_prefix ##### -->
+<para>
+
+</para>
+
+@prefix: 
+
+
+<!-- ##### FUNCTION libiodef_log_set_callback ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### FUNCTION libiodef_log_set_logfile ##### -->
+<para>
+
+</para>
+
+@filename: 
+@Returns: 
+
+

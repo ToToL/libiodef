@@ -15,8 +15,8 @@
 *                                                                     *
 ***********************************************************************/
 
-#ifndef _LIBPRELUDE_NTP_H
-#define _LIBPRELUDE_NTP_H
+#ifndef _LIBIODEF_NTP_H
+#define _LIBIODEF_NTP_H
 
 #define TS_MASK         0xfffff000      /* mask to usec, for time stamps */
 #define TS_ROUNDBIT     0x00000800      /* round at this bit */
@@ -126,4 +126,4 @@ extern const long tstoushi[];
 
 
 
-#endif /* _LIBPRELUDE_NTP_H */
+#endif /* _LIBIODEF_NTP_H */

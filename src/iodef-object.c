@@ -3,7 +3,7 @@
 * Copyright (C) 2014-2016 CS-SI. All Rights Reserved.
 * Author: Yoann Vandoorselaere <yoannv@gmail.com>
 *
-* This file is part of the Prelude library.
+* This file is part of the LibIodef library.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ iodef_object_t *iodef_object_ref(iodef_object_t *obj)
         int ret;
 
         ret = iodef_class_ref(obj->_iodef_object_id, obj);
-        prelude_return_val_if_fail(ret == 0, NULL);
+        libiodef_return_val_if_fail(ret == 0, NULL);
 
         return obj;
 }
@@ -81,51 +81,51 @@ int iodef_object_copy(iodef_object_t *src, iodef_object_t *dst)
 
 
 
-int iodef_object_print(iodef_object_t *obj, prelude_io_t *fd)
+int iodef_object_print(iodef_object_t *obj, libiodef_io_t *fd)
 {
         return iodef_class_print(obj->_iodef_object_id, obj, fd);
 }
 
-int iodef_object_print_json(iodef_object_t *obj, prelude_io_t *fd)
+int iodef_object_print_json(iodef_object_t *obj, libiodef_io_t *fd)
 {
         return iodef_class_print_json(obj->_iodef_object_id, obj, fd);
 }
 
-int iodef_object_print_binary(iodef_object_t *obj, prelude_io_t *fd)
+int iodef_object_print_binary(iodef_object_t *obj, libiodef_io_t *fd)
 {
         return iodef_class_print_binary(obj->_iodef_object_id, obj, fd);
 }
 
-void iodef_object_add(prelude_list_t *head, iodef_object_t *object)
+void iodef_object_add(libiodef_list_t *head, iodef_object_t *object)
 {
-        prelude_return_if_fail(iodef_class_is_listed(object->_iodef_object_id));
-        prelude_list_add(head, &((iodef_linked_object_t *) object)->_list);
+        libiodef_return_if_fail(iodef_class_is_listed(object->_iodef_object_id));
+        libiodef_list_add(head, &((iodef_linked_object_t *) object)->_list);
 }
 
 
-void iodef_object_add_tail(prelude_list_t *head, iodef_object_t *object)
+void iodef_object_add_tail(libiodef_list_t *head, iodef_object_t *object)
 {
-        prelude_return_if_fail(iodef_class_is_listed(object->_iodef_object_id));
-        prelude_list_add_tail(head, &((iodef_linked_object_t *) object)->_list);
+        libiodef_return_if_fail(iodef_class_is_listed(object->_iodef_object_id));
+        libiodef_list_add_tail(head, &((iodef_linked_object_t *) object)->_list);
 }
 
 
 void iodef_object_del(iodef_object_t *object)
 {
-        prelude_return_if_fail(iodef_class_is_listed(object->_iodef_object_id));
-        prelude_list_del(&((iodef_linked_object_t *) object)->_list);
+        libiodef_return_if_fail(iodef_class_is_listed(object->_iodef_object_id));
+        libiodef_list_del(&((iodef_linked_object_t *) object)->_list);
 }
 
 
 void iodef_object_del_init(iodef_object_t *object)
 {
-        prelude_return_if_fail(iodef_class_is_listed(object->_iodef_object_id));
-        prelude_list_del(&((iodef_linked_object_t *) object)->_list);
-        prelude_list_init(&((iodef_linked_object_t *) object)->_list);
+        libiodef_return_if_fail(iodef_class_is_listed(object->_iodef_object_id));
+        libiodef_list_del(&((iodef_linked_object_t *) object)->_list);
+        libiodef_list_init(&((iodef_linked_object_t *) object)->_list);
 }
 
 
-void *iodef_object_get_list_entry(prelude_list_t *elem)
+void *iodef_object_get_list_entry(libiodef_list_t *elem)
 {
-        return prelude_list_entry(elem, iodef_linked_object_t, _list);
+        return libiodef_list_entry(elem, iodef_linked_object_t, _list);
 }
