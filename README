@@ -1,15 +1,37 @@
 IODEF Library (https://www.prelude-siem.org)
-The IODEF Library is brought to you by CS (http://www.c-s.fr).
 
+The IODEF Library is brought to you by CS (http://www.c-s.fr)
+under GPLv2 license.
+
+Copying and distribution of this library, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved. This file is offered as-is,
+without warranty of any kind.
+
+For commercial use, if you need another license than GPLv2, please
+contact CS : contact.prelude@c-s.fr
 
 IODEF Library Overview
 ========================
 
-The IODEF Library is based on libPrelude (https://www.prelude-siem.org)
-and aim to split IODEF manipulation dans IODEF transport.
+The IODEF Library is a framework to manipulate IODEF objects. You can
+create, update and print IODEF objects. It used to make sensor
+developers' life better by providing features used by every sensor.
 
-The IODEF Library is used to make sensor developers' life better by
-providing features used by every sensor.
+The IODEF object is described in RFC 5070: https://www.ietf.org/rfc/rfc5070.txt
+
+To update a value, you have to use the IODEF Paths, inpired by
+libPrelude paths.
+
+The print functions allow you to export IODEF as :
+- pretty print stdout
+- JSON string
+- Binary string, inspired by libPrelude implementation
+
+For transport dedicated to IODEF objects, we will soon release a
+framework to do that.
+
+The IODEF Library is inspired by libPrelude (https://www.prelude-siem.org).
 
 Dependencies
 ============
@@ -50,12 +72,8 @@ give feedback directly to the authors or you're just bored, visit
 Get Support
 ===========
 
-Prelude-user forums can be accessed at:
-    https://www.prelude-siem.org/projects/prelude/boards
-
-Old mailing lists can be accessed at:
-	http://news.gmane.org/gmane.comp.security.ids.prelude.user
-	news://news.gmane.org/gmane.comp.security.ids.prelude.user
+We use the Prelude-user forums for the support. It can be accessed at:
+	https://www.prelude-siem.org/projects/prelude/boards
 
 Commercial Support is available through the CS company:
 	http://www.prelude-siem.com, contact.prelude@c-s.fr
@@ -64,6 +82,9 @@ Commercial Support is available through the CS company:
 
 Help development
 ================
+
+For now, we are using the Prelude support (boards, bug tracker, irc) to
+discuss with people who need help.
 
 1. SUBMITTING PATCHES
 
